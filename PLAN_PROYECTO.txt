@@ -6,8 +6,8 @@ ENFOQUE DEL PROYECTO:
 ---------------------
 - **8 Laboratorios** completos y detallados
 - **100% GRATUITO** (solo Free Tier de AWS)
-- **SIN CAPTURAS** (todo explicado textualmente)
-- **Listo para entregar** (sin trabajo adicional)
+- **SIN CAPTURAS** (todo explicado textualmente, excepto Lab 8)
+- **Estado actual:** Labs 1-3 completados, 4-8 en desarrollo
 
 ESTRUCTURA DEL PROYECTO:
 ------------------------
@@ -193,49 +193,63 @@ ENTREGABLES DEL PROYECTO:
    □ Presentación final del proyecto
 
 **IMPORTANTE: Todo 100% gratuito con Free Tier de AWS**
-**Sin capturas de pantalla - Todo explicado textualmente**ta a AWS
-- Lab 2: Fundamentos de VPC
-- Lab 3: Conectividad a Internet
-- Redacción detallada de procedimientos
+**Sin capturas de pantalla - Todo explicado textualmente**
 
-Semana 5-6 (Nov 11-24): Desarrollo de Labs 4-6
-- Lab 4: EC2 y Seguridad de Red
-- Lab 5: Seguridad Avanzada
-- Lab 6: VPC Peering (conceptual)
-- Desarrollo de marco teórico extenso
 
-Semana 7-8 (Nov 25 - Dic 8): Labs finales y cuestionarios
-- Lab 7: Monitoreo con CloudWatch
-- Lab 8: Proyecto Integrador Final
-- Creación de banco de 120+ preguntas
-- Integración de cuestionarios en labs
+CRONOGRAMA DE DESARROLLO (Sep-Dic 2025):
+-----------------------------------------
 
-Semana 9 (Dic 9-15): Documentación complementaria
-- Manual del instructor
-- Guía de implementación
-- Refinamiento de contenidos
-- Validación técnica
+Semana 1-2 (2-15 Sep 2025): Planificación Inicial ✅
+- 2 Sep: Inicio del proyecto
+- 5 Sep: Definición detallada de alcance (8 labs)
+- 8 Sep: Crear estructura completa del proyecto
+- 12 Sep: Preparar plantillas LaTeX
+- 15 Sep: Metodología definida
 
-Semana 10 (Dic 16-22): Revisión y preparación de entrega
-- Revisión completa de documentos
-- Correcciones finales
-- Compilación de PDFs
-- Preparación de presentación
+Semana 3-6 (16 Sep - 13 Oct): Labs 1-3 ✅ COMPLETADO
+- 18 Sep: Inicio Lab 1 (Introducción AWS)
+- 22 Sep: Finalización Lab 1
+- 24 Sep: Inicio Lab 2 (VPC Fundamentos)
+- 28 Sep: Finalización Lab 2
+- 2 Oct: Inicio Lab 3 (Internet Gateway)
+- 6 Oct: Finalización Lab 3
+- 9 Oct: Revisión intermedia de avances
+- 13 Oct: Labs 1-3 completados
 
-**ENTREGA FINAL: Diciembre 2025**rios y evaluaciones
-- Crear banco de preguntas
-- Revisar y validar respuestas
-- Formatear documentos
+Semana 7-10 (14 Oct - 10 Nov): Desarrollo de Labs 4-7 🔄
+- 16 Oct: Lab 4 (EC2 y Security Groups)
+- 20 Oct: Finalización Lab 4
+- 23 Oct: Lab 5 (Seguridad Avanzada - NACLs)
+- 27 Oct: Finalización Lab 5
+- 30 Oct: Lab 6 (VPC Peering)
+- 3 Nov: Finalización Lab 6
+- 5 Nov: Lab 7 (CloudWatch)
+- 9 Nov: Finalización Lab 7
 
-Semana 13-14: Material complementario
-- Scripts y automatización
-- Diagramas finales
-- Guías para instructores
+Semana 11-12 (11-24 Nov): Labs finales y cuestionarios 📋
+- 12 Nov: Diseño Lab 8 (Proyecto Integrador)
+- 15 Nov: Desarrollo Lab 8 (Arquitectura 3-Tier)
+- 19 Nov: Pruebas Lab 8
+- 22 Nov: Finalización Lab 8
+- 24 Nov: Creación de banco de 120+ preguntas
 
-Semana 15-16: Revisión y entrega final
-- Pruebas completas
-- Correcciones
-- Preparar presentación
+Semana 13-14 (25 Nov - 8 Dic): Documentación complementaria 📋
+- 26 Nov: Compilación de cuestionarios
+- 28 Nov: Manual del instructor
+- 30 Nov: Memoria del proyecto
+- 3 Dic: Guía de implementación
+- 5 Dic: Refinamiento de contenidos
+- 7 Dic: Validación técnica completa
+
+Semana 15-16 (9-22 Dic): Revisión y entrega 📋
+- 10 Dic: Revisión completa de documentos
+- 12 Dic: Correcciones finales
+- 14 Dic: Compilación de todos los PDFs
+- 16 Dic: Preparación de presentación
+- 18 Dic: Entrega de documentación
+- 20 Dic: Presentación final del proyecto
+
+**ENTREGA FINAL: 20 de Diciembre de 2025**
 
 
 CONSIDERACIONES TÉCNICAS:

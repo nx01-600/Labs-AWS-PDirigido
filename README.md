@@ -2,14 +2,12 @@
 
 ## 📋 Descripción del Proyecto
 
-Proyecto dirigido para la asignatura "Redes de Nueva Generación" que consiste en el diseño e implementación de 12 laboratorios prácticos en AWS para fortalecer competencias en redes mediante servicios de nube.
+Proyecto dirigido para la asignatura "Redes de Nueva Generación" que consiste en el diseño e implementación de 8 laboratorios prácticos en AWS para fortalecer competencias en redes mediante servicios de nube.
 
 ## 👥 Autores
 
 - **Nicolás Carreño Tascón**
 - **Juan Manuel Canchala Jiménez**
-
-**Director:** Carlos Olarte
 
 ## 🎯 Objetivos
 
@@ -20,24 +18,20 @@ Diseñar e implementar un entorno práctico de redes utilizando Amazon Web Servi
 ### Laboratorios Incluidos
 
 1. **Lab 1:** Introducción a AWS y Configuración Inicial (60-90 min)
-2. **Lab 2:** Fundamentos de Amazon VPC (90-120 min)
-3. **Lab 3:** Conectividad a Internet en VPC (90 min)
-4. **Lab 4:** Amazon EC2 y Seguridad de Red (120 min)
-5. **Lab 5:** Alta Disponibilidad y Multi-AZ (120 min)
-6. **Lab 6:** VPC Peering (90 min)
-7. **Lab 7:** VPN y Conectividad Híbrida (120 min)
-8. **Lab 8:** AWS Transit Gateway (120 min)
-9. **Lab 9:** Seguridad Avanzada en Redes (120 min)
-10. **Lab 10:** Monitoreo y Troubleshooting (90 min)
-11. **Lab 11:** AWS Direct Connect - Conceptual (60 min)
-12. **Lab 12:** Proyecto Final Integrador (180-240 min)
+2. **Lab 2:** Fundamentos de Amazon VPC (75-90 min)
+3. **Lab 3:** Conectividad a Internet en VPC (45-60 min)
+4. **Lab 4:** Amazon EC2 y Security Groups (90-120 min)
+5. **Lab 5:** Seguridad Avanzada - Network ACLs y VPC Flow Logs (90 min)
+6. **Lab 6:** VPC Peering - Conectividad entre VPCs (75 min)
+7. **Lab 7:** Monitoreo y CloudWatch (75 min)
+8. **Lab 8:** Proyecto Integrador - Arquitectura Completa 3-Tier (120-150 min)
 
 ### Componentes del Proyecto
 
-- ✅ **12 Laboratorios completos en LaTeX/PDF**
-- ✅ **150+ preguntas de evaluación** (cuestionarios tipo Kahoot/Quiz)
+- ✅ **8 Laboratorios completos en LaTeX/PDF**
+- ✅ **120+ preguntas de evaluación** (cuestionarios tipo Kahoot/Quiz)
 - ✅ **Diagramas de arquitectura** para cada laboratorio
-- ✅ **Scripts de automatización** (CloudFormation/Terraform)
+- ✅ **Documentación textual detallada** (sin capturas, excepto Lab 8)
 - ✅ **Manual para instructores**
 - ✅ **Guía de implementación**
 
@@ -55,11 +49,12 @@ proyectodirigidi/
 │   ├── plantilla_lab.tex          # Plantilla base LaTeX
 │   ├── CONTENIDO_LABORATORIOS.txt # Detalle de cada lab
 │   ├── lab01_introduccion_aws.tex
-│   ├── lab02_vpc_fundamentos.tex
-│   └── ... (hasta lab12)
+│   ├── lab02_vpc_redes_virtuales.tex
+│   ├── lab03_internet_gateway.tex
+│   └── ... (hasta lab08)
 │
 ├── cuestionarios/
-│   └── banco_cuestionarios.tex    # 150+ preguntas
+│   └── banco_cuestionarios.tex    # 120+ preguntas
 │
 ├── recursos/
 │   ├── diagramas/                 # Diagramas de arquitectura
@@ -107,7 +102,7 @@ proyectodirigidi/
 
 ### Para Estudiantes
 
-1. Completar los laboratorios en orden secuencial (1 al 12)
+1. Completar los laboratorios en orden secuencial (1 al 8)
 2. Leer el marco teórico antes de iniciar la práctica
 3. Seguir los pasos detalladamente
 4. Completar los cuestionarios después de cada lab
@@ -119,7 +114,7 @@ proyectodirigidi/
 2. Adaptar el cronograma según necesidades del curso
 3. Usar los cuestionarios para evaluación
 4. Implementar rúbricas de evaluación incluidas
-5. Considerar el proyecto integrador (Lab 12) como evaluación final
+5. Considerar el proyecto integrador (Lab 8) como evaluación final
 
 ## 🔧 Requisitos Previos
 
@@ -160,28 +155,27 @@ pdflatex lab01_introduccion_aws.tex  # Segunda vez para referencias
 El proyecto sigue una metodología progresiva:
 
 1. **Fundamentos:** Labs 1-3 (Básico)
-   - Introducción a AWS y VPC
-   - Conceptos esenciales
+   - Introducción a AWS, VPC y conectividad
+   - Conceptos esenciales de redes en la nube
 
-2. **Intermedio:** Labs 4-6
-   - Seguridad y alta disponibilidad
-   - Conectividad entre VPCs
+2. **Intermedio:** Labs 4-5
+   - Cómputo con EC2 y Security Groups
+   - Seguridad avanzada con NACLs y Flow Logs
 
-3. **Avanzado:** Labs 7-11
-   - Conectividad híbrida
-   - Seguridad avanzada
-   - Monitoreo
+3. **Avanzado:** Labs 6-7
+   - Conectividad entre VPCs (Peering)
+   - Monitoreo con CloudWatch
 
-4. **Integración:** Lab 12
-   - Proyecto completo
-   - Todos los conceptos juntos
+4. **Integración:** Lab 8
+   - Arquitectura completa 3-tier
+   - Todos los conceptos integrados
 
 ## 📊 Evaluación
 
 ### Componentes de Evaluación
 - **Laboratorios prácticos:** 50%
 - **Cuestionarios:** 20%
-- **Proyecto final (Lab 12):** 30%
+- **Proyecto final (Lab 8):** 30%
 
 ### Criterios de Calificación
 - Completitud de implementación
@@ -196,12 +190,6 @@ Este es un proyecto académico. Para sugerencias o mejoras:
 2. Incluir capturas o ejemplos
 3. Referenciar el laboratorio específico
 
-## 📞 Contacto
-
-**Profesor Director:** Carlos Olarte  
-**Asignatura:** Redes de Nueva Generación  
-**Universidad:** [Nombre de la Universidad]
-
 ## 📄 Licencia
 
 Este material es desarrollado con fines educativos para la asignatura "Redes de Nueva Generación".
@@ -210,8 +198,7 @@ Este material es desarrollado con fines educativos para la asignatura "Redes de 
 
 - AWS por la documentación oficial
 - Comunidad de AWS en español
-- Profesor Carlos Olarte por la dirección del proyecto
-- AWS Free Tier por hacer posible el aprendizaje práctico
+- AWS Free Tier por hacer posible el aprendizaje práctico sin costos
 
 ## 🚀 Estado del Proyecto
 
@@ -225,26 +212,26 @@ Este material es desarrollado con fines educativos para la asignatura "Redes de 
 - [x] Banco de cuestionarios (estructura)
 
 ### En Progreso 🔄
-- [ ] Desarrollo Lab 1
-- [ ] Desarrollo Labs 2-12
-- [ ] Toma de capturas
+- [x] Desarrollo Labs 1-3
+- [ ] Desarrollo Labs 4-8
 - [ ] Creación de diagramas
+- [ ] Manual del instructor
 
 ### Pendiente 📋
-- [ ] Scripts de automatización
-- [ ] Manual del instructor
-- [ ] Videos explicativos
-- [ ] Revisión final
+- [ ] Completar Labs 4-8
+- [ ] Banco completo de cuestionarios
+- [ ] Memoria del proyecto
+- [ ] Revisión final y presentación
 
 ## 📅 Cronograma
 
-**Duración estimada:** 16 semanas  
-**Inicio:** [Fecha]  
-**Entrega final:** [Fecha]
+**Duración:** 10 semanas de desarrollo activo  
+**Inicio:** 2 de septiembre de 2025  
+**Entrega final:** 20 de diciembre de 2025
 
-Ver `CHECKLIST_ENTREGA.txt` para el cronograma detallado.
+Ver `PLAN_PROYECTO_NUEVO.txt` para el cronograma detallado.
 
 ---
 
-**Última actualización:** Noviembre 2025  
+**Última actualización:** 28 de noviembre de 2025  
 **Versión:** 1.0

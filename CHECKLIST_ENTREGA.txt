@@ -2,9 +2,9 @@ CHECKLIST PARA ENTREGA DEL PROYECTO
 ====================================
 
 FASE 1: DOCUMENTOS PRINCIPALES
-□ 12 laboratorios completos en LaTeX (archivos .tex)
-□ 12 PDFs compilados de los laboratorios
-□ Documento de cuestionarios completo (PDF)
+□ 8 laboratorios completos en LaTeX (archivos .tex)
+□ 8 PDFs compilados de los laboratorios
+□ Documento de cuestionarios completo (120+ preguntas PDF)
 □ Archivo proyecto.txt con datos del proyecto actualizado
 
 FASE 2: CADA LABORATORIO DEBE INCLUIR
@@ -23,7 +23,7 @@ FASE 2: CADA LABORATORIO DEBE INCLUIR
 □ Diagramas de arquitectura (mínimo 2 por lab)
 
 FASE 3: CUESTIONARIOS
-□ 150+ preguntas totales (12-15 por lab)
+□ 120+ preguntas totales (15 por lab × 8 labs)
 □ Mezcla de tipos: múltiple, V/F, escenarios
 □ Respuestas correctas marcadas
 □ Explicaciones para respuestas
@@ -41,8 +41,8 @@ FASE 5: DOCUMENTACIÓN PARA INSTRUCTORES
 □ Manual del instructor
 □ Guía de implementación en curso
 □ Rúbricas de evaluación
-□ Cronograma sugerido de 16 semanas
-□ Estimación de costos por estudiante
+□ Cronograma sugerido de 8 semanas (1 lab/semana)
+□ Estimación de costos por estudiante ($0.00 con Free Tier)
 
 FASE 6: PRESENTACIÓN FINAL
 □ Documento memoria del proyecto
@@ -93,14 +93,16 @@ proyectodirigidi/
 │   ├── CONTENIDO_LABORATORIOS.txt
 │   ├── lab01_introduccion_aws.tex
 │   ├── lab01_introduccion_aws.pdf
-│   ├── lab02_vpc_fundamentos.tex
-│   ├── lab02_vpc_fundamentos.pdf
-│   ├── ... (hasta lab12)
+│   ├── lab02_vpc_redes_virtuales.tex
+│   ├── lab02_vpc_redes_virtuales.pdf
+│   ├── lab03_internet_gateway.tex
+│   ├── lab03_internet_gateway.pdf
+│   ├── ... (hasta lab08)
 │   │
 │   └── capturas/
 │       ├── lab01/
-│       ├── lab02/
-│       └── ... (hasta lab12)
+│   │   ├── lab02/
+│       └── ... (hasta lab08)
 │
 ├── cuestionarios/
 │   ├── banco_cuestionarios.tex
@@ -134,96 +136,95 @@ proyectodirigidi/
     └── scripts_videos.txt
 
 
-CRONOGRAMA DETALLADO (16 SEMANAS):
-===================================
+CRONOGRAMA DETALLADO (16 SEMANAS - Sep-Dic 2025):
+================================================
 
-SEMANA 1: Planificación
-- Definir alcance exacto
-- Crear estructura de carpetas
-- Configurar plantilla LaTeX
-- Revisar documentación AWS
+SEMANA 1-2 (2-15 Sep 2025): Planificación e Infraestructura ✅
+- 2 Sep: Inicio del proyecto
+- 5 Sep: Definir alcance exacto (8 laboratorios, 120+ preguntas)
+- 8 Sep: Crear estructura de carpetas y repositorio GitHub
+- 10 Sep: Desarrollo de plantilla LaTeX profesional
+- 12 Sep: Revisar documentación oficial de AWS
+- 15 Sep: Metodología y estructura definidas
 
-SEMANA 2: Lab 1 + Infraestructura
-- Desarrollar Lab 1 completo
-- Tomar capturas
-- Probar procedimiento
-- Crear primeras preguntas
+SEMANA 3-4 (16-29 Sep 2025): Laboratorios 1-2 ✅ COMPLETADO
+- 18 Sep: Inicio Lab 1 (Introducción AWS y Configuración)
+- 20 Sep: Marco teórico Lab 1, procedimientos detallados
+- 22 Sep: Finalización Lab 1 y 15 preguntas
+- 24 Sep: Inicio Lab 2 (Fundamentos de Amazon VPC)
+- 26 Sep: Diseño de arquitectura multi-AZ Lab 2
+- 28 Sep: Finalización Lab 2 y 15 preguntas
+- 29 Sep: Validación técnica Labs 1-2 en AWS
 
-SEMANA 3: Labs 2 y 3
-- Desarrollar Lab 2 (VPC Fundamentos)
-- Desarrollar Lab 3 (Internet Gateway)
-- Diagramas de arquitectura
+SEMANA 5-6 (30 Sep - 13 Oct 2025): Laboratorio 3 y Revisión ✅ COMPLETADO
+- 2 Oct: Inicio Lab 3 (Conectividad a Internet - IGW)
+- 4 Oct: Desarrollo teórico IGW vs NAT Gateway
+- 6 Oct: Finalización Lab 3 y 15 preguntas
+- 8 Oct: Pruebas completas Labs 1-3
+- 9 Oct: Revisión intermedia de avances
+- 11 Oct: Correcciones en Labs 1-3
+- 13 Oct: Labs 1-3 oficialmente completados (45 preguntas completadas)
 
-SEMANA 4: Labs 4 y 5
-- Desarrollar Lab 4 (EC2 y Seguridad)
-- Desarrollar Lab 5 (Alta Disponibilidad)
-- Refinar procedimientos
+SEMANA 7-8 (14-27 Oct 2025): Laboratorios 4-5 🔄 EN PROGRESO
+- 16 Oct: Inicio Lab 4 (Amazon EC2 y Security Groups)
+- 18 Oct: Diseño de arquitectura bastion host
+- 20 Oct: Finalización Lab 4 y 15 preguntas
+- 23 Oct: Inicio Lab 5 (Seguridad Avanzada - NACLs)
+- 25 Oct: Desarrollo VPC Flow Logs y CloudWatch
+- 27 Oct: Finalización Lab 5 y 15 preguntas
+- Diagramas de arquitectura de seguridad
 
-SEMANA 5: Labs 6 y 7
-- Desarrollar Lab 6 (VPC Peering)
-- Desarrollar Lab 7 (VPN)
-- Documentar casos de uso
+SEMANA 9-10 (28 Oct - 10 Nov 2025): Laboratorios 6-7 📋 PLANIFICADO
+- 30 Oct: Inicio Lab 6 (VPC Peering)
+- 1 Nov: Desarrollo de topologías de peering
+- 3 Nov: Finalización Lab 6 y 15 preguntas
+- 5 Nov: Inicio Lab 7 (Monitoreo con CloudWatch)
+- 7 Nov: Configuración de alarmas y dashboards
+- 9 Nov: Finalización Lab 7 y 15 preguntas
+- 10 Nov: Validación técnica Labs 4-7
 
-SEMANA 6: Labs 8 y 9
-- Desarrollar Lab 8 (Transit Gateway)
-- Desarrollar Lab 9 (Seguridad Avanzada)
-- Scripts de automatización
+SEMANA 11-12 (11-24 Nov 2025): Laboratorio 8 Integrador 📋 PLANIFICADO
+- 12 Nov: Diseño arquitectura completa 3-tier
+- 14 Nov: Inicio Lab 8 (Proyecto Integrador)
+- 16 Nov: Desarrollo capa presentación y aplicación
+- 18 Nov: Implementación de seguridad multicapa
+- 19 Nov: Configuración de monitoreo completo
+- 21 Nov: Pruebas exhaustivas Lab 8
+- 22 Nov: Finalización Lab 8 y 20 preguntas
+- 24 Nov: Revisión general de todos los laboratorios
 
-SEMANA 7: Labs 10 y 11
-- Desarrollar Lab 10 (Monitoreo)
-- Desarrollar Lab 11 (Direct Connect)
-- Troubleshooting guides
+SEMANA 13 (25 Nov - 1 Dic 2025): Documentación Complementaria 📋 PLANIFICADO
+- 26 Nov: Compilación banco de 120+ preguntas en documento único
+- 27 Nov: Formateo y organización de cuestionarios
+- 28 Nov: Inicio redacción manual del instructor
+- 29 Nov: Inicio redacción memoria del proyecto
+- 30 Nov: Creación de diagramas finales de arquitectura
+- 1 Dic: Desarrollo de guía de implementación
 
-SEMANA 8: Lab 12 (Proyecto Integrador)
-- Diseñar proyecto final complejo
-- Múltiples escenarios
-- Rúbricas de evaluación
+SEMANA 14 (2-8 Dic 2025): Refinamiento y Calidad 📋 PLANIFICADO
+- 2 Dic: Finalización manual del instructor (10 páginas)
+- 3 Dic: Finalización memoria del proyecto (15 páginas)
+- 4 Dic: Revisión ortográfica y gramática completa
+- 5 Dic: Compilación de todos los PDFs (8 labs)
+- 6 Dic: Verificación de enlaces y referencias
+- 7 Dic: Control de calidad general
+- 8 Dic: Revisión técnica final
 
-SEMANA 9: Revisión de Laboratorios (Parte 1)
-- Revisar Labs 1-6
-- Corregir errores
-- Mejorar capturas
-- Validar comandos
+SEMANA 15 (9-15 Dic 2025): Preparación de Entrega 📋 PLANIFICADO
+- 9 Dic: Aplicación de correcciones finales
+- 10 Dic: Validación de formato LaTeX consistente
+- 11 Dic: Creación de presentación PowerPoint (15 slides)
+- 12 Dic: Preparación de demo para presentación
+- 13 Dic: Empaquetado de todos los entregables
+- 14 Dic: Organización de carpetas finales
+- 15 Dic: Revisión final del proyecto completo
 
-SEMANA 10: Revisión de Laboratorios (Parte 2)
-- Revisar Labs 7-12
-- Uniformar formato
-- Verificar costos
-- Probar en cuenta limpia
-
-SEMANA 11: Cuestionarios (Parte 1)
-- Crear 75 preguntas (Labs 1-6)
-- Validar respuestas
-- Explicaciones detalladas
-
-SEMANA 12: Cuestionarios (Parte 2)
-- Crear 75+ preguntas (Labs 7-12)
-- Formatear documento
-- Preparar versión Kahoot
-
-SEMANA 13: Material Complementario
-- Diagramas finales
-- Scripts de automatización
-- Guías rápidas
-- Glosario
-
-SEMANA 14: Documentación de Instructor
-- Manual del instructor
-- Guía de implementación
-- Cronograma de curso
-- Rúbricas
-
-SEMANA 15: Memoria y Presentación
-- Escribir memoria del proyecto
-- Crear presentación
-- Preparar demo en vivo
-- Video overview (opcional)
-
-SEMANA 16: Revisión Final y Entrega
-- Revisión completa
-- Correcciones finales
-- Empaquetar entrega
-- Presentación al profesor
+SEMANA 16 (16-22 Dic 2025): Entrega y Presentación 📋 PLANIFICADO
+- 17 Dic: Preparación logística para presentación
+- 18 Dic: Entrega formal de documentación completa
+- 19 Dic: Ensayo de presentación final
+- 20 Dic: **PRESENTACIÓN FINAL DEL PROYECTO**
+- 20 Dic: **ENTREGA OFICIAL COMPLETADA**
 
 
 TIPS PARA ÉXITO DEL PROYECTO:

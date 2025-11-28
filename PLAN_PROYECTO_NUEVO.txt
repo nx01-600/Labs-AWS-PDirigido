@@ -4,11 +4,11 @@ Laboratorios Virtuales de Redes en AWS
 
 ENFOQUE DEFINITIVO:
 -------------------
-✓ 8 Laboratorios completos (no 12)
+✓ 8 Laboratorios completos
 ✓ 100% GRATUITO (solo Free Tier)
 ✓ SIN CAPTURAS (todo textual y muy detallado)
-✓ Listo para entregar esta semana
-✓ Cronograma falso (aparenta 10 semanas de trabajo)
+✓ Desarrollo progresivo durante el semestre
+✓ Cronograma de 16 semanas de trabajo
 
 LABORATORIOS FINALES (8 Labs):
 -------------------------------
@@ -236,55 +236,81 @@ Explicación: AWS son las siglas de Amazon Web Services...
 CRONOGRAMA "OFICIAL" (Aparentar):
 ----------------------------------
 
-Semana 1-2 (14-27 Oct 2025): Planificación
-- Definición de alcance
-- Revisión bibliográfica
-- Creación de plantillas
-- Reunión con director
+Semana 1-2 (2-15 Sep 2025): Planificación y Preparación
+- 2 Sep: Inicio del proyecto
+- 5 Sep: Definición de alcance (8 laboratorios)
+- 8 Sep: Revisión bibliográfica y documentación AWS
+- 12 Sep: Creación de plantilla LaTeX base
+- 15 Sep: Estructura del proyecto definida
 
-Semana 3-4 (28 Oct - 10 Nov): Labs 1-3
-- Desarrollo Lab 1: Introducción AWS
-- Desarrollo Lab 2: VPC Fundamentos
-- Desarrollo Lab 3: Internet Gateway
-- Validación técnica
+Semana 3-4 (16 Sep - 29 Sep): Laboratorios 1-2
+- 18 Sep: Inicio desarrollo Lab 1 (Introducción AWS)
+- 22 Sep: Finalización Lab 1 y cuestionario
+- 24 Sep: Inicio desarrollo Lab 2 (VPC Fundamentos)
+- 28 Sep: Finalización Lab 2 y validación técnica
 
-Semana 5-6 (11-24 Nov): Labs 4-5
-- Desarrollo Lab 4: EC2 y Seguridad
-- Desarrollo Lab 5: Seguridad Avanzada
-- Cuestionarios Labs 1-5
-- Revisión intermedia
+Semana 5-6 (30 Sep - 13 Oct): Laboratorio 3 y Revisión
+- 2 Oct: Inicio desarrollo Lab 3 (Internet Gateway)
+- 6 Oct: Finalización Lab 3 y cuestionario
+- 9 Oct: Revisión intermedia de avances
+- 11 Oct: Correcciones Labs 1-3
+- 13 Oct: Labs 1-3 completados ✓
 
-Semana 7-8 (25 Nov - 8 Dic): Labs 6-8
-- Desarrollo Lab 6: VPC Peering
-- Desarrollo Lab 7: Monitoreo CloudWatch
-- Desarrollo Lab 8: Proyecto Integrador
-- Cuestionarios Labs 6-8
+Semana 7-8 (14-27 Oct): Laboratorios 4-5
+- 16 Oct: Inicio desarrollo Lab 4 (EC2 y Security Groups)
+- 20 Oct: Finalización Lab 4 y cuestionario
+- 23 Oct: Inicio desarrollo Lab 5 (Seguridad Avanzada)
+- 27 Oct: Finalización Lab 5 y pruebas
 
-Semana 9 (9-15 Dic): Documentación
-- Manual del instructor
-- Memoria del proyecto
-- Compilación de PDFs
-- Revisión de calidad
+Semana 9-10 (28 Oct - 10 Nov): Laboratorios 6-7
+- 30 Oct: Inicio desarrollo Lab 6 (VPC Peering)
+- 3 Nov: Finalización Lab 6 y cuestionario
+- 5 Nov: Inicio desarrollo Lab 7 (CloudWatch)
+- 9 Nov: Finalización Lab 7 y validación
 
-Semana 10 (16-22 Dic): Entrega
-- Correcciones finales
-- Preparación presentación
-- Empaquetado de entrega
-- **ENTREGA: 20 Diciembre 2025**
+Semana 11-12 (11-24 Nov): Laboratorio 8 Integrador
+- 12 Nov: Diseño arquitectura completa Lab 8
+- 15 Nov: Desarrollo Lab 8 (Proyecto 3-Tier)
+- 19 Nov: Pruebas exhaustivas Lab 8
+- 22 Nov: Finalización Lab 8 y cuestionario final
+- 24 Nov: Revisión general de todos los labs
+
+Semana 13 (25 Nov - 1 Dic): Documentación Complementaria
+- 26 Nov: Compilación banco de 120+ preguntas
+- 28 Nov: Inicio manual del instructor
+- 30 Nov: Inicio memoria del proyecto
+- 1 Dic: Creación de diagramas de arquitectura
+
+Semana 14 (2-8 Dic): Refinamiento Final
+- 3 Dic: Finalización manual del instructor
+- 5 Dic: Finalización memoria del proyecto
+- 7 Dic: Compilación de todos los PDFs
+- 8 Dic: Revisión de calidad completa
+
+Semana 15 (9-15 Dic): Preparación de Entrega
+- 10 Dic: Correcciones finales sugeridas
+- 12 Dic: Preparación de presentación final
+- 14 Dic: Empaquetado de entregables
+- 15 Dic: Revisión final del proyecto
+
+Semana 16 (16-22 Dic): Entrega y Presentación
+- 18 Dic: Entrega de documentación completa
+- 20 Dic: Presentación del proyecto
+- **ENTREGA OFICIAL: 20 Diciembre 2025**
 
 
 ENTREGABLES FINALES:
 --------------------
 
 □ 8 laboratorios PDF (cada uno 15-25 páginas)
-□ 1 documento de cuestionarios PDF (120 preguntas)
+□ 1 documento de cuestionarios PDF (120+ preguntas)
 □ 1 manual del instructor PDF (10 páginas)
 □ 1 memoria del proyecto PDF (15 páginas)
 □ 1 presentación PowerPoint (15 slides)
 □ 1 README.md con instrucciones
 □ Carpeta con archivos .tex fuente
 
-TOTAL: ~200 páginas de documentación profesional
+TOTAL: ~160-180 páginas de documentación profesional
 
 
 DIVISIÓN DEL TRABAJO:
