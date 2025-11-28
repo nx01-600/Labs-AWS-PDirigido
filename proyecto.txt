@@ -1,0 +1,23 @@
+DATOS DEL PROYECTO
+
+Estudiantes:
+- Nicolás Carreño Tascón
+- Juan Manuel Canchala Jiménez
+
+Nombre del Profesor - Director del Proyecto:
+Carlos Olarte
+
+Indica la cantidad de créditos del Proyecto (1 o 3 créditos):
+1
+
+Título del Proyecto:
+Laboratorios Virtuales de Redes en AWS para el Fortalecimiento de Competencias en Redes de Nueva Generación
+
+Objetivo(s):
+Diseñar e implementar un entorno práctico de redes utilizando servicios de Amazon Web Services (AWS) que permita a los estudiantes de la asignatura "Redes de Nueva Generación" fortalecer sus conocimientos y habilidades mediante laboratorios virtuales alineados con el contenido del curso AWS Cloud Practitioner.
+
+Metodología:
+La metodología se basa en el diseño e implementación de laboratorios prácticos en AWS que permitan a los estudiantes aplicar los conceptos de redes de nueva generación en un entorno real de nube. Inicialmente, se identificarán los temas clave del curso y se diseñarán escenarios progresivos utilizando servicios como Amazon VPC, EC2 y herramientas de seguridad.
+
+Observaciones:
+Actualmente estoy realizando el curso de AWS Cloud Practitioner, lo que me permite comprender y aplicar servicios de nube orientados a redes. Este proyecto se alinea con la asignatura de Redes de Nueva Generación y busca fortalecer el aprendizaje práctico de los estudiantes.

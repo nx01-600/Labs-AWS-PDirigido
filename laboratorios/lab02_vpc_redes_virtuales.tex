@@ -1,0 +1,2139 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#2}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 2 - Amazon VPC},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+% Comandos personalizados para respuestas
+\newcommand{\correcta}[1]{\textcolor{green!70!black}{\textbf{#1}}}
+\newcommand{\incorrecta}[1]{\textcolor{red}{#1}}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#2\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Amazon VPC - Redes Virtuales Privadas\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 60-90 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio introduce los conceptos fundamentales de Amazon Virtual Private Cloud (VPC), el servicio de red virtual de AWS que permite crear una red lógicamente aislada en la nube. A través de actividades prácticas completamente textuales, los estudiantes aprenderán a diseñar, configurar y gestionar redes virtuales privadas utilizando exclusivamente servicios del nivel gratuito de AWS.
+
+El laboratorio cubre la arquitectura de VPC, incluyendo bloques CIDR (Classless Inter-Domain Routing), subredes públicas y privadas, tablas de enrutamiento, y la distribución de recursos en múltiples Zonas de Disponibilidad para alta disponibilidad. Los participantes comprenderán cómo VPC proporciona control total sobre el entorno de red virtual, permitiendo definir rangos de direcciones IP, crear subredes, y configurar rutas de red.
+
+Se enfatiza la diferencia entre subredes públicas (con acceso a internet) y subredes privadas (sin acceso directo a internet), preparando el terreno para laboratorios posteriores donde se implementarán Internet Gateways, instancias EC2, y configuraciones de seguridad avanzadas. Este laboratorio es fundamental porque VPC es el componente base de casi cualquier arquitectura en AWS, y comprender su funcionamiento es esencial para diseñar soluciones escalables y seguras.
+
+Los estudiantes aplicarán conocimientos de redes tradicionales (direccionamiento IP, subnetting, enrutamiento) en el contexto de infraestructura definida por software (SDN) en la nube. Al finalizar, habrán creado una VPC completamente funcional con subredes distribuidas geográficamente, tablas de enrutamiento configuradas, y comprenderán cómo esta infraestructura se integra con otros servicios de AWS.
+
+\textbf{Palabras clave:} Amazon VPC, Virtual Private Cloud, CIDR, Subnetting, Subredes Públicas, Subredes Privadas, Tablas de Enrutamiento, Zonas de Disponibilidad, Redes Virtuales, Infraestructura como Código.
+
+\textbf{Duración estimada:} 60-90 minutos.
+
+\textbf{Costo:} \$0.00 USD (Free Tier).
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Diseñar, crear y configurar una Amazon Virtual Private Cloud (VPC) con arquitectura multi-zona de disponibilidad, implementando subredes públicas y privadas con sus respectivas tablas de enrutamiento, aplicando principios de diseño de redes para construir una infraestructura de red escalable, segura y de alta disponibilidad en AWS, sentando las bases para el despliegue de aplicaciones y servicios en la nube.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Comprender los fundamentos de Amazon VPC:} Estudiar la arquitectura de redes virtuales en AWS, incluyendo el modelo de aislamiento lógico, la integración con la infraestructura global de AWS (regiones y zonas de disponibilidad), y las ventajas de VPC frente a modelos de red tradicionales.
+    
+    \item \textbf{Dominar el direccionamiento CIDR y subnetting:} Aplicar conocimientos de notación CIDR para definir rangos de direcciones IP privadas según RFC 1918, calcular máscaras de subred, determinar capacidad de hosts por subred, y planificar el crecimiento futuro de la red considerando la escalabilidad.
+    
+    \item \textbf{Crear una VPC personalizada en AWS:} Implementar una VPC desde cero utilizando la consola de AWS, especificando bloques CIDR primarios, configurando opciones de DNS, y entendiendo las diferencias entre VPC por defecto y VPC personalizadas.
+    
+    \item \textbf{Diseñar arquitectura de subredes multi-AZ:} Crear subredes distribuidas en al menos dos Zonas de Disponibilidad, diferenciando entre subredes públicas (con potencial acceso a internet) y subredes privadas (sin acceso directo a internet), aplicando principios de alta disponibilidad y tolerancia a fallos.
+    
+    \item \textbf{Configurar tablas de enrutamiento:} Crear y configurar tablas de enrutamiento personalizadas, entender rutas locales automáticas, asociar subredes a tablas de enrutamiento específicas, y comprender cómo el tráfico de red fluye dentro de una VPC.
+    
+    \item \textbf{Aplicar mejores prácticas de diseño de redes en la nube:} Implementar convenciones de nomenclatura consistentes, documentar decisiones de diseño, utilizar etiquetas (tags) para organizar recursos, y planificar arquitecturas de red escalables que soporten crecimiento futuro.
+    
+    \item \textbf{Verificar conectividad y configuración de red:} Validar que las subredes estén correctamente configuradas, verificar asociaciones de tablas de enrutamiento, confirmar distribución geográfica de recursos, y entender cómo diagnosticar problemas de configuración de red.
+    
+    \item \textbf{Preparar infraestructura para servicios futuros:} Construir la base de red sobre la cual se desplegarán instancias EC2, balanceadores de carga, bases de datos, y otros servicios en laboratorios posteriores, entendiendo cómo VPC es el fundamento de cualquier arquitectura en AWS.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+
+\textbf{Competencias Técnicas:}
+\begin{itemize}[leftmargin=*]
+    \item Diseño y arquitectura de redes virtuales en entornos de nube pública
+    \item Cálculo y aplicación de direccionamiento IP con notación CIDR
+    \item Configuración de infraestructura de red definida por software (SDN)
+    \item Implementación de arquitecturas de alta disponibilidad multi-zona
+    \item Gestión de tablas de enrutamiento y flujos de tráfico de red
+    \item Uso eficiente de la consola de administración de AWS para servicios de red
+    \item Aplicación de etiquetado y organización de recursos en la nube
+\end{itemize}
+
+\textbf{Competencias Profesionales:}
+\begin{itemize}[leftmargin=*]
+    \item Planificación de infraestructura escalable considerando crecimiento futuro
+    \item Documentación técnica de decisiones de diseño de arquitectura
+    \item Aplicación de estándares de la industria (RFC 1918, mejores prácticas de AWS)
+    \item Pensamiento sistémico para entender dependencias entre componentes de red
+    \item Resolución de problemas de configuración de red en entornos de nube
+    \item Toma de decisiones arquitectónicas balanceando simplicidad, costo y rendimiento
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{¿Qué es Amazon VPC?}
+
+\subsubsection{Definición y Concepto}
+
+\textbf{Amazon Virtual Private Cloud (VPC)} es un servicio de red virtual que te permite crear una red lógicamente aislada dentro de la nube de AWS. Es tu "red privada" en AWS, donde tienes control total sobre la configuración de red, similar a operar una red tradicional en tu propio centro de datos, pero con los beneficios de escalabilidad y flexibilidad de la infraestructura de AWS.
+
+Una VPC te permite:
+\begin{itemize}[leftmargin=*]
+    \item Definir tu propio rango de direcciones IP usando notación CIDR
+    \item Crear subredes en diferentes Zonas de Disponibilidad
+    \item Configurar tablas de enrutamiento para controlar el flujo de tráfico
+    \item Conectar tu VPC a internet, a tu red corporativa, o a otras VPCs
+    \item Aplicar múltiples capas de seguridad (Security Groups, Network ACLs)
+    \item Alojar recursos de AWS (EC2, RDS, Lambda) en un entorno de red controlado
+\end{itemize}
+
+\subsubsection{Analogía con Redes Tradicionales}
+
+Si tienes experiencia con redes tradicionales, puedes pensar en VPC de la siguiente manera:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{VPC} $\equiv$ Tu red empresarial completa con un rango IP privado
+    \item \textbf{Subred} $\equiv$ Segmentos de red (VLANs) dentro de tu red empresarial
+    \item \textbf{Tabla de enrutamiento} $\equiv$ Router que dirige tráfico entre subredes
+    \item \textbf{Internet Gateway} $\equiv$ Router de borde que conecta tu red a internet
+    \item \textbf{Security Group} $\equiv$ Firewall a nivel de instancia (stateful)
+    \item \textbf{Network ACL} $\equiv$ Firewall a nivel de subred (stateless)
+\end{itemize}
+
+La diferencia clave es que en VPC, toda esta infraestructura es \textbf{virtual} y se configura mediante software, no hardware físico.
+
+\subsubsection{VPC por Defecto vs VPC Personalizada}
+
+Cuando creas una cuenta de AWS, cada región viene con una \textbf{VPC por defecto (Default VPC)} preconfigurada:
+
+\textbf{Características de VPC por Defecto:}
+\begin{itemize}[leftmargin=*]
+    \item Bloque CIDR: \texttt{172.31.0.0/16} (65,536 direcciones IP)
+    \item Una subred pública por cada Zona de Disponibilidad en la región
+    \item Internet Gateway adjunto (permite acceso a internet)
+    \item Tablas de enrutamiento preconfiguradas
+    \item Ideal para comenzar rápidamente sin configuración de red
+    \item Todos los recursos tienen acceso a internet por defecto
+\end{itemize}
+
+\textbf{Características de VPC Personalizada:}
+\begin{itemize}[leftmargin=*]
+    \item Tú defines el bloque CIDR (por ejemplo: \texttt{10.0.0.0/16})
+    \item Tú creas las subredes según tus necesidades
+    \item Control total sobre enrutamiento y conectividad
+    \item Mayor seguridad (nada tiene acceso a internet hasta que lo configures)
+    \item Recomendada para entornos de producción
+    \item Permite implementar arquitecturas complejas
+\end{itemize}
+
+En este laboratorio crearemos una \textbf{VPC personalizada} para aprender todos los componentes desde cero.
+
+\subsection{Componentes Fundamentales de VPC}
+
+\subsubsection{Bloques CIDR (Classless Inter-Domain Routing)}
+
+\textbf{CIDR} es la notación moderna para representar rangos de direcciones IP. Usa el formato:
+
+\begin{center}
+\texttt{dirección\_IP/máscara\_de\_prefijo}
+\end{center}
+
+Ejemplos:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{10.0.0.0/16} $\rightarrow$ 65,536 direcciones IP (10.0.0.0 a 10.0.255.255)
+    \item \texttt{10.0.1.0/24} $\rightarrow$ 256 direcciones IP (10.0.1.0 a 10.0.1.255)
+    \item \texttt{10.0.1.0/28} $\rightarrow$ 16 direcciones IP (10.0.1.0 a 10.0.1.15)
+\end{itemize}
+
+\textbf{Rangos IP Privados (RFC 1918):}
+
+Estos son los rangos que puedes usar libremente en tu VPC sin conflictos con internet público:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Rango CIDR} & \textbf{Direcciones IP} & \textbf{Uso Común} \\ \hline
+10.0.0.0/8 & 16,777,216 & Redes empresariales grandes \\ \hline
+172.16.0.0/12 & 1,048,576 & Redes medianas (AWS Default VPC usa 172.31.0.0/16) \\ \hline
+192.168.0.0/16 & 65,536 & Redes pequeñas (hogares, oficinas) \\ \hline
+\end{tabular}
+\caption{Rangos de direcciones IP privadas según RFC 1918}
+\end{table}
+
+\textbf{Cálculo de Direcciones Disponibles:}
+
+La máscara de prefijo determina cuántas direcciones IP tienes:
+
+\begin{itemize}[leftmargin=*]
+    \item /16 $\rightarrow$ $2^{32-16} = 2^{16} = 65,536$ direcciones
+    \item /20 $\rightarrow$ $2^{32-20} = 2^{12} = 4,096$ direcciones
+    \item /24 $\rightarrow$ $2^{32-24} = 2^{8} = 256$ direcciones
+    \item /28 $\rightarrow$ $2^{32-28} = 2^{4} = 16$ direcciones
+\end{itemize}
+
+\textbf{Importante:} AWS reserva 5 direcciones IP en cada subred:
+\begin{itemize}[leftmargin=*]
+    \item Primera dirección: dirección de red (por ejemplo, 10.0.1.0)
+    \item Segunda dirección: reservada para el router de VPC (10.0.1.1)
+    \item Tercera dirección: reservada para DNS de AWS (10.0.1.2)
+    \item Cuarta dirección: reservada para uso futuro (10.0.1.3)
+    \item Última dirección: dirección de broadcast de red (10.0.1.255)
+\end{itemize}
+
+Por lo tanto, en una subred /24 (256 direcciones), solo tienes 251 direcciones IP utilizables para instancias EC2, bases de datos, etc.
+
+\subsubsection{Subredes (Subnets)}
+
+Una \textbf{subred} es un segmento del rango de direcciones IP de tu VPC. Cada subred:
+
+\begin{itemize}[leftmargin=*]
+    \item Debe residir completamente dentro de una Zona de Disponibilidad (AZ)
+    \item No puede abarcar múltiples AZs
+    \item Tiene su propio bloque CIDR (subconjunto del CIDR de la VPC)
+    \item Puede ser pública o privada según su tabla de enrutamiento
+\end{itemize}
+
+\textbf{Tipos de Subredes:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Subred Pública:}
+    \begin{itemize}
+        \item Tiene una ruta a un Internet Gateway en su tabla de enrutamiento
+        \item Los recursos pueden recibir direcciones IP públicas
+        \item Ejemplo de uso: servidores web, balanceadores de carga
+        \item Tráfico saliente puede llegar a internet
+    \end{itemize}
+    
+    \item \textbf{Subred Privada:}
+    \begin{itemize}
+        \item NO tiene ruta directa a Internet Gateway
+        \item Los recursos no tienen direcciones IP públicas
+        \item Ejemplo de uso: bases de datos, servidores de aplicación backend
+        \item Solo puede comunicarse dentro de la VPC (o mediante NAT Gateway)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Planificación de Subredes - Ejemplo Práctico:}
+
+Si tienes una VPC con CIDR \texttt{10.0.0.0/16}, podrías dividirla así:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Subred} & \textbf{CIDR} & \textbf{Tipo} & \textbf{AZ} \\ \hline
+Subred Pública 1 & 10.0.1.0/24 & Pública & us-east-1a \\ \hline
+Subred Pública 2 & 10.0.2.0/24 & Pública & us-east-1b \\ \hline
+Subred Privada 1 & 10.0.11.0/24 & Privada & us-east-1a \\ \hline
+Subred Privada 2 & 10.0.12.0/24 & Privada & us-east-1b \\ \hline
+\end{tabular}
+\caption{Ejemplo de distribución de subredes multi-AZ}
+\end{table}
+
+Este diseño proporciona:
+\begin{itemize}[leftmargin=*]
+    \item Alta disponibilidad (recursos en 2 AZs)
+    \item Separación entre capa pública (web) y privada (base de datos)
+    \item Espacio para crecer (muchos rangos /24 sin usar aún)
+\end{itemize}
+
+\subsubsection{Tablas de Enrutamiento (Route Tables)}
+
+Una \textbf{tabla de enrutamiento} contiene un conjunto de reglas (rutas) que determinan hacia dónde se dirige el tráfico de red desde tu subred.
+
+\textbf{Componentes de una Ruta:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Destination (Destino):} Rango CIDR de destino (por ejemplo, \texttt{0.0.0.0/0} = cualquier dirección)
+    \item \textbf{Target (Objetivo):} Hacia dónde enviar el tráfico (por ejemplo, Internet Gateway, NAT Gateway, local)
+\end{itemize}
+
+\textbf{Ruta Local (Local Route):}
+
+Cada tabla de enrutamiento en una VPC incluye automáticamente una ruta "local":
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Destination:} CIDR de la VPC (por ejemplo, \texttt{10.0.0.0/16})
+    \item \textbf{Target:} \texttt{local}
+    \item \textbf{Significado:} Todo el tráfico dentro de la VPC se enruta localmente
+    \item \textbf{Importante:} Esta ruta NO se puede modificar ni eliminar
+\end{itemize}
+
+Esto significa que todas las subredes dentro de una VPC pueden comunicarse entre sí por defecto.
+
+\textbf{Tabla de Enrutamiento Principal (Main Route Table):}
+\begin{itemize}[leftmargin=*]
+    \item Cada VPC tiene una tabla de enrutamiento principal creada automáticamente
+    \item Por defecto, cualquier subred nueva se asocia a esta tabla
+    \item Recomendación: dejar la tabla principal sin ruta a internet (para seguridad)
+    \item Crear tablas de enrutamiento personalizadas para subredes públicas
+\end{itemize}
+
+\textbf{Ejemplo de Tablas de Enrutamiento:}
+
+\textit{Tabla de Enrutamiento Privada:}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Destination} & \textbf{Target} & \textbf{Significado} \\ \hline
+10.0.0.0/16 & local & Tráfico dentro de la VPC \\ \hline
+\end{tabular}
+\caption{Tabla de enrutamiento para subred privada}
+\end{table}
+
+\textit{Tabla de Enrutamiento Pública (agregaremos Internet Gateway en Lab 3):}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Destination} & \textbf{Target} & \textbf{Significado} \\ \hline
+10.0.0.0/16 & local & Tráfico dentro de la VPC \\ \hline
+0.0.0.0/0 & igw-xxxx & Tráfico a internet (Lab 3) \\ \hline
+\end{tabular}
+\caption{Tabla de enrutamiento para subred pública (futuro)}
+\end{table}
+
+\subsection{Zonas de Disponibilidad y Alta Disponibilidad}
+
+\subsubsection{¿Qué son las Zonas de Disponibilidad (AZs)?}
+
+Una \textbf{Zona de Disponibilidad (Availability Zone - AZ)} es uno o más centros de datos discretos con energía, redes y conectividad redundantes dentro de una región de AWS.
+
+\textbf{Características de las AZs:}
+\begin{itemize}[leftmargin=*]
+    \item Cada región de AWS tiene al menos 3 AZs (algunas tienen 6+)
+    \item Las AZs están físicamente separadas (varios kilómetros de distancia)
+    \item Conectadas con redes de baja latencia y alto rendimiento
+    \item Aisladas entre sí para tolerancia a fallos
+    \item Si una AZ falla, las otras continúan operando
+\end{itemize}
+
+\textbf{Nomenclatura de AZs:}
+
+Ejemplos en región \texttt{us-east-1} (Norte de Virginia):
+\begin{itemize}[leftmargin=*]
+    \item \texttt{us-east-1a}
+    \item \texttt{us-east-1b}
+    \item \texttt{us-east-1c}
+    \item \texttt{us-east-1d}
+    \item \texttt{us-east-1e}
+    \item \texttt{us-east-1f}
+\end{itemize}
+
+\subsubsection{Diseño Multi-AZ para Alta Disponibilidad}
+
+\textbf{Principio Fundamental:} Distribuir recursos en múltiples AZs para que tu aplicación siga funcionando incluso si una AZ completa falla.
+
+\textbf{Arquitectura Recomendada:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Mínimo 2 AZs:} Distribuir subredes en al menos 2 zonas de disponibilidad
+    \item \textbf{Simetría:} Crear subredes equivalentes en cada AZ
+    \begin{itemize}
+        \item AZ-A: Subred pública + Subred privada
+        \item AZ-B: Subred pública + Subred privada
+    \end{itemize}
+    \item \textbf{Balanceo de carga:} Distribuir tráfico entre instancias en diferentes AZs
+    \item \textbf{Replicación de datos:} Bases de datos con réplicas en múltiples AZs
+\end{enumerate}
+
+\textbf{Beneficios del Diseño Multi-AZ:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Tolerancia a fallos:} Si AZ-A falla, AZ-B continúa sirviendo tráfico
+    \item \textbf{Mantenimiento sin interrupciones:} Actualizar instancias en AZ-A mientras AZ-B atiende usuarios
+    \item \textbf{Baja latencia:} Usuarios se conectan a la AZ más cercana
+    \item \textbf{Cumplimiento normativo:} Algunas regulaciones exigen redundancia geográfica
+\end{itemize}
+
+\textbf{Ejemplo Visual de Arquitectura Multi-AZ:}
+
+\begin{center}
+\begin{tikzpicture}[node distance=2cm]
+    % VPC
+    \draw[awsblue, thick] (0,0) rectangle (10,6);
+    \node[awsblue] at (5,5.5) {\textbf{VPC 10.0.0.0/16}};
+    
+    % AZ A
+    \draw[awsorange, dashed] (0.5,0.5) rectangle (4.5,5);
+    \node[awsorange] at (2.5,4.5) {\textbf{AZ us-east-1a}};
+    \draw[green!60!black] (1,1) rectangle (4,2.5);
+    \node at (2.5,1.75) {\small Subred Pública 1};
+    \node at (2.5,1.4) {\tiny 10.0.1.0/24};
+    \draw[red!60!black] (1,2.7) rectangle (4,4.2);
+    \node at (2.5,3.45) {\small Subred Privada 1};
+    \node at (2.5,3.1) {\tiny 10.0.11.0/24};
+    
+    % AZ B
+    \draw[awsorange, dashed] (5.5,0.5) rectangle (9.5,5);
+    \node[awsorange] at (7.5,4.5) {\textbf{AZ us-east-1b}};
+    \draw[green!60!black] (6,1) rectangle (9,2.5);
+    \node at (7.5,1.75) {\small Subred Pública 2};
+    \node at (7.5,1.4) {\tiny 10.0.2.0/24};
+    \draw[red!60!black] (6,2.7) rectangle (9,4.2);
+    \node at (7.5,3.45) {\small Subred Privada 2};
+    \node at (7.5,3.1) {\tiny 10.0.12.0/24};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Características de VPC en AWS Free Tier}
+
+\subsubsection{Costos de Amazon VPC}
+
+\textbf{¡Excelente noticia!} Amazon VPC es \textbf{completamente gratuito}. No hay cargos por:
+
+\begin{itemize}[leftmargin=*]
+    \item Crear VPCs
+    \item Crear subredes
+    \item Crear tablas de enrutamiento
+    \item Asociar subredes a tablas de enrutamiento
+    \item Usar direcciones IP privadas dentro de tu VPC
+    \item Tráfico de red entre instancias en la misma VPC
+\end{itemize}
+
+\textbf{Servicios relacionados que SÍ pueden generar costos:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{NAT Gateway:} \$0.045/hora + \$0.045/GB procesado (NO lo usaremos en este lab)
+    \item \textbf{VPN Connection:} \$0.05/hora (NO lo usaremos)
+    \item \textbf{Traffic Mirroring:} Tiene costo (NO lo usaremos)
+    \item \textbf{Elastic IP no asociada:} \$0.005/hora si no está en uso
+    \item \textbf{Transferencia de datos a internet:} Primeros 100 GB/mes gratis, después \$0.09/GB
+\end{itemize}
+
+\textbf{En este laboratorio:} Todo es \texttt{\$0.00} porque solo crearemos la estructura de VPC sin servicios adicionales.
+
+\subsubsection{Límites de VPC en Free Tier}
+
+AWS tiene límites por defecto para proteger tu cuenta:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Recurso} & \textbf{Límite por Región} \\ \hline
+VPCs & 5 (puede aumentarse) \\ \hline
+Subredes por VPC & 200 \\ \hline
+Tablas de enrutamiento por VPC & 200 \\ \hline
+Rutas por tabla de enrutamiento & 50 \\ \hline
+Internet Gateways por región & 5 \\ \hline
+Elastic IPs & 5 \\ \hline
+Security Groups por VPC & 2,500 \\ \hline
+Reglas por Security Group & 60 (entrada) + 60 (salida) \\ \hline
+Network ACLs por VPC & 200 \\ \hline
+\end{tabular}
+\caption{Límites de recursos de VPC por región}
+\end{table}
+
+Para este laboratorio, estos límites son más que suficientes.
+
+\subsection{Mejores Prácticas de Diseño de VPC}
+
+\subsubsection{Planificación de Direccionamiento IP}
+
+\textbf{1. Elegir el tamaño correcto de CIDR:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Demasiado pequeño} (/24, /28): Te quedarás sin IPs rápidamente
+    \item \textbf{Demasiado grande} (/8): Desperdicia espacio, complica enrutamiento
+    \item \textbf{Recomendado para producción:} /16 (65,536 IPs) - Balance ideal
+    \item \textbf{Para este lab:} /16 es perfecto para aprendizaje
+\end{itemize}
+
+\textbf{2. Evitar conflictos con redes existentes:}
+
+Si planeas conectar tu VPC con redes corporativas o VPNs:
+\begin{itemize}[leftmargin=*]
+    \item Verifica que el rango CIDR no se solape con redes existentes
+    \item Documenta qué rangos IP usas en cada VPC
+    \item Usa herramientas de gestión de direcciones IP (IPAM)
+\end{itemize}
+
+\textbf{3. Reservar espacio para crecimiento:}
+
+No uses todos los rangos inmediatamente:
+\begin{itemize}[leftmargin=*]
+    \item Ejemplo: Si tienes VPC \texttt{10.0.0.0/16}, usa solo \texttt{10.0.0.0/20} inicialmente
+    \item Deja rangos \texttt{10.0.16.0/20}, \texttt{10.0.32.0/20}, etc., para expansión futura
+    \item Así puedes añadir nuevas subredes sin reconfigurar la arquitectura completa
+\end{itemize}
+
+\subsubsection{Nomenclatura y Etiquetado}
+
+\textbf{Convenciones de nombres claras:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{VPC:} \texttt{proyecto-entorno-vpc} (ejemplo: \texttt{laboratorio-dev-vpc})
+    \item \textbf{Subredes públicas:} \texttt{public-subnet-az} (ejemplo: \texttt{public-subnet-1a})
+    \item \textbf{Subredes privadas:} \texttt{private-subnet-az} (ejemplo: \texttt{private-subnet-1a})
+    \item \textbf{Tablas de enrutamiento:} \texttt{tipo-rtb} (ejemplo: \texttt{public-rtb}, \texttt{private-rtb})
+\end{itemize}
+
+\textbf{Etiquetas (Tags) obligatorias:}
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{Name}: Nombre descriptivo del recurso
+    \item \texttt{Environment}: dev / staging / production
+    \item \texttt{Project}: Nombre del proyecto
+    \item \texttt{ManagedBy}: Terraform / CloudFormation / Manual
+    \item \texttt{CostCenter}: Para rastreo de costos en organizaciones
+\end{itemize}
+
+\subsubsection{Seguridad desde el Diseño}
+
+\textbf{Principio de defensa en profundidad:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Capa 1 - Subredes:} Separar recursos públicos de privados
+    \item \textbf{Capa 2 - Security Groups:} Firewall a nivel de instancia (stateful)
+    \item \textbf{Capa 3 - Network ACLs:} Firewall a nivel de subred (stateless)
+    \item \textbf{Capa 4 - IAM:} Control de quién puede modificar recursos de red
+    \item \textbf{Capa 5 - VPC Flow Logs:} Auditoría de tráfico de red
+\end{enumerate}
+
+\textbf{Regla de oro:} Por defecto, denegar todo. Luego, permitir explícitamente solo lo necesario.
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Requeridos}
+
+Para aprovechar al máximo este laboratorio, deberías tener conocimientos básicos en:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Laboratorio 1 completado:}
+    \begin{itemize}
+        \item Cuenta de AWS creada y activa
+        \item Usuario IAM configurado con permisos de administrador
+        \item MFA habilitado en cuenta root y usuario IAM
+        \item Alertas de facturación configuradas
+        \item Familiaridad con la consola de AWS
+    \end{itemize}
+    
+    \item \textbf{Fundamentos de redes TCP/IP:}
+    \begin{itemize}
+        \item Direcciones IP (IPv4)
+        \item Máscaras de subred y notación CIDR
+        \item Concepto de gateway y enrutamiento
+        \item Diferencia entre direcciones IP públicas y privadas
+        \item Modelo OSI (especialmente capas 2-4)
+    \end{itemize}
+    
+    \item \textbf{Conceptos básicos de seguridad:}
+    \begin{itemize}
+        \item Firewalls y reglas de acceso
+        \item Principio de mínimo privilegio
+        \item Aislamiento de redes
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Recursos Técnicos}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cuenta de AWS activa} con acceso al Free Tier
+    \item \textbf{Conexión a internet} estable
+    \item \textbf{Navegador web moderno} (Chrome, Firefox, Edge, Safari)
+    \item \textbf{Usuario IAM} con permisos de administrador (creado en Lab 1)
+    \item \textbf{Calculadora de subnetting} (opcional): \url{https://www.subnet-calculator.com/}
+    \item \textbf{Papel y lápiz} (recomendado) para dibujar tu arquitectura
+\end{itemize}
+
+\subsection{Verificación de Costos}
+
+\textbf{Antes de comenzar, verificar:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Servicio} & \textbf{Costo} & \textbf{Nota} \\ \hline
+Amazon VPC & \$0.00 & Siempre gratuito \\ \hline
+Subredes & \$0.00 & Sin límite \\ \hline
+Tablas de enrutamiento & \$0.00 & Sin límite \\ \hline
+Etiquetas (Tags) & \$0.00 & Sin límite \\ \hline
+\textbf{TOTAL} & \textbf{\$0.00} & 100\% Free Tier \\ \hline
+\end{tabular}
+\caption{Costos del Laboratorio 2}
+\end{table}
+
+\textbf{¡Garantizado \$0.00!} Este laboratorio no generará ningún cargo en tu cuenta de AWS.
+
+\subsection{Tiempo Estimado}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Lectura y comprensión de conceptos:} 20-30 minutos
+    \item \textbf{Creación de VPC y subredes:} 15-20 minutos
+    \item \textbf{Configuración de tablas de enrutamiento:} 10-15 minutos
+    \item \textbf{Verificación y documentación:} 10-15 minutos
+    \item \textbf{Cuestionario:} 10 minutos
+    \item \textbf{TOTAL:} 60-90 minutos
+\end{itemize}
+
+\subsection{Región de AWS Recomendada}
+
+Para este laboratorio, recomendamos usar:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Región primaria:} \texttt{us-east-1} (Norte de Virginia)
+    \item \textbf{Razón:} Mayor cantidad de AZs disponibles (6 zonas)
+    \item \textbf{Alternativas:} \texttt{us-west-2} (Oregón), \texttt{eu-west-1} (Irlanda)
+\end{itemize}
+
+\textbf{Importante:} Asegúrate de trabajar siempre en la misma región durante todo el laboratorio.
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+\subsection{Paso 1: Planificación de la Arquitectura de Red}
+
+\textbf{Objetivo:} Diseñar la arquitectura de red antes de crearla en AWS.
+
+\subsubsection{1.1 Definir Especificaciones de la VPC}
+
+Antes de crear recursos, definiremos exactamente qué vamos a construir:
+
+\textbf{Especificaciones de nuestro diseño:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{VPC CIDR:} \texttt{10.0.0.0/16}
+    \begin{itemize}
+        \item Capacidad: 65,536 direcciones IP
+        \item Rango: 10.0.0.0 hasta 10.0.255.255
+        \item Razón: Suficientemente grande para escalar, estándar RFC 1918
+    \end{itemize}
+    
+    \item \textbf{Cantidad de AZs:} 2 (us-east-1a y us-east-1b)
+    \begin{itemize}
+        \item Proporciona alta disponibilidad
+        \item Cumple mejores prácticas de AWS
+        \item Permite balanceo de carga en futuros laboratorios
+    \end{itemize}
+    
+    \item \textbf{Cantidad de subredes:} 4 subredes totales
+    \begin{itemize}
+        \item 2 subredes públicas (una por AZ)
+        \item 2 subredes privadas (una por AZ)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Tabla de diseño de subredes:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Nombre} & \textbf{CIDR} & \textbf{Tipo} & \textbf{AZ} & \textbf{IPs útiles} \\ \hline
+Public Subnet 1A & 10.0.1.0/24 & Pública & us-east-1a & 251 \\ \hline
+Public Subnet 1B & 10.0.2.0/24 & Pública & us-east-1b & 251 \\ \hline
+Private Subnet 1A & 10.0.11.0/24 & Privada & us-east-1a & 251 \\ \hline
+Private Subnet 1B & 10.0.12.0/24 & Privada & us-east-1b & 251 \\ \hline
+\end{tabular}
+\caption{Plan de subredes para el laboratorio}
+\end{table}
+
+\textbf{Notas sobre el diseño:}
+\begin{itemize}[leftmargin=*]
+    \item Usamos /24 (256 IPs) para cada subred, de las cuales 251 son utilizables
+    \item Las subredes públicas usan rangos 10.0.1.x y 10.0.2.x
+    \item Las subredes privadas usan rangos 10.0.11.x y 10.0.12.x (separación clara)
+    \item Quedan disponibles rangos 10.0.3-10, 10.0.13-255 para expansión futura
+\end{itemize}
+
+\subsubsection{1.2 Dibujar Diagrama de Arquitectura (Opcional pero Recomendado)}
+
+En papel o usando una herramienta digital, dibuja tu arquitectura:
+
+\begin{enumerate}[leftmargin=*]
+    \item Dibuja un rectángulo grande etiquetado "VPC 10.0.0.0/16"
+    \item Dentro, dibuja dos columnas verticales para las dos AZs
+    \item En cada AZ, dibuja dos rectángulos: uno para subred pública, otro para privada
+    \item Etiqueta cada subred con su CIDR
+    \item Añade una nota: "Internet Gateway" (lo crearemos en Lab 3)
+\end{enumerate}
+
+Este diagrama te ayudará a visualizar tu red y será útil en laboratorios futuros.
+
+\subsection{Paso 2: Crear la VPC}
+
+\textbf{Objetivo:} Crear una VPC personalizada con el bloque CIDR planificado.
+
+\subsubsection{2.1 Iniciar Sesión como Usuario IAM}
+
+\textbf{Importante:} NO uses la cuenta root. Usa tu usuario IAM administrador del Lab 1.
+
+\begin{enumerate}[leftmargin=*]
+    \item Abrir navegador web
+    \item Ir a la URL de inicio de sesión de IAM que guardaste en Lab 1
+    \item Ejemplo: \texttt{https://tu-alias.signin.aws.amazon.com/console}
+    \item O: \texttt{https://123456789012.signin.aws.amazon.com/console}
+    \item Ingresar nombre de usuario IAM (ejemplo: \texttt{admin-usuario})
+    \item Ingresar contraseña
+    \item Si configuraste MFA, ingresar código de 6 dígitos de tu aplicación
+    \item Hacer clic en "Sign in"
+\end{enumerate}
+
+\textbf{Verificar que estás usando usuario IAM:}
+\begin{itemize}[leftmargin=*]
+    \item En esquina superior derecha, deberías ver tu nombre de usuario
+    \item Ejemplo: "admin-usuario @ tu-alias"
+    \item NO debería aparecer tu correo electrónico (eso indicaría cuenta root)
+\end{itemize}
+
+\subsubsection{2.2 Verificar Región}
+
+\textbf{Crucial:} Asegurarte de estar en la región correcta.
+
+\begin{enumerate}[leftmargin=*]
+    \item En la barra superior derecha, ver el selector de región
+    \item Debería decir "N. Virginia" o el nombre de tu región elegida
+    \item Si está en otra región, hacer clic en el selector
+    \item Seleccionar "US East (N. Virginia) us-east-1"
+    \item Todas las operaciones de este lab deben ser en esta región
+\end{enumerate}
+
+\textbf{¿Por qué es importante la región?}
+\begin{itemize}[leftmargin=*]
+    \item Los recursos de VPC son específicos de región
+    \item Si cambias de región, no verás los recursos creados en otra región
+    \item Las VPCs no se comparten entre regiones
+\end{itemize}
+
+\subsubsection{2.3 Navegar al Servicio VPC}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la consola de AWS, hacer clic en "Services" (esquina superior izquierda)
+    \item En el cuadro de búsqueda, escribir: \texttt{VPC}
+    \item En los resultados, hacer clic en "VPC"
+    \item Categoría: "Networking \& Content Delivery"
+    \item Se abrirá el dashboard del servicio VPC
+\end{enumerate}
+
+\textbf{Alternativa rápida:}
+\begin{itemize}[leftmargin=*]
+    \item Usar la barra de búsqueda global (parte superior central)
+    \item Escribir "VPC" y presionar Enter
+    \item Hacer clic en el primer resultado
+\end{itemize}
+
+\subsubsection{2.4 Explorar el Dashboard de VPC}
+
+\textbf{Vista inicial del dashboard de VPC:}
+
+Al abrir VPC por primera vez, verás:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Panel izquierdo:} Menú de navegación con opciones:
+    \begin{itemize}
+        \item Your VPCs
+        \item Subnets
+        \item Route Tables
+        \item Internet Gateways
+        \item NAT Gateways
+        \item Security Groups
+        \item Network ACLs
+        \item Y más...
+    \end{itemize}
+    
+    \item \textbf{Panel central:} Dashboard con resumen de recursos
+    \begin{itemize}
+        \item Cantidad de VPCs (probablemente verás 1: la VPC por defecto)
+        \item Cantidad de subredes
+        \item Cantidad de tablas de enrutamiento
+        \item Gráficos de uso
+    \end{itemize}
+    
+    \item \textbf{Botones de acción:} "Create VPC", "Launch VPC Wizard"
+\end{enumerate}
+
+\textbf{Nota sobre VPC por defecto:}
+\begin{itemize}[leftmargin=*]
+    \item Verás una VPC ya existente (Default VPC)
+    \item CIDR: \texttt{172.31.0.0/16}
+    \item NO la borraremos (puede ser útil para pruebas rápidas)
+    \item Crearemos nuestra propia VPC personalizada
+\end{itemize}
+
+\subsubsection{2.5 Crear VPC Personalizada}
+
+\textbf{Opción 1: Crear VPC manualmente (Recomendado para aprendizaje)}
+
+Usaremos esta opción porque nos enseña cada componente:
+
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo, hacer clic en "Your VPCs"
+    \item En la parte superior, hacer clic en el botón naranja "Create VPC"
+    \item Se abrirá el formulario de creación
+\end{enumerate}
+
+\textbf{Formulario de creación de VPC:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Resources to create:} Seleccionar "VPC only"
+    \begin{itemize}
+        \item NO seleccionar "VPC and more" (eso usa un wizard)
+        \item Queremos crear cada componente manualmente para aprender
+    \end{itemize}
+    
+    \item \textbf{Name tag:} Ingresar nombre descriptivo
+    \begin{itemize}
+        \item Ejemplo: \texttt{Lab2-VPC}
+        \item O: \texttt{Laboratorio-Redes-VPC}
+        \item Este nombre aparecerá en la consola para identificar tu VPC
+    \end{itemize}
+    
+    \item \textbf{IPv4 CIDR block:} Especificar el rango de direcciones IP
+    \begin{itemize}
+        \item Seleccionar "IPv4 CIDR manual input"
+        \item En el campo de texto, ingresar: \texttt{10.0.0.0/16}
+        \item Verificar que no aparezca ningún error rojo
+        \item Deberías ver un mensaje indicando: "65,536 IPs available"
+    \end{itemize}
+    
+    \item \textbf{IPv6 CIDR block:} Dejar en "No IPv6 CIDR block"
+    \begin{itemize}
+        \item No usaremos IPv6 en este laboratorio
+        \item IPv4 es suficiente para nuestros propósitos
+    \end{itemize}
+    
+    \item \textbf{Tenancy:} Dejar en "Default"
+    \begin{itemize}
+        \item "Default" = instancias comparten hardware físico (normal)
+        \item "Dedicated" = hardware dedicado (caro, no necesario)
+    \end{itemize}
+    
+    \item \textbf{Tags:} Agregar etiquetas adicionales (opcional pero recomendado)
+    \begin{itemize}
+        \item Hacer clic en "Add new tag"
+        \item Key: \texttt{Environment}, Value: \texttt{development}
+        \item Hacer clic en "Add new tag" nuevamente
+        \item Key: \texttt{Project}, Value: \texttt{AWS-Labs}
+        \item Las etiquetas ayudan a organizar recursos en cuentas grandes
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Revisar configuración antes de crear:}
+
+Verificar que los valores sean exactamente:
+\begin{itemize}[leftmargin=*]
+    \item Name: Lab2-VPC (o tu nombre elegido)
+    \item IPv4 CIDR: 10.0.0.0/16
+    \item IPv6: No IPv6 CIDR block
+    \item Tenancy: Default
+    \item Tags: Name, Environment, Project (al menos)
+\end{itemize}
+
+\subsubsection{2.6 Confirmar Creación de VPC}
+
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic en el botón naranja "Create VPC" (parte inferior derecha)
+    \item AWS procesará la solicitud (tarda 2-5 segundos)
+    \item Verás un banner verde de éxito: "Successfully created VPC"
+    \item El banner mostrará el VPC ID (ejemplo: \texttt{vpc-0a1b2c3d4e5f67890})
+    \item Hacer clic en el VPC ID en el banner (es un enlace)
+\end{enumerate}
+
+\textbf{Vista de detalles de tu nueva VPC:}
+
+Serás redirigido a la página de detalles de tu VPC, donde verás:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{VPC ID:} Identificador único (ejemplo: vpc-0a1b2c3d4e5f67890)
+    \item \textbf{State:} "available" (en verde)
+    \item \textbf{IPv4 CIDR:} 10.0.0.0/16
+    \item \textbf{DHCP options set:} (asignado automáticamente)
+    \item \textbf{Main route table:} (creada automáticamente)
+    \item \textbf{Main network ACL:} (creada automáticamente)
+    \item \textbf{DNS resolution:} Enabled (permite que instancias resuelvan nombres DNS)
+    \item \textbf{DNS hostnames:} Disabled (podemos habilitarlo si es necesario)
+\end{itemize}
+
+\textbf{¿Qué creó AWS automáticamente?}
+
+Al crear una VPC, AWS automáticamente crea:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Tabla de enrutamiento principal (Main Route Table):}
+    \begin{itemize}
+        \item Con una ruta local: 10.0.0.0/16 $\rightarrow$ local
+        \item Permite comunicación entre recursos dentro de la VPC
+    \end{itemize}
+    
+    \item \textbf{Network ACL principal (Main Network ACL):}
+    \begin{itemize}
+        \item Por defecto, permite todo el tráfico entrante y saliente
+        \item Es un firewall a nivel de subred (stateless)
+    \end{itemize}
+    
+    \item \textbf{Security Group por defecto (Default Security Group):}
+    \begin{itemize}
+        \item Permite tráfico entre recursos que usen este security group
+        \item Permite todo el tráfico saliente
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Importante:} NO se crean subredes automáticamente. Tendremos que crearlas manualmente.
+
+\subsubsection{2.7 Anotar VPC ID}
+
+\textbf{Muy importante para siguientes pasos:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Copiar el VPC ID de tu nueva VPC
+    \item Ejemplo: \texttt{vpc-0a1b2c3d4e5f67890}
+    \item Guardarlo en un documento de texto temporal
+    \item Lo necesitarás para crear subredes y verificar configuraciones
+\end{enumerate}
+
+\textbf{¿Dónde encontrar el VPC ID?}
+\begin{itemize}[leftmargin=*]
+    \item En la página de detalles de la VPC (donde estás ahora)
+    \item En la lista de VPCs (panel "Your VPCs")
+    \item En la columna "VPC ID"
+\end{itemize}
+
+\subsection{Paso 3: Crear Subredes}
+
+\textbf{Objetivo:} Crear 4 subredes (2 públicas, 2 privadas) distribuidas en 2 AZs.
+
+\subsubsection{3.1 Navegar a la Sección de Subredes}
+
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo del dashboard de VPC, hacer clic en "Subnets"
+    \item Verás una lista de subredes existentes (probablemente de la VPC por defecto)
+    \item En la parte superior, hacer clic en el botón naranja "Create subnet"
+\end{enumerate}
+
+\subsubsection{3.2 Crear Primera Subred Pública (Public Subnet 1A)}
+
+\textbf{Formulario de creación de subred:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{VPC ID:} Seleccionar tu VPC recién creada
+    \begin{itemize}
+        \item Hacer clic en el campo desplegable
+        \item Buscar por nombre: "Lab2-VPC"
+        \item O buscar por VPC ID: vpc-0a1b2c3d4e5f67890
+        \item Seleccionar tu VPC (NO la Default VPC)
+        \item Verificar que muestre: "Lab2-VPC | 10.0.0.0/16"
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Configuración de la subred:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Subnet name:} Ingresar nombre descriptivo
+    \begin{itemize}
+        \item Escribir: \texttt{Public-Subnet-1A}
+        \item Este nombre indica que es pública y está en AZ "a"
+    \end{itemize}
+    
+    \item \textbf{Availability Zone:} Seleccionar primera AZ
+    \begin{itemize}
+        \item Hacer clic en el desplegable
+        \item Seleccionar: \texttt{us-east-1a}
+        \item NO seleccionar "No preference" (queremos control específico)
+    \end{itemize}
+    
+    \item \textbf{IPv4 CIDR block:} Definir rango de direcciones
+    \begin{itemize}
+        \item Ingresar: \texttt{10.0.1.0/24}
+        \item AWS mostrará: "256 IPs available"
+        \item Recordar: solo 251 son realmente utilizables (AWS reserva 5)
+        \item Verificar que el rango esté dentro de 10.0.0.0/16
+    \end{itemize}
+    
+    \item \textbf{IPv6 CIDR block:} Dejar en "No IPv6 CIDR block"
+    
+    \item \textbf{Tags:} Agregar etiquetas adicionales
+    \begin{itemize}
+        \item Ya tiene tag "Name" con valor "Public-Subnet-1A"
+        \item Clic en "Add new tag"
+        \item Key: \texttt{Type}, Value: \texttt{Public}
+        \item Clic en "Add new tag"
+        \item Key: \texttt{AZ}, Value: \texttt{us-east-1a}
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Crear la subred:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Revisar todos los valores:
+    \begin{itemize}
+        \item VPC: Lab2-VPC (10.0.0.0/16)
+        \item Name: Public-Subnet-1A
+        \item AZ: us-east-1a
+        \item CIDR: 10.0.1.0/24
+    \end{itemize}
+    \item Hacer clic en "Create subnet" (botón naranja, parte inferior)
+    \item Verás banner verde: "Successfully created subnet"
+    \item Anotar el Subnet ID (ejemplo: subnet-0123456789abcdef0)
+\end{enumerate}
+
+\subsubsection{3.3 Crear Segunda Subred Pública (Public Subnet 1B)}
+
+\textbf{Repetir el proceso para la segunda AZ:}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la lista de subredes, hacer clic nuevamente en "Create subnet"
+    \item \textbf{VPC ID:} Seleccionar la misma VPC: "Lab2-VPC"
+    \item \textbf{Subnet name:} \texttt{Public-Subnet-1B}
+    \item \textbf{Availability Zone:} \texttt{us-east-1b} (nota la "b")
+    \item \textbf{IPv4 CIDR block:} \texttt{10.0.2.0/24} (nota el "2")
+    \item \textbf{Tags adicionales:}
+    \begin{itemize}
+        \item Key: \texttt{Type}, Value: \texttt{Public}
+        \item Key: \texttt{AZ}, Value: \texttt{us-east-1b}
+    \end{itemize}
+    \item Hacer clic en "Create subnet"
+    \item Anotar el Subnet ID
+\end{enumerate}
+
+\textbf{¡Ya tienes 2 subredes públicas en 2 AZs diferentes!}
+
+\subsubsection{3.4 Crear Primera Subred Privada (Private Subnet 1A)}
+
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic nuevamente en "Create subnet"
+    \item \textbf{VPC ID:} Seleccionar "Lab2-VPC"
+    \item \textbf{Subnet name:} \texttt{Private-Subnet-1A}
+    \item \textbf{Availability Zone:} \texttt{us-east-1a}
+    \begin{itemize}
+        \item Misma AZ que Public-Subnet-1A
+        \item Esto permite arquitecturas donde frontend (público) y backend (privado) están en la misma AZ
+    \end{itemize}
+    \item \textbf{IPv4 CIDR block:} \texttt{10.0.11.0/24}
+    \begin{itemize}
+        \item Nota el "11" en vez de "1"
+        \item Esto separa claramente subredes públicas (10.0.1-10) de privadas (10.0.11-20)
+    \end{itemize}
+    \item \textbf{Tags adicionales:}
+    \begin{itemize}
+        \item Key: \texttt{Type}, Value: \texttt{Private}
+        \item Key: \texttt{AZ}, Value: \texttt{us-east-1a}
+    \end{itemize}
+    \item Hacer clic en "Create subnet"
+    \item Anotar el Subnet ID
+\end{enumerate}
+
+\subsubsection{3.5 Crear Segunda Subred Privada (Private Subnet 1B)}
+
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic nuevamente en "Create subnet"
+    \item \textbf{VPC ID:} Seleccionar "Lab2-VPC"
+    \item \textbf{Subnet name:} \texttt{Private-Subnet-1B}
+    \item \textbf{Availability Zone:} \texttt{us-east-1b}
+    \item \textbf{IPv4 CIDR block:} \texttt{10.0.12.0/24}
+    \item \textbf{Tags adicionales:}
+    \begin{itemize}
+        \item Key: \texttt{Type}, Value: \texttt{Private}
+        \item Key: \texttt{AZ}, Value: \texttt{us-east-1b}
+    \end{itemize}
+    \item Hacer clic en "Create subnet"
+    \item Anotar el Subnet ID
+\end{enumerate}
+
+\textbf{¡Felicidades! Ya creaste las 4 subredes.}
+
+\subsubsection{3.6 Verificar Todas las Subredes Creadas}
+
+\textbf{En la lista de subredes:}
+
+Deberías ver ahora tus 4 subredes listadas. Verificar:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Nombre} & \textbf{CIDR} & \textbf{AZ} & \textbf{VPC} \\ \hline
+Public-Subnet-1A & 10.0.1.0/24 & us-east-1a & Lab2-VPC \\ \hline
+Public-Subnet-1B & 10.0.2.0/24 & us-east-1b & Lab2-VPC \\ \hline
+Private-Subnet-1A & 10.0.11.0/24 & us-east-1a & Lab2-VPC \\ \hline
+Private-Subnet-1B & 10.0.12.0/24 & us-east-1b & Lab2-VPC \\ \hline
+\end{tabular}
+\caption{Verificación de subredes creadas}
+\end{table}
+
+\textbf{Filtrar por VPC (opcional pero útil):}
+
+Para ver solo tus subredes (sin las de la VPC por defecto):
+
+\begin{enumerate}[leftmargin=*]
+    \item En la lista de subredes, buscar el campo de filtro (parte superior)
+    \item Hacer clic en el ícono de filtro
+    \item Seleccionar "VPC ID"
+    \item Elegir tu VPC: "Lab2-VPC"
+    \item Ahora solo verás las 4 subredes de tu VPC
+\end{enumerate}
+
+\subsubsection{3.7 Entender el Estado de las Subredes}
+
+\textbf{Inspeccionar detalles de una subred:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar una subred (hacer clic en la casilla izquierda)
+    \item Ejemplo: seleccionar "Public-Subnet-1A"
+    \item En la parte inferior, ver las pestañas de detalles
+\end{enumerate}
+
+\textbf{Pestaña "Details":}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Subnet ID:} Identificador único
+    \item \textbf{State:} "Available" (en verde)
+    \item \textbf{VPC:} Lab2-VPC
+    \item \textbf{IPv4 CIDR:} 10.0.1.0/24
+    \item \textbf{Available IPv4 addresses:} 251
+    \item \textbf{Availability Zone:} us-east-1a
+    \item \textbf{Availability Zone ID:} (ID interno de AWS)
+    \item \textbf{Route table:} (tabla principal por defecto)
+    \item \textbf{Network ACL:} (ACL principal por defecto)
+    \item \textbf{Auto-assign public IPv4 address:} No (para públicas, cambiaremos esto)
+\end{itemize}
+
+\textbf{Nota importante sobre "Auto-assign public IPv4 address":}
+\begin{itemize}[leftmargin=*]
+    \item Por defecto está en "No" para todas las subredes nuevas
+    \item Significa que instancias EC2 NO recibirán IP pública automáticamente
+    \item Para subredes públicas, queremos habilitarlo
+    \item Lo haremos en el siguiente paso
+\end{itemize}
+
+\subsubsection{3.8 Habilitar Asignación Automática de IP Pública (Subredes Públicas)}
+
+\textbf{Para Public-Subnet-1A:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar "Public-Subnet-1A" (casilla izquierda)
+    \item Hacer clic en el menú "Actions" (parte superior derecha)
+    \item Seleccionar "Edit subnet settings"
+    \item Se abrirá una página de configuración
+    \item Buscar la sección "Auto-assign IP settings"
+    \item Marcar la casilla: \textbf{"Enable auto-assign public IPv4 address"}
+    \item Hacer clic en "Save" (guardar)
+    \item Verás banner verde: "Subnet settings updated"
+\end{enumerate}
+
+\textbf{Para Public-Subnet-1B:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Repetir el mismo proceso para "Public-Subnet-1B"
+    \item Seleccionar la subred
+    \item Actions $\rightarrow$ Edit subnet settings
+    \item Marcar "Enable auto-assign public IPv4 address"
+    \item Save
+\end{enumerate}
+
+\textbf{NO habilitar para subredes privadas:}
+\begin{itemize}[leftmargin=*]
+    \item Private-Subnet-1A y Private-Subnet-1B deben permanecer con "No"
+    \item Los recursos en subredes privadas NO deben tener IPs públicas
+    \item Esto es una característica de seguridad, no un bug
+\end{itemize}
+
+\textbf{¿Qué logramos con esto?}
+\begin{itemize}[leftmargin=*]
+    \item Cuando lances instancias EC2 en subredes públicas (Lab 4), recibirán IP pública automáticamente
+    \item Podrán acceder a internet (una vez que agreguemos Internet Gateway en Lab 3)
+    \item Usuarios externos podrán conectarse a esas instancias (con security groups apropiados)
+\end{itemize}
+
+\textbf{Tabla actualizada de configuración:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Nombre} & \textbf{CIDR} & \textbf{AZ} & \textbf{Auto-assign Public IP} \\ \hline
+Public-Subnet-1A & 10.0.1.0/24 & us-east-1a & \textcolor{green!70!black}{Yes} \\ \hline
+Public-Subnet-1B & 10.0.2.0/24 & us-east-1b & \textcolor{green!70!black}{Yes} \\ \hline
+Private-Subnet-1A & 10.0.11.0/24 & us-east-1a & \textcolor{red}{No} \\ \hline
+Private-Subnet-1B & 10.0.12.0/24 & us-east-1b & \textcolor{red}{No} \\ \hline
+\end{tabular}
+\caption{Configuración de asignación de IP pública por subred}
+\end{table}
+
+\newpage
+
+\subsection{Paso 4: Configurar Tablas de Enrutamiento}
+
+\textbf{Objetivo:} Crear y configurar tablas de enrutamiento para subredes públicas y privadas.
+
+\subsubsection{4.1 Entender las Tablas de Enrutamiento Actuales}
+
+\textbf{Navegar a Route Tables:}
+
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo del dashboard de VPC, hacer clic en "Route Tables"
+    \item Verás una lista de tablas de enrutamiento
+    \item Buscar las que pertenecen a tu VPC (Lab2-VPC)
+\end{enumerate}
+
+\textbf{Tabla de enrutamiento principal (Main Route Table):}
+
+\begin{enumerate}[leftmargin=*]
+    \item Filtrar por VPC: hacer clic en el filtro, seleccionar "Lab2-VPC"
+    \item Verás una tabla con columna "Main" = "Yes"
+    \item Esta es la tabla de enrutamiento principal creada automáticamente
+    \item Seleccionarla (casilla izquierda) para ver detalles
+\end{enumerate}
+
+\textbf{Inspeccionar rutas de la tabla principal:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Con la tabla principal seleccionada, hacer clic en la pestaña "Routes" (parte inferior)
+    \item Verás una ruta:
+    \begin{itemize}
+        \item \textbf{Destination:} 10.0.0.0/16
+        \item \textbf{Target:} local
+        \item \textbf{Status:} Active
+    \end{itemize}
+    \item Esta ruta permite comunicación entre todas las subredes dentro de la VPC
+    \item NO se puede eliminar ni modificar
+\end{enumerate}
+
+\textbf{Ver asociaciones de subredes:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic en la pestaña "Subnet associations" (junto a Routes)
+    \item Verás dos secciones:
+    \begin{itemize}
+        \item \textbf{Explicit subnet associations:} Ninguna (inicialmente)
+        \item \textbf{Subnets without explicit associations:} Las 4 subredes
+    \end{itemize}
+    \item Esto significa que tus 4 subredes usan la tabla principal por defecto
+    \item Vamos a cambiar esto
+\end{enumerate}
+
+\subsubsection{4.2 Estrategia de Tablas de Enrutamiento}
+
+\textbf{Mejor práctica recomendada por AWS:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Tabla Principal (Main Route Table):}
+    \begin{itemize}
+        \item Dejarla sin ruta a internet
+        \item Así, si alguien crea una subred y olvida especificar tabla, será privada por defecto
+        \item Principio de seguridad: "seguro por defecto"
+    \end{itemize}
+    
+    \item \textbf{Tabla Pública (nueva):}
+    \begin{itemize}
+        \item Crear una tabla nueva para subredes públicas
+        \item Asociar subredes públicas a esta tabla
+        \item En Lab 3, agregaremos ruta a Internet Gateway
+    \end{itemize}
+    
+    \item \textbf{Tabla Privada (opcional):}
+    \begin{itemize}
+        \item Podemos usar la tabla principal para subredes privadas
+        \item O crear una tabla explícita para mayor claridad
+        \item En este lab, usaremos la tabla principal
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{4.3 Renombrar la Tabla Principal}
+
+\textbf{Para claridad, darle nombre a la tabla principal:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar la tabla principal (Main = Yes)
+    \item Hacer clic en el ícono de lápiz junto a la columna "Name" (o hacer clic en la celda)
+    \item Ingresar nombre: \texttt{Private-Route-Table}
+    \item Presionar Enter o hacer clic en el check verde
+    \item Ahora la tabla tiene un nombre descriptivo
+\end{enumerate}
+
+\textbf{Agregar etiquetas a la tabla principal:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Con la tabla seleccionada, hacer clic en la pestaña "Tags"
+    \item Hacer clic en "Manage tags"
+    \item Agregar etiqueta:
+    \begin{itemize}
+        \item Key: \texttt{Type}, Value: \texttt{Private}
+    \end{itemize}
+    \item Hacer clic en "Save"
+\end{enumerate}
+
+\subsubsection{4.4 Crear Tabla de Enrutamiento Pública}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la lista de Route Tables, hacer clic en "Create route table" (botón naranja)
+    \item Se abrirá el formulario de creación
+\end{enumerate}
+
+\textbf{Formulario de creación:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Name:} Ingresar \texttt{Public-Route-Table}
+    \item \textbf{VPC:} Seleccionar "Lab2-VPC" (tu VPC)
+    \item Verificar que el VPC ID sea correcto
+    \item \textbf{Tags:} Agregar etiquetas
+    \begin{itemize}
+        \item Ya tiene tag "Name" con valor "Public-Route-Table"
+        \item Agregar: Key: \texttt{Type}, Value: \texttt{Public}
+    \end{itemize}
+    \item Hacer clic en "Create route table"
+    \item Verás banner verde: "Successfully created route table"
+\end{enumerate}
+
+\textbf{Verificar rutas de la nueva tabla:}
+
+\begin{enumerate}[leftmargin=*]
+    \item La nueva tabla aparecerá seleccionada automáticamente
+    \item Hacer clic en la pestaña "Routes"
+    \item Verás solo una ruta:
+    \begin{itemize}
+        \item Destination: 10.0.0.0/16, Target: local
+    \end{itemize}
+    \item En Lab 3, agregaremos ruta 0.0.0.0/0 $\rightarrow$ Internet Gateway
+    \item Por ahora, déjala con solo la ruta local
+\end{enumerate}
+
+\subsubsection{4.5 Asociar Subredes Públicas a la Tabla Pública}
+
+\textbf{Asociar Public-Subnet-1A:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Con "Public-Route-Table" seleccionada, hacer clic en la pestaña "Subnet associations"
+    \item Verás "Subnets without explicit associations": todas tus subredes
+    \item Hacer clic en "Edit subnet associations"
+    \item Se abrirá una página con lista de checkboxes
+    \item Marcar las casillas de:
+    \begin{itemize}
+        \item \textbf{Public-Subnet-1A} (10.0.1.0/24)
+        \item \textbf{Public-Subnet-1B} (10.0.2.0/24)
+    \end{itemize}
+    \item \textbf{NO} marcar las subredes privadas
+    \item Hacer clic en "Save associations"
+    \item Verás banner verde: "Successfully updated subnet associations"
+\end{enumerate}
+
+\textbf{Verificar asociaciones:}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la pestaña "Subnet associations", ahora deberías ver:
+    \item \textbf{Explicit subnet associations:} 2 subredes
+    \begin{itemize}
+        \item Public-Subnet-1A (10.0.1.0/24, us-east-1a)
+        \item Public-Subnet-1B (10.0.2.0/24, us-east-1b)
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{4.6 Verificar Asociaciones de Subredes Privadas}
+
+\textbf{Las subredes privadas deben usar la tabla principal:}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la lista de Route Tables, seleccionar "Private-Route-Table" (Main = Yes)
+    \item Hacer clic en la pestaña "Subnet associations"
+    \item En "Subnets without explicit associations", deberías ver:
+    \begin{itemize}
+        \item Private-Subnet-1A (10.0.11.0/24, us-east-1a)
+        \item Private-Subnet-1B (10.0.12.0/24, us-east-1b)
+    \end{itemize}
+    \item Esto significa que estas subredes usan la tabla principal automáticamente
+    \item NO necesitamos hacer asociación explícita
+\end{enumerate}
+
+\textbf{¿Por qué "Subnets without explicit associations"?}
+
+\begin{itemize}[leftmargin=*]
+    \item AWS usa el término "implicit association" para subredes que usan la tabla principal
+    \item Cualquier subred sin asociación explícita usa la tabla principal (Main)
+    \item Esto es conveniente: nuevas subredes serán privadas por defecto
+\end{itemize}
+
+\subsubsection{4.7 Verificar Configuración Completa de Enrutamiento}
+
+\textbf{Estado final de tablas de enrutamiento:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tabla} & \textbf{Rutas} & \textbf{Subredes Asociadas} \\ \hline
+Private-Route-Table (Main) & 10.0.0.0/16 $\rightarrow$ local & Private-Subnet-1A, Private-Subnet-1B \\ \hline
+Public-Route-Table & 10.0.0.0/16 $\rightarrow$ local & Public-Subnet-1A, Public-Subnet-1B \\ \hline
+\end{tabular}
+\caption{Configuración de tablas de enrutamiento}
+\end{table}
+
+\textbf{Verificar desde la vista de Subnets:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Navegar a "Subnets" en el panel izquierdo
+    \item Filtrar por tu VPC: Lab2-VPC
+    \item Ver la columna "Route table"
+    \item Verificar:
+    \begin{itemize}
+        \item Public-Subnet-1A $\rightarrow$ Public-Route-Table
+        \item Public-Subnet-1B $\rightarrow$ Public-Route-Table
+        \item Private-Subnet-1A $\rightarrow$ Private-Route-Table
+        \item Private-Subnet-1B $\rightarrow$ Private-Route-Table
+    \end{itemize}
+\end{enumerate}
+
+\textbf{¡Perfecto! Enrutamiento configurado correctamente.}
+
+\subsubsection{4.8 Entender el Flujo de Tráfico Actual}
+
+\textbf{¿Qué puede hacer el tráfico AHORA con esta configuración?}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Comunicación dentro de la VPC:} ✓
+    \begin{itemize}
+        \item Una instancia en Public-Subnet-1A puede comunicarse con instancia en Private-Subnet-1B
+        \item Razón: ambas tienen ruta 10.0.0.0/16 $\rightarrow$ local
+        \item El tráfico fluye dentro de la VPC sin salir a internet
+    \end{itemize}
+    
+    \item \textbf{Comunicación entre AZs:} ✓
+    \begin{itemize}
+        \item Instancias en us-east-1a pueden comunicarse con instancias en us-east-1b
+        \item AWS enruta el tráfico internamente entre AZs de forma segura y rápida
+    \end{itemize}
+    
+    \item \textbf{Acceso a internet:} ✗
+    \begin{itemize}
+        \item NINGUNA subred puede acceder a internet todavía
+        \item Razón: no hay ruta 0.0.0.0/0 $\rightarrow$ Internet Gateway
+        \item Lo agregaremos en Lab 3
+    \end{itemize}
+    
+    \item \textbf{Acceso DESDE internet:} ✗
+    \begin{itemize}
+        \item Nadie desde internet puede llegar a tus subredes
+        \item Razón: no hay Internet Gateway adjunto
+        \item También lo haremos en Lab 3
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Resumen visual del estado actual:}
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.5cm]
+    % VPC
+    \draw[awsblue, ultra thick] (0,0) rectangle (8,5);
+    \node[awsblue] at (4,4.5) {\textbf{VPC 10.0.0.0/16}};
+    
+    % Subredes
+    \draw[green!60!black, thick] (0.5,2.5) rectangle (3.5,4);
+    \node at (2,3.5) {\scriptsize Public-1A};
+    \node at (2,3) {\tiny 10.0.1.0/24};
+    
+    \draw[green!60!black, thick] (4.5,2.5) rectangle (7.5,4);
+    \node at (6,3.5) {\scriptsize Public-1B};
+    \node at (6,3) {\tiny 10.0.2.0/24};
+    
+    \draw[red!60!black, thick] (0.5,0.5) rectangle (3.5,2);
+    \node at (2,1.5) {\scriptsize Private-1A};
+    \node at (2,1) {\tiny 10.0.11.0/24};
+    
+    \draw[red!60!black, thick] (4.5,0.5) rectangle (7.5,2);
+    \node at (6,1.5) {\scriptsize Private-1B};
+    \node at (6,1) {\tiny 10.0.12.0/24};
+    
+    % Flechas de comunicación interna
+    \draw[<->, thick] (2,2) -- (2,2.5);
+    \draw[<->, thick] (6,2) -- (6,2.5);
+    \draw[<->, thick] (3.5,3.25) -- (4.5,3.25);
+    \draw[<->, thick] (3.5,1.25) -- (4.5,1.25);
+    
+    % Etiqueta
+    \node at (4,5.8) {\textcolor{green!70!black}{\textbf{✓ Comunicación interna funcionando}}};
+    \node at (4,-0.5) {\textcolor{red}{\textbf{✗ Sin acceso a internet (aún)}}};
+\end{tikzpicture}
+\end{center}
+
+\newpage
+
+\subsection{Paso 5: Verificación de la Configuración}
+
+\textbf{Objetivo:} Confirmar que toda la infraestructura de red está correctamente configurada.
+
+\subsubsection{5.1 Verificar VPC}
+
+\begin{enumerate}[leftmargin=*]
+    \item Navegar a "Your VPCs" en el panel izquierdo
+    \item Filtrar por región us-east-1 (si no lo hiciste antes)
+    \item Verificar que existe "Lab2-VPC" con:
+    \begin{itemize}
+        \item IPv4 CIDR: 10.0.0.0/16
+        \item State: Available (verde)
+        \item DNS resolution: Enabled
+        \item DNS hostnames: Enabled o Disabled (ambos OK por ahora)
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{5.2 Verificar Subredes}
+
+\begin{enumerate}[leftmargin=*]
+    \item Navegar a "Subnets"
+    \item Filtrar por VPC: Lab2-VPC
+    \item Contar: deben aparecer exactamente 4 subredes
+    \item Verificar cada subred:
+\end{enumerate}
+
+\textbf{Checklist de verificación:}
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Nombre} & \textbf{CIDR} & \textbf{AZ} & \textbf{Auto IP} & \textbf{Route Table} & \textbf{✓} \\ \hline
+Public-Subnet-1A & 10.0.1.0/24 & us-east-1a & Yes & Public-Route-Table & $\square$ \\ \hline
+Public-Subnet-1B & 10.0.2.0/24 & us-east-1b & Yes & Public-Route-Table & $\square$ \\ \hline
+Private-Subnet-1A & 10.0.11.0/24 & us-east-1a & No & Private-Route-Table & $\square$ \\ \hline
+Private-Subnet-1B & 10.0.12.0/24 & us-east-1b & No & Private-Route-Table & $\square$ \\ \hline
+\end{tabular}
+\caption{Checklist de verificación de subredes}
+\end{table}
+
+\subsubsection{5.3 Verificar Tablas de Enrutamiento}
+
+\begin{enumerate}[leftmargin=*]
+    \item Navegar a "Route Tables"
+    \item Filtrar por VPC: Lab2-VPC
+    \item Deben aparecer 2 tablas:
+    \begin{itemize}
+        \item Private-Route-Table (Main = Yes)
+        \item Public-Route-Table (Main = No)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Verificar Public-Route-Table:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar "Public-Route-Table"
+    \item Pestaña "Routes": debe tener solo ruta 10.0.0.0/16 $\rightarrow$ local
+    \item Pestaña "Subnet associations": debe mostrar 2 subredes públicas
+    \item Si todo correcto: ✓
+\end{enumerate}
+
+\textbf{Verificar Private-Route-Table:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar "Private-Route-Table"
+    \item Pestaña "Routes": debe tener solo ruta 10.0.0.0/16 $\rightarrow$ local
+    \item Pestaña "Subnet associations": debe mostrar 2 subredes privadas (implícitas)
+    \item Si todo correcto: ✓
+\end{enumerate}
+
+\subsubsection{5.4 Verificar Costos}
+
+\textbf{Confirmar que no hay cargos:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic en tu nombre (esquina superior derecha)
+    \item Seleccionar "Billing and Cost Management"
+    \item Ver "Month-to-date costs"
+    \item Debe seguir en \$0.00
+    \item Si hay algún cargo, verificar qué servicio lo generó (no debería ser VPC)
+\end{enumerate}
+
+\subsection{Paso 6: Documentación y Limpieza}
+
+\subsubsection{6.1 Documentar tu Infraestructura}
+
+\textbf{Crear documento de referencia (opcional pero muy recomendado):}
+
+En un documento de texto o hoja de cálculo, anotar:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{VPC ID:} vpc-0a1b2c3d4e5f67890
+    \item \textbf{VPC CIDR:} 10.0.0.0/16
+    \item \textbf{Región:} us-east-1
+    \item \textbf{Subredes:}
+    \begin{itemize}
+        \item Public-Subnet-1A: subnet-xxx (10.0.1.0/24, us-east-1a)
+        \item Public-Subnet-1B: subnet-yyy (10.0.2.0/24, us-east-1b)
+        \item Private-Subnet-1A: subnet-zzz (10.0.11.0/24, us-east-1a)
+        \item Private-Subnet-1B: subnet-www (10.0.12.0/24, us-east-1b)
+    \end{itemize}
+    \item \textbf{Route Tables:}
+    \begin{itemize}
+        \item Public-Route-Table: rtb-aaa
+        \item Private-Route-Table: rtb-bbb (Main)
+    \end{itemize}
+\end{enumerate}
+
+Esta documentación será útil en laboratorios futuros cuando necesites recordar IDs de recursos.
+
+\subsubsection{6.2 ¿Limpiar Recursos?}
+
+\textbf{Pregunta importante:} ¿Debemos eliminar la VPC ahora?
+
+\textbf{Respuesta: NO}
+
+\begin{itemize}[leftmargin=*]
+    \item La VPC y subredes NO generan costos (\$0.00)
+    \item Las necesitaremos para Lab 3 (Internet Gateway)
+    \item Y para Lab 4 (instancias EC2)
+    \item Y para todos los laboratorios siguientes
+\end{itemize}
+
+\textbf{Cuándo SÍ deberías eliminar recursos:}
+\begin{itemize}[leftmargin=*]
+    \item Al finalizar TODOS los laboratorios del curso
+    \item Si decides pausar el curso por más de 1 mes
+    \item Si vas a crear una nueva arquitectura desde cero
+\end{itemize}
+
+\textbf{Cómo eliminar VPC (para referencia futura):}
+
+Si en el futuro necesitas eliminar la VPC:
+
+\begin{enumerate}[leftmargin=*]
+    \item PRIMERO: Eliminar todos los recursos dentro de la VPC
+    \begin{itemize}
+        \item Instancias EC2 (si existen)
+        \item Internet Gateways adjuntos
+        \item NAT Gateways (si existen)
+        \item Elastic IPs asociados
+        \item Load Balancers
+        \item Endpoints de VPC
+    \end{itemize}
+    \item LUEGO: Eliminar la VPC
+    \begin{itemize}
+        \item Ir a "Your VPCs"
+        \item Seleccionar tu VPC
+        \item Actions $\rightarrow$ Delete VPC
+        \item AWS eliminará automáticamente subredes, tablas de enrutamiento, NACLs
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Por ahora: NO eliminar nada. Mantener la VPC para siguientes laboratorios.}
+
+\newpage
+
+% ================== CUESTIONARIO ==================
+\section{Cuestionario de Evaluación}
+
+\textbf{Instrucciones:} Selecciona la respuesta correcta para cada pregunta.
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Qué significa CIDR en el contexto de redes?}
+\begin{enumerate}[label=\alph*)]
+    \item Central Internet Data Routing
+    \item Classless Inter-Domain Routing
+    \item Cloud Infrastructure Data Repository
+    \item Centralized IP Distribution Range
+\end{enumerate}
+
+\item \textbf{¿Cuántas direcciones IP proporciona un bloque CIDR /16?}
+\begin{enumerate}[label=\alph*)]
+    \item 256 direcciones
+    \item 4,096 direcciones
+    \item 65,536 direcciones
+    \item 16,777,216 direcciones
+\end{enumerate}
+
+\item \textbf{¿Cuántas direcciones IP reserva AWS en cada subred y para qué?}
+\begin{enumerate}[label=\alph*)]
+    \item 3 direcciones: red, router, broadcast
+    \item 5 direcciones: red, router VPC, DNS, uso futuro, broadcast
+    \item 2 direcciones: red y broadcast
+    \item 10 direcciones para uso interno de AWS
+\end{enumerate}
+
+\item \textbf{¿Cuál es la principal diferencia entre una subred pública y una privada en VPC?}
+\begin{enumerate}[label=\alph*)]
+    \item El tamaño del bloque CIDR
+    \item La tabla de enrutamiento: públicas tienen ruta a Internet Gateway, privadas no
+    \item Las subredes públicas están en múltiples AZs, las privadas en una sola
+    \item Las subredes públicas son más caras que las privadas
+\end{enumerate}
+
+\item \textbf{¿Puede una subred de VPC abarcar múltiples Zonas de Disponibilidad?}
+\begin{enumerate}[label=\alph*)]
+    \item Sí, para mayor disponibilidad
+    \item Sí, pero solo si es subred pública
+    \item No, cada subred debe residir completamente en una sola AZ
+    \item Depende del tamaño del bloque CIDR
+\end{enumerate}
+
+\item \textbf{¿Cuál es el rango de direcciones IP privadas más grande según RFC 1918?}
+\begin{enumerate}[label=\alph*)]
+    \item 192.168.0.0/16
+    \item 172.16.0.0/12
+    \item 10.0.0.0/8
+    \item 100.64.0.0/10
+\end{enumerate}
+
+\item \textbf{¿Qué ruta se crea automáticamente en toda tabla de enrutamiento de VPC?}
+\begin{enumerate}[label=\alph*)]
+    \item 0.0.0.0/0 $\rightarrow$ Internet Gateway
+    \item CIDR de la VPC $\rightarrow$ local
+    \item 169.254.169.254/32 $\rightarrow$ metadata service
+    \item 8.8.8.8/32 $\rightarrow$ DNS de Google
+\end{enumerate}
+
+\item \textbf{¿Tiene costo crear y mantener una VPC en AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item Sí, \$0.05 por hora por VPC
+    \item Sí, pero solo las primeras 5 VPCs son gratis
+    \item No, Amazon VPC es siempre gratuito
+    \item Depende del tamaño del bloque CIDR
+\end{enumerate}
+
+\item \textbf{Si una subred NO tiene asociación explícita a una tabla de enrutamiento, ¿cuál usa?}
+\begin{enumerate}[label=\alph*)]
+    \item No puede funcionar sin asociación explícita
+    \item Usa la tabla de enrutamiento principal (Main Route Table)
+    \item Crea una tabla de enrutamiento temporal
+    \item Usa la tabla de enrutamiento de la VPC por defecto
+\end{enumerate}
+
+\item \textbf{¿Cuál es la mejor práctica para la tabla de enrutamiento principal (Main)?}
+\begin{enumerate}[label=\alph*)]
+    \item Agregarle ruta a Internet Gateway para que todas las subredes tengan internet
+    \item Dejarla sin ruta a internet, así nuevas subredes son privadas por defecto
+    \item Eliminarla y crear solo tablas personalizadas
+    \item Asociarle explícitamente todas las subredes
+\end{enumerate}
+
+\item \textbf{¿Qué configuración permite que instancias EC2 en una subred reciban IP pública automáticamente?}
+\begin{enumerate}[label=\alph*)]
+    \item Habilitar "Auto-assign public IPv4 address" en la configuración de la subred
+    \item Agregar ruta 0.0.0.0/0 a la tabla de enrutamiento
+    \item Adjuntar un Internet Gateway a la VPC
+    \item Configurar DHCP options set
+\end{enumerate}
+
+\item \textbf{¿Cuántas VPCs puedes crear por región en AWS Free Tier por defecto?}
+\begin{enumerate}[label=\alph*)]
+    \item 1 VPC
+    \item 5 VPCs (límite puede aumentarse)
+    \item 10 VPCs
+    \item Ilimitadas
+\end{enumerate}
+
+\item \textbf{Si tienes VPC con CIDR 10.0.0.0/16 y creas subred 10.0.1.0/24, ¿cuántas IPs utilizables tiene esa subred?}
+\begin{enumerate}[label=\alph*)]
+    \item 256 IPs
+    \item 254 IPs
+    \item 251 IPs (AWS reserva 5)
+    \item 250 IPs
+\end{enumerate}
+
+\item \textbf{¿Por qué se recomienda distribuir subredes en al menos 2 Zonas de Disponibilidad?}
+\begin{enumerate}[label=\alph*)]
+    \item Para aumentar el ancho de banda disponible
+    \item Para alta disponibilidad y tolerancia a fallos
+    \item Para reducir costos de transferencia de datos
+    \item Para cumplir requisitos mínimos de AWS Free Tier
+\end{enumerate}
+
+\item \textbf{Con la configuración de este laboratorio (sin Internet Gateway), ¿pueden las instancias en subredes públicas comunicarse con instancias en subredes privadas dentro de la misma VPC?}
+\begin{enumerate}[label=\alph*)]
+    \item No, necesitan Internet Gateway para comunicarse
+    \item No, subredes públicas y privadas están aisladas
+    \item Sí, gracias a la ruta local 10.0.0.0/16 $\rightarrow$ local
+    \item Solo si están en la misma AZ
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Respuestas del Cuestionario}
+
+\begin{enumerate}
+
+\item \textbf{Respuesta correcta: b)} CIDR significa Classless Inter-Domain Routing. Es un método para asignar direcciones IP y enrutar paquetes que reemplazó al antiguo sistema de clases (A, B, C). Usa notación slash (/) para indicar la máscara de red.
+
+\item \textbf{Respuesta correcta: c)} Un bloque /16 proporciona $2^{32-16} = 2^{16} = 65,536$ direcciones IP. Por ejemplo, 10.0.0.0/16 va desde 10.0.0.0 hasta 10.0.255.255.
+
+\item \textbf{Respuesta correcta: b)} AWS reserva 5 direcciones en cada subred: primera (dirección de red), segunda (router de VPC), tercera (servidor DNS de AWS), cuarta (uso futuro), y última (broadcast de red). Por eso una subred /24 con 256 IPs solo tiene 251 utilizables.
+
+\item \textbf{Respuesta correcta: b)} La diferencia está en la tabla de enrutamiento. Subredes públicas tienen una ruta 0.0.0.0/0 apuntando a un Internet Gateway, permitiendo tráfico hacia/desde internet. Subredes privadas no tienen esta ruta y por tanto no pueden acceder directamente a internet.
+
+\item \textbf{Respuesta correcta: c)} No, cada subred debe residir completamente dentro de una sola Zona de Disponibilidad. No puede abarcar múltiples AZs. Para alta disponibilidad, debes crear múltiples subredes, una en cada AZ.
+
+\item \textbf{Respuesta correcta: c)} El rango 10.0.0.0/8 es el más grande según RFC 1918, proporcionando 16,777,216 direcciones IP (desde 10.0.0.0 hasta 10.255.255.255). Los otros rangos privados son 172.16.0.0/12 (1,048,576 IPs) y 192.168.0.0/16 (65,536 IPs).
+
+\item \textbf{Respuesta correcta: b)} Automáticamente se crea una ruta con destino al CIDR completo de la VPC y target "local". Por ejemplo, si tu VPC es 10.0.0.0/16, la ruta será 10.0.0.0/16 $\rightarrow$ local. Esta ruta permite comunicación entre todas las subredes dentro de la VPC y no se puede eliminar.
+
+\item \textbf{Respuesta correcta: c)} Amazon VPC es completamente gratuito. No hay cargos por crear VPCs, subredes, tablas de enrutamiento, o usar direcciones IP privadas. Solo algunos servicios relacionados como NAT Gateway o VPN Connection tienen costo.
+
+\item \textbf{Respuesta correcta: b)} Usa la tabla de enrutamiento principal (Main Route Table) automáticamente. Por eso es una mejor práctica mantener la tabla principal sin ruta a internet: así, cualquier subred creada sin asociación explícita será privada por defecto (principio de seguridad).
+
+\item \textbf{Respuesta correcta: b)} La mejor práctica es dejar la tabla principal SIN ruta a Internet Gateway. Así, si alguien crea una subred y olvida especificar tabla de enrutamiento, será privada por defecto. Crear tablas separadas para subredes públicas garantiza que el acceso a internet sea explícito e intencional.
+
+\item \textbf{Respuesta correcta: a)} Debes habilitar "Auto-assign public IPv4 address" en la configuración de la subred. Esto hace que instancias lanzadas en esa subred reciban automáticamente una IP pública además de su IP privada. Las subredes privadas deben tener esta opción deshabilitada.
+
+\item \textbf{Respuesta correcta: b)} Por defecto puedes crear 5 VPCs por región. Este límite puede aumentarse contactando a AWS Support. En Free Tier, las 5 VPCs son gratuitas (VPC es siempre gratis, independientemente del plan).
+
+\item \textbf{Respuesta correcta: c)} Una subred /24 tiene 256 direcciones, pero AWS reserva 5, dejando 251 utilizables para instancias EC2, bases de datos, y otros recursos. Las 5 reservadas son: .0 (red), .1 (router), .2 (DNS), .3 (futuro), .255 (broadcast).
+
+\item \textbf{Respuesta correcta: b)} Distribuir en múltiples AZs proporciona alta disponibilidad y tolerancia a fallos. Si una AZ completa falla (evento raro pero posible), tus recursos en otras AZs continúan funcionando. Es una práctica fundamental para arquitecturas de producción.
+
+\item \textbf{Respuesta correcta: c)} Sí, pueden comunicarse gracias a la ruta local. Todas las subredes dentro de una VPC tienen automáticamente una ruta al CIDR completo de la VPC con target "local", permitiendo comunicación interna sin necesidad de Internet Gateway. El concepto de "pública" vs "privada" solo afecta el acceso a/desde internet, no la comunicación interna.
+
+\end{enumerate}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+Al finalizar este laboratorio, has construido los cimientos de una infraestructura de red robusta en AWS, dominando conceptos fundamentales de redes virtuales que son aplicables no solo a AWS, sino a cualquier plataforma de computación en nube. La VPC que creaste es el componente base sobre el cual se construirán todas las arquitecturas futuras en este curso.
+
+\subsection{Logros Técnicos Principales}
+
+\textbf{1. Dominio de Direccionamiento IP y CIDR}
+
+Has aplicado conocimientos de redes tradicionales al contexto de infraestructura definida por software. Comprendes cómo calcular rangos CIDR, determinar capacidad de hosts, y planificar subredes considerando las 5 direcciones reservadas por AWS. Esta habilidad es fundamental para cualquier arquitecto de soluciones en la nube.
+
+\textbf{2. Creación de Arquitectura Multi-AZ}
+
+Has diseñado e implementado una arquitectura distribuida geográficamente en dos Zonas de Disponibilidad, aplicando principios de alta disponibilidad y tolerancia a fallos. Esta arquitectura simétrica (2 subredes públicas + 2 privadas) es un patrón estándar de la industria utilizado en entornos de producción.
+
+\textbf{3. Segmentación de Red con Subredes Públicas y Privadas}
+
+Has implementado separación de responsabilidades mediante subredes públicas (para recursos orientados a internet) y privadas (para recursos backend). Esta arquitectura de múltiples capas es una práctica de seguridad fundamental que reduce la superficie de ataque y aísla componentes críticos.
+
+\textbf{4. Gestión de Tablas de Enrutamiento}
+
+Has configurado enrutamiento diferenciado para subredes públicas y privadas, entendiendo cómo controlar flujos de tráfico mediante tablas de enrutamiento. Comprendes la importancia de la ruta local automática y has preparado la infraestructura para futuros Internet Gateways.
+
+\subsection{Competencias Desarrolladas}
+
+\textbf{Competencias de Diseño:}
+\begin{itemize}[leftmargin=*]
+    \item Planificación de arquitecturas de red escalables
+    \item Aplicación de convenciones de nomenclatura consistentes
+    \item Uso de etiquetado (tagging) para organización de recursos
+    \item Documentación de decisiones de arquitectura
+    \item Previsión de crecimiento futuro en diseño de direccionamiento
+\end{itemize}
+
+\textbf{Competencias Operacionales:}
+\begin{itemize}[leftmargin=*]
+    \item Navegación eficiente en consola de AWS para servicios de red
+    \item Creación y configuración de recursos de VPC
+    \item Verificación sistemática de configuraciones de red
+    \item Interpretación de flujos de tráfico en arquitecturas de nube
+    \item Resolución de problemas de configuración de red
+\end{itemize}
+
+\textbf{Competencias de Seguridad:}
+\begin{itemize}[leftmargin=*]
+    \item Aplicación de principio de "seguro por defecto" (tabla principal sin internet)
+    \item Diseño de arquitectura de defensa en profundidad
+    \item Aislamiento de recursos mediante subredes privadas
+    \item Control de acceso a nivel de red
+\end{itemize}
+
+\subsection{Comprensión de Conceptos Clave}
+
+\textbf{VPC como Fundamento:}
+
+Has comprendido que VPC es el primer paso obligatorio en casi cualquier arquitectura de AWS. Sin una VPC adecuadamente diseñada, no puedes desplegar instancias EC2, bases de datos RDS, clústeres EKS, o la mayoría de servicios de AWS de manera controlada y segura.
+
+\textbf{Infraestructura como Código Conceptual:}
+
+Aunque has creado recursos mediante la consola, has seguido un proceso sistemático y documentado que podría traducirse fácilmente a Infrastructure as Code (IaC) usando Terraform o CloudFormation. Comprendes qué recursos dependen de otros y el orden de creación necesario.
+
+\textbf{Costo Cero, Valor Infinito:}
+
+Has aprendido que una de las fortalezas de AWS es que puedes diseñar y construir arquitecturas de red completas sin costo alguno. La VPC, subredes, tablas de enrutamiento, y la mayoría de componentes de red son gratuitos, permitiendo experimentación y aprendizaje sin riesgo financiero.
+
+\subsection{Preparación para Laboratorios Futuros}
+
+Esta VPC que construiste será la base para:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Lab 3 - Internet Gateway:} Conectarás las subredes públicas a internet, permitiendo acceso bidireccional
+    \item \textbf{Lab 4 - EC2 y Security Groups:} Lanzarás instancias EC2 en tus subredes, aplicando seguridad a nivel de instancia
+    \item \textbf{Lab 5 - Seguridad Avanzada:} Implementarás Network ACLs, VPC Flow Logs, y análisis de tráfico
+    \item \textbf{Lab 6 - VPC Peering:} Conectarás múltiples VPCs para arquitecturas complejas
+    \item \textbf{Lab 7 - CloudWatch:} Monitorearás el rendimiento de tu red y recursos
+    \item \textbf{Lab 8 - Proyecto Integrador:} Desplegarás una aplicación completa sobre esta infraestructura
+\end{itemize}
+
+Cada laboratorio agregará capas adicionales de funcionalidad y seguridad sobre la base sólida que construiste hoy.
+
+\subsection{Mejores Prácticas Aprendidas}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Planificar antes de implementar:} El tiempo invertido en diseño previene problemas futuros
+    \item \textbf{Convenciones de nomenclatura:} Nombres descriptivos facilitan gestión en entornos grandes
+    \item \textbf{Etiquetado consistente:} Tags permiten organización, facturación, y automatización
+    \item \textbf{Arquitectura multi-AZ:} Siempre considerar alta disponibilidad desde el inicio
+    \item \textbf{Seguridad por defecto:} Diseñar redes privadas por defecto, público solo cuando necesario
+    \item \textbf{Documentación continua:} Anotar IDs de recursos facilita troubleshooting futuro
+    \item \textbf{Escalabilidad:} Dejar espacio de direccionamiento para crecimiento
+\end{enumerate}
+
+\subsection{Reflexión Final}
+
+La habilidad de diseñar y construir redes virtuales en la nube es fundamental para cualquier profesional de tecnología moderna. No es solo sobre AWS: los conceptos de direccionamiento IP, subnetting, enrutamiento, y segmentación de red son universales y aplicables a Azure, Google Cloud, entornos on-premise, y cualquier infraestructura de red.
+
+Has demostrado que comprendes no solo cómo crear recursos en AWS, sino \textit{por qué} se crean de cierta manera. Entiendes las decisiones de arquitectura detrás de subredes públicas vs privadas, la importancia de distribución multi-AZ, y cómo las tablas de enrutamiento controlan flujos de tráfico.
+
+Esta infraestructura de red que construiste en menos de 90 minutos, sin costo alguno, equivale a diseños de red empresarial que en entornos tradicionales requerirían hardware físico, configuración compleja, y semanas de implementación. Esta es la potencia de la nube: infraestructura definida por software, escalable, flexible, y accesible.
+
+\textbf{¡Felicidades por completar el Laboratorio 2 exitosamente!}
+
+Ahora tienes una VPC robusta, lista para el siguiente paso: conectarla a internet mediante Internet Gateway en el Laboratorio 3.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{Amazon VPC}
+\begin{itemize}[leftmargin=*]
+    \item Amazon VPC Documentation \\
+    \url{https://docs.aws.amazon.com/vpc/}
+    \item What is Amazon VPC? \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html}
+    \item VPC Examples and Scenarios \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenarios.html}
+    \item Amazon VPC Best Practices \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-best-practices.html}
+\end{itemize}
+
+\item \textbf{VPC Subnets}
+\begin{itemize}[leftmargin=*]
+    \item VPC and Subnets \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html}
+    \item Create a Subnet \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/working-with-vpcs.html}
+\end{itemize}
+
+\item \textbf{Route Tables}
+\begin{itemize}[leftmargin=*]
+    \item Route Tables for Your VPC \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html}
+    \item Work with Route Tables \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html}
+\end{itemize}
+
+\item \textbf{Availability Zones}
+\begin{itemize}[leftmargin=*]
+    \item Regions and Availability Zones \\
+    \url{https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html}
+    \item AWS Global Infrastructure \\
+    \url{https://aws.amazon.com/about-aws/global-infrastructure/}
+\end{itemize}
+
+\end{enumerate}
+
+\subsection{Recursos sobre Redes y CIDR}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{RFC 1918 - Address Allocation for Private Internets} \\
+\url{https://tools.ietf.org/html/rfc1918} \\
+Especificación estándar de rangos de direcciones IP privadas.
+
+\item \textbf{RFC 4632 - Classless Inter-domain Routing (CIDR)} \\
+\url{https://tools.ietf.org/html/rfc4632} \\
+Definición técnica de notación CIDR.
+
+\item \textbf{CIDR Calculator} \\
+\url{https://www.subnet-calculator.com/cidr.php} \\
+Herramienta online para cálculos de CIDR y subnetting.
+
+\item \textbf{IP Address Guide} \\
+\url{https://www.ipaddressguide.com/cidr} \\
+Guía interactiva sobre direccionamiento IP y CIDR.
+
+\end{enumerate}
+
+\subsection{Tutoriales y Guías de AWS}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{Getting Started with Amazon VPC} \\
+\url{https://aws.amazon.com/vpc/getting-started/}
+
+\item \textbf{AWS VPC Workshop} \\
+\url{https://catalog.workshops.aws/networking/en-US}
+
+\item \textbf{AWS re:Invent Videos sobre VPC} \\
+\url{https://www.youtube.com/c/AWSEventsChannel} \\
+Buscar "Amazon VPC" en el canal oficial de AWS.
+
+\item \textbf{AWS Skill Builder - VPC Courses} \\
+\url{https://skillbuilder.aws/} \\
+Cursos gratuitos sobre networking en AWS.
+
+\end{enumerate}
+
+\subsection{Libros y Publicaciones}
+
+\begin{enumerate}[leftmargin=*]
+
+\item Wittig, A., \& Wittig, M. (2018). \textit{Amazon Web Services in Action} (2nd ed.). Manning Publications. \\
+Capítulo 6: "Securing your system: IAM, security groups, and VPC" - Explicación detallada de VPC.
+
+\item Varia, J., \& Mathew, S. (2014). \textit{Overview of Amazon Web Services}. Amazon Web Services. \\
+\url{https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html}
+
+\item AWS Well-Architected Framework - Security Pillar. \\
+\url{https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html} \\
+Sección sobre diseño de redes seguras.
+
+\item Tanenbaum, A. S., \& Wetherall, D. J. (2011). \textit{Computer Networks} (5th ed.). Pearson. \\
+Referencia fundamental sobre conceptos de redes, incluyendo subnetting e IP routing.
+
+\end{enumerate}
+
+\subsection{Herramientas Útiles}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{AWS VPC Visual Subnet Calculator} \\
+\url{https://network00.com/NetworkTools/IPv4VisualSubnetCalculator/} \\
+Calculadora visual para planificar subredes.
+
+\item \textbf{draw.io (diagrams.net)} \\
+\url{https://app.diagrams.net/} \\
+Herramienta gratuita para dibujar arquitecturas de AWS, incluye íconos oficiales.
+
+\item \textbf{AWS Architecture Icons} \\
+\url{https://aws.amazon.com/architecture/icons/} \\
+Íconos oficiales para documentar arquitecturas.
+
+\item \textbf{CloudCraft} \\
+\url{https://www.cloudcraft.co/} \\
+Herramienta de diagramación de arquitecturas AWS con estimación de costos.
+
+\end{enumerate}
+
+\vspace{1cm}
+
+\textbf{Nota:} Todas las URLs fueron verificadas al momento de creación de este documento. AWS actualiza constantemente su documentación; si algún enlace cambia, buscar el tema en \url{https://docs.aws.amazon.com/}.
+
+\end{document}

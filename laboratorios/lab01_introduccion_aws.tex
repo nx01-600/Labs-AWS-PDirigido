@@ -1,0 +1,1835 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#1}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 1 - Introducción a AWS},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#1\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Introducción a AWS y Creación de Cuenta\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 60-90 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio introduce los conceptos fundamentales de Amazon Web Services (AWS) y guía paso a paso en la creación y configuración de una cuenta AWS. Los estudiantes aprenderán a navegar por la consola de AWS, configurar Identity and Access Management (IAM) para gestionar usuarios y permisos, habilitar la autenticación multifactor (MFA) para mejorar la seguridad, y configurar alertas de facturación para monitorear el uso de servicios.
+
+El laboratorio está diseñado para ser completado utilizando exclusivamente el nivel gratuito (Free Tier) de AWS, lo que permite a los estudiantes adquirir experiencia práctica sin incurrir en costos. Al finalizar, los participantes comprenderán la arquitectura global de AWS, incluyendo regiones y zonas de disponibilidad, y estarán preparados para trabajar de manera segura con servicios en la nube.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} AWS, Cloud Computing, IAM, MFA, Free Tier, Seguridad en la Nube, Consola AWS
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+Proporcionar a los estudiantes una comprensión práctica de Amazon Web Services y desarrollar las habilidades necesarias para crear, configurar y gestionar de manera segura una cuenta AWS utilizando las mejores prácticas de la industria.
+
+\subsection{Objetivos Específicos}
+\begin{itemize}[leftmargin=*]
+    \item Comprender los conceptos fundamentales de cloud computing y el modelo de servicios de AWS
+    \item Crear y configurar correctamente una cuenta de AWS aprovechando el nivel gratuito (Free Tier)
+    \item Implementar medidas de seguridad básicas utilizando AWS IAM (Identity and Access Management)
+    \item Configurar autenticación multifactor (MFA) para proteger el acceso a la cuenta
+    \item Establecer alertas de facturación para monitorear y controlar costos
+    \item Navegar eficientemente por la consola de AWS y comprender su estructura
+    \item Identificar las diferentes regiones y zonas de disponibilidad de AWS
+    \item Aplicar el principio de mínimo privilegio en la gestión de permisos
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Gestión de Identidad y Acceso:} Capacidad para crear y administrar usuarios, grupos y políticas de seguridad en entornos de nube
+    \item \textbf{Seguridad en la Nube:} Implementación de controles de seguridad y mejores prácticas para proteger recursos en AWS
+    \item \textbf{Administración de Costos:} Monitoreo y control del gasto en servicios de nube mediante alertas y herramientas de facturación
+    \item \textbf{Navegación de Consolas:} Destreza en el uso de interfaces web para la gestión de infraestructura en la nube
+    \item \textbf{Toma de Decisiones Técnicas:} Selección apropiada de regiones y servicios según requisitos de latencia, cumplimiento y disponibilidad
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{¿Qué es Cloud Computing?}
+
+El Cloud Computing o computación en la nube es un modelo que permite el acceso bajo demanda a un conjunto compartido de recursos computacionales configurables (redes, servidores, almacenamiento, aplicaciones y servicios) que pueden ser rápidamente aprovisionados y liberados con un mínimo esfuerzo de gestión.
+
+\subsubsection{Características Esenciales del Cloud Computing}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Autoservicio bajo demanda:} Los usuarios pueden aprovisionar recursos automáticamente sin interacción humana con el proveedor
+    \item \textbf{Amplio acceso a la red:} Los servicios están disponibles a través de la red mediante mecanismos estándar
+    \item \textbf{Agrupación de recursos:} Los recursos del proveedor se agrupan para servir a múltiples clientes usando un modelo multi-tenant
+    \item \textbf{Rápida elasticidad:} Los recursos pueden ser aprovisionados y liberados de forma elástica, en algunos casos automáticamente
+    \item \textbf{Servicio medido:} Los sistemas en la nube controlan y optimizan automáticamente el uso de recursos mediante capacidades de medición
+\end{enumerate}
+
+\subsubsection{Modelos de Servicio}
+
+\textbf{Infrastructure as a Service (IaaS):}
+Proporciona recursos computacionales fundamentales como procesamiento, almacenamiento y redes. El usuario controla sistemas operativos, almacenamiento y aplicaciones, pero no la infraestructura subyacente. AWS EC2 y VPC son ejemplos de IaaS.
+
+\textbf{Platform as a Service (PaaS):}
+Proporciona una plataforma que permite a los clientes desarrollar, ejecutar y gestionar aplicaciones sin la complejidad de construir y mantener la infraestructura. AWS Elastic Beanstalk es un ejemplo.
+
+\textbf{Software as a Service (SaaS):}
+Proporciona aplicaciones completas que se ejecutan en la infraestructura del proveedor. Los usuarios acceden a las aplicaciones desde diversos dispositivos cliente. Amazon WorkMail es un ejemplo.
+
+\subsection{Introducción a Amazon Web Services (AWS)}
+
+Amazon Web Services es la plataforma de servicios en la nube más completa y ampliamente adoptada del mundo. Lanzada en 2006, AWS ofrece más de 200 servicios completamente funcionales desde centros de datos distribuidos globalmente. Millones de clientes, incluyendo startups, grandes empresas y agencias gubernamentales, utilizan AWS para reducir costos, ser más ágiles e innovar más rápido.
+
+\subsubsection{Ventajas de AWS}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Elasticidad y Escalabilidad:} Capacidad de aumentar o reducir recursos según la demanda
+    \item \textbf{Pago por uso:} Solo pagas por los recursos que consumes, sin contratos a largo plazo
+    \item \textbf{Alcance Global:} Presencia en múltiples regiones geográficas para baja latencia
+    \item \textbf{Seguridad:} Cumplimiento de estándares internacionales y herramientas de seguridad robustas
+    \item \textbf{Innovación Continua:} Lanzamiento constante de nuevos servicios y funcionalidades
+    \item \textbf{Experiencia y Madurez:} Más de 15 años de experiencia en servicios en la nube
+\end{itemize}
+
+\subsection{Infraestructura Global de AWS}
+
+\subsubsection{Regiones (Regions)}
+
+Una región de AWS es una ubicación geográfica física en el mundo donde AWS tiene múltiples centros de datos. Cada región es completamente independiente y está aislada de las demás para lograr la máxima tolerancia a fallos y estabilidad.
+
+\textbf{Características de las Regiones:}
+\begin{itemize}[leftmargin=*]
+    \item Cada región tiene múltiples zonas de disponibilidad aisladas
+    \item Los datos no se replican automáticamente entre regiones (cumplimiento normativo)
+    \item Puedes elegir la región según latencia, costos y requisitos regulatorios
+    \item A partir de 2025, AWS cuenta con más de 30 regiones en todo el mundo
+\end{itemize}
+
+\textbf{Ejemplos de Regiones:}
+\begin{itemize}
+    \item \texttt{us-east-1} - Virginia del Norte (EE.UU.) - Región más antigua y con más servicios
+    \item \texttt{us-west-2} - Oregón (EE.UU.)
+    \item \texttt{eu-west-1} - Irlanda (Europa)
+    \item \texttt{ap-southeast-1} - Singapur (Asia Pacífico)
+    \item \texttt{sa-east-1} - São Paulo (Sudamérica)
+\end{itemize}
+
+\subsubsection{Zonas de Disponibilidad (Availability Zones - AZs)}
+
+Una Zona de Disponibilidad es uno o más centros de datos discretos, cada uno con energía, redes y conectividad redundantes, ubicados dentro de una región de AWS. Las AZs están diseñadas para el aislamiento de fallos.
+
+\textbf{Características de las AZs:}
+\begin{itemize}[leftmargin=*]
+    \item Cada región tiene múltiples AZs (típicamente 3 o más)
+    \item Las AZs están separadas físicamente (kilómetros de distancia)
+    \item Conectadas entre sí con redes de baja latencia (menos de 1ms)
+    \item Permiten diseñar aplicaciones de alta disponibilidad
+    \item Identificadas con letras: us-east-1a, us-east-1b, us-east-1c
+\end{itemize}
+
+\textbf{Ejemplo de Arquitectura Multi-AZ:}
+
+Si una aplicación se despliega en dos AZs diferentes, si una AZ falla (por desastre natural, corte de energía, etc.), la aplicación continúa funcionando en la otra AZ, garantizando alta disponibilidad.
+
+\subsubsection{Edge Locations y CloudFront}
+
+Las Edge Locations son puntos de presencia que AWS utiliza para entregar contenido con baja latencia a los usuarios finales. Hay más de 400 edge locations distribuidas globalmente, muchas más que regiones. Se utilizan principalmente para Amazon CloudFront (CDN) y Route 53 (DNS).
+
+\subsection{AWS Free Tier (Nivel Gratuito)}
+
+AWS ofrece un nivel gratuito que permite a los usuarios explorar y probar servicios de AWS sin costo. Existen tres tipos de ofertas de Free Tier:
+
+\subsubsection{Prueba Gratuita de 12 Meses}
+
+Disponible para nuevos clientes de AWS, comienza desde la fecha de registro inicial. Incluye:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Amazon EC2:} 750 horas por mes de instancias t2.micro (o t3.micro en algunas regiones)
+    \item \textbf{Amazon S3:} 5 GB de almacenamiento estándar
+    \item \textbf{Amazon RDS:} 750 horas por mes de instancias db.t2.micro
+    \item \textbf{Amazon CloudFront:} 50 GB de transferencia de datos salientes
+    \item \textbf{Amazon VPC:} Sin costo adicional (incluido en Free Tier)
+\end{itemize}
+
+\subsubsection{Siempre Gratuito}
+
+Ofertas que no expiran y están disponibles para todos los clientes de AWS:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{AWS Lambda:} 1 millón de solicitudes gratuitas por mes
+    \item \textbf{Amazon DynamoDB:} 25 GB de almacenamiento
+    \item \textbf{Amazon SNS:} 1 millón de publicaciones
+    \item \textbf{Amazon CloudWatch:} 10 métricas personalizadas y 10 alarmas
+\end{itemize}
+
+\subsubsection{Pruebas a Corto Plazo}
+
+Ofertas de prueba que comienzan desde la primera vez que activas un servicio particular.
+
+\textbf{IMPORTANTE:} Para este laboratorio, utilizaremos exclusivamente servicios incluidos en el Free Tier. Es fundamental seguir las instrucciones de limpieza al final para evitar cargos no deseados.
+
+\subsection{AWS Identity and Access Management (IAM)}
+
+IAM es el servicio de AWS que permite gestionar de forma segura el acceso a los recursos de AWS. Con IAM, puedes controlar quién está autenticado (ha iniciado sesión) y autorizado (tiene permisos) para usar recursos.
+
+\subsubsection{Componentes Principales de IAM}
+
+\textbf{1. Usuarios (Users):}
+\begin{itemize}[leftmargin=*]
+    \item Representan a una persona o aplicación que interactúa con AWS
+    \item Cada usuario tiene credenciales únicas (contraseña y/o access keys)
+    \item Pueden tener permisos asignados directamente o a través de grupos
+    \item Buena práctica: NO usar la cuenta root para tareas diarias
+\end{itemize}
+
+\textbf{2. Grupos (Groups):}
+\begin{itemize}[leftmargin=*]
+    \item Colección de usuarios IAM
+    \item Los permisos asignados al grupo se aplican a todos sus miembros
+    \item Un usuario puede pertenecer a múltiples grupos
+    \item Facilita la gestión de permisos a escala
+\end{itemize}
+
+\textbf{3. Roles (Roles):}
+\begin{itemize}[leftmargin=*]
+    \item Identidad IAM con permisos específicos
+    \item Pueden ser asumidos temporalmente por usuarios, aplicaciones o servicios
+    \item No tienen credenciales permanentes (se generan temporalmente)
+    \item Útiles para servicios de AWS que necesitan acceder a otros servicios
+\end{itemize}
+
+\textbf{4. Políticas (Policies):}
+\begin{itemize}[leftmargin=*]
+    \item Documentos JSON que definen permisos
+    \item Especifican qué acciones se permiten o deniegan sobre qué recursos
+    \item Pueden ser administradas por AWS o creadas por el usuario
+    \item Se adjuntan a usuarios, grupos o roles
+\end{itemize}
+
+\subsubsection{Ejemplo de Política IAM}
+
+\begin{lstlisting}[language=json, caption=Política que permite solo lectura en S3]
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::mi-bucket/*",
+        "arn:aws:s3:::mi-bucket"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\subsubsection{Principio de Mínimo Privilegio}
+
+Es una mejor práctica de seguridad que consiste en otorgar únicamente los permisos necesarios para realizar una tarea específica. Esto limita el impacto de compromisos de seguridad y reduce el riesgo de cambios accidentales.
+
+\textbf{Aplicación práctica:}
+\begin{itemize}[leftmargin=*]
+    \item No usar la cuenta root para operaciones diarias
+    \item Crear usuarios IAM con permisos específicos
+    \item Revisar y auditar permisos regularmente
+    \item Eliminar permisos no utilizados
+\end{itemize}
+
+\subsection{Autenticación Multifactor (MFA)}
+
+MFA añade una capa adicional de seguridad al requerir dos o más métodos de verificación:
+\begin{enumerate}
+    \item \textbf{Algo que sabes:} Contraseña o PIN
+    \item \textbf{Algo que tienes:} Dispositivo físico o aplicación móvil
+    \item \textbf{Algo que eres:} Huella digital o reconocimiento facial
+\end{enumerate}
+
+\textbf{Tipos de MFA en AWS:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MFA Virtual:} Aplicaciones como Google Authenticator, Microsoft Authenticator, Authy
+    \item \textbf{U2F Security Key:} Dispositivos físicos como YubiKey
+    \item \textbf{MFA por Hardware:} Token físico dedicado
+\end{itemize}
+
+Para este laboratorio, utilizaremos MFA Virtual (gratuito y fácil de configurar).
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Necesarios}
+\begin{itemize}[leftmargin=*]
+    \item Conocimientos básicos de navegación web
+    \item Comprensión general de conceptos de redes e internet
+    \item Capacidad para seguir instrucciones técnicas detalladas
+    \item Familiaridad con correo electrónico y aplicaciones móviles
+\end{itemize}
+
+\subsection{Recursos Técnicos Requeridos}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Computadora:} PC, Mac o Linux con navegador web moderno
+    \item \textbf{Navegador:} Chrome, Firefox, Safari o Edge (actualizado)
+    \item \textbf{Conexión a Internet:} Estable, mínimo 1 Mbps
+    \item \textbf{Correo Electrónico:} Cuenta de email válida y activa
+    \item \textbf{Teléfono Móvil:} Para instalar aplicación MFA (Google Authenticator o similar)
+    \item \textbf{Tarjeta de Crédito/Débito:} Para verificación de identidad (NO se realizarán cargos)
+\end{itemize}
+
+\subsection{Costos Estimados}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Concepto} & \textbf{Costo} \\
+\hline
+Creación de cuenta AWS & \$0.00 \\
+Servicios IAM & \$0.00 (siempre gratuito) \\
+MFA Virtual & \$0.00 (aplicación gratuita) \\
+Alertas de facturación & \$0.00 (Free Tier) \\
+\hline
+\textbf{TOTAL} & \textbf{\$0.00} \\
+\hline
+\end{tabular}
+\caption{Costos del Laboratorio 1}
+\end{table}
+
+\textbf{NOTA IMPORTANTE:} AWS requiere una tarjeta de crédito/débito para verificar tu identidad, pero NO se realizarán cargos si sigues las instrucciones correctamente y permaneces dentro de los límites del Free Tier.
+
+\subsection{Tiempo Estimado}
+\begin{itemize}[leftmargin=*]
+    \item Lectura del marco teórico: 15-20 minutos
+    \item Creación de cuenta AWS: 15-20 minutos
+    \item Configuración de IAM y MFA: 20-30 minutos
+    \item Configuración de alertas: 10-15 minutos
+    \item Exploración de la consola: 10-15 minutos
+    \item \textbf{TOTAL ESTIMADO:} 60-90 minutos
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+\subsection{Paso 1: Creación de Cuenta AWS}
+
+\textbf{Objetivo:} Crear una nueva cuenta de Amazon Web Services aprovechando el nivel gratuito.
+
+\subsubsection{1.1 Acceder al Sitio Web de AWS}
+
+\textbf{Instrucciones detalladas:}
+\begin{enumerate}[leftmargin=*]
+    \item Abrir tu navegador web preferido (Chrome, Firefox, Safari o Edge)
+    \item En la barra de direcciones, escribir: \texttt{https://aws.amazon.com}
+    \item Presionar Enter para cargar la página
+    \item Esperar a que la página principal de AWS se cargue completamente
+    \item Verificar que estés en el sitio oficial (debe aparecer el candado de seguridad en la barra de direcciones)
+\end{enumerate}
+
+\textbf{Descripción visual de la página:}
+La página principal de AWS muestra un banner grande con opciones de servicios, un botón naranja que dice "Crear una cuenta de AWS" en la esquina superior derecha, y varios menús desplegables incluyendo "Productos", "Soluciones" y "Recursos".
+
+\subsubsection{1.2 Iniciar el Proceso de Registro}
+
+\textbf{Instrucciones:}
+\begin{enumerate}[leftmargin=*]
+    \item Localizar el botón naranja "Crear una cuenta de AWS" en la esquina superior derecha
+    \item Si no lo ves, busca "Sign Up" o "Registrarse"
+    \item Hacer clic en el botón
+    \item Serás redirigido a la página de registro
+\end{enumerate}
+
+\textbf{Alternativa:}
+Puedes ir directamente a: \texttt{https://portal.aws.amazon.com/billing/signup}
+
+\subsubsection{1.3 Proporcionar Información de la Cuenta Root}
+
+\textbf{Formulario a completar:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{Campo} & \textbf{Descripción / Qué ingresar} \\
+\hline
+Root user email address & Tu dirección de correo electrónico personal (ej: tunombre@gmail.com) \\
+\hline
+AWS account name & Un nombre descriptivo para tu cuenta (ej: "CuentaEstudiantil-NombreApellido") \\
+\hline
+\end{tabular}
+\caption{Información de Cuenta Root}
+\end{table}
+
+\textbf{Instrucciones paso a paso:}
+\begin{enumerate}[leftmargin=*]
+    \item En el campo "Root user email address", escribir tu correo electrónico
+    \item IMPORTANTE: Usa un correo que revises frecuentemente
+    \item El correo debe ser válido y accesible (recibirás un código de verificación)
+    \item En "AWS account name", ingresar un nombre descriptivo
+    \item Ejemplos de nombres: "AWS-Estudiante-2025", "Proyecto-Redes-AWS", "MiCuenta-Practica"
+    \item Hacer clic en "Verify email address" (Verificar dirección de correo)
+\end{enumerate}
+
+\textbf{Verificación de correo electrónico:}
+\begin{enumerate}[leftmargin=*]
+    \item AWS enviará un código de verificación de 6 dígitos a tu correo
+    \item Abrir tu bandeja de entrada (puede tardar 1-2 minutos)
+    \item Buscar un correo de "Amazon Web Services" con asunto "Your AWS verification code"
+    \item Copiar el código de 6 dígitos
+    \item Volver a la página de AWS
+    \item Pegar el código en el campo "Verification code"
+    \item Hacer clic en "Verify" (Verificar)
+\end{enumerate}
+
+\textbf{¿Qué pasa si no recibo el correo?}
+\begin{itemize}[leftmargin=*]
+    \item Revisar la carpeta de spam/correo no deseado
+    \item Esperar 3-5 minutos (a veces hay retraso)
+    \item Verificar que escribiste correctamente el correo
+    \item Hacer clic en "Resend code" si es necesario
+\end{itemize}
+
+\subsubsection{1.4 Crear Contraseña para la Cuenta Root}
+
+\textbf{Requisitos de la contraseña:}
+\begin{itemize}[leftmargin=*]
+    \item Mínimo 8 caracteres
+    \item Al menos una letra mayúscula
+    \item Al menos una letra minúscula
+    \item Al menos un número
+    \item Se recomienda incluir caracteres especiales (!@\#\$\%\^{}\&*)
+\end{itemize}
+
+\textbf{Instrucciones:}
+\begin{enumerate}[leftmargin=*]
+    \item En "Root user password", crear una contraseña segura
+    \item Ejemplo de contraseña segura: \texttt{MiAWS2025!Segura}
+    \item En "Confirm root user password", escribir exactamente la misma contraseña
+    \item IMPORTANTE: Guardar esta contraseña en un lugar seguro (administrador de contraseñas)
+    \item NO compartir esta contraseña con nadie
+    \item Hacer clic en "Continue" (Continuar)
+\end{enumerate}
+
+\textbf{Recomendación de seguridad:}
+Utiliza un administrador de contraseñas como LastPass, 1Password, Bitwarden o el integrado en tu navegador para generar y almacenar contraseñas seguras.
+
+\subsubsection{1.5 Proporcionar Información de Contacto}
+
+\textbf{Tipo de cuenta a seleccionar:}
+\begin{itemize}[leftmargin=*]
+    \item AWS ofrece dos tipos: "Personal" (Personal) y "Business" (Empresarial)
+    \item Para este laboratorio, seleccionar \textbf{"Personal"}
+    \item La diferencia principal es administrativa, los servicios son los mismos
+\end{itemize}
+
+\textbf{Formulario de información personal:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|p{7cm}|}
+\hline
+\textbf{Campo} & \textbf{Qué ingresar} \\
+\hline
+Full Name & Tu nombre completo (ej: Nicolás Carreño Tascón) \\
+\hline
+Phone Number & Número de teléfono con código de país (ej: +57 300 123 4567) \\
+\hline
+Country/Region & Seleccionar tu país de la lista desplegable \\
+\hline
+Address & Dirección física completa (calle y número) \\
+\hline
+City & Ciudad de residencia \\
+\hline
+State/Province/Region & Departamento o estado \\
+\hline
+Postal Code & Código postal \\
+\hline
+\end{tabular}
+\caption{Información de Contacto Requerida}
+\end{table}
+
+\textbf{Instrucciones paso a paso:}
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic en el círculo "Personal" en "Account type"
+    \item Completar "Full Name" con tu nombre completo legal
+    \item En "Phone Number":
+    \begin{itemize}
+        \item Seleccionar el código de tu país del menú desplegable (ej: +57 para Colombia)
+        \item Escribir tu número de celular sin espacios ni guiones
+        \item Ejemplo: +57 3001234567
+    \end{itemize}
+    \item Seleccionar tu país en "Country or Region"
+    \item Completar tu dirección física exacta en "Address"
+    \item Escribir tu ciudad en "City"
+    \item Seleccionar o escribir tu estado/departamento en "State/Province/Region"
+    \item Ingresar el código postal en "Postal Code"
+    \item Leer el "AWS Customer Agreement" (Acuerdo de Cliente de AWS)
+    \item Marcar la casilla "I have read and agree to the terms of the AWS Customer Agreement"
+    \item Hacer clic en "Continue" (Continuar)
+\end{enumera te}
+
+\textbf{Nota importante:}
+AWS utiliza esta información para cumplir con regulaciones fiscales y geográficas. Los datos deben ser verídicos y precisos.
+
+\subsubsection{1.6 Agregar Información de Pago}
+
+\textbf{¿Por qué AWS requiere una tarjeta?}
+\begin{itemize}[leftmargin=*]
+    \item Para verificar tu identidad y prevenir fraude
+    \item Para tener un método de pago en caso de que excedas los límites del Free Tier
+    \item La tarjeta NO será cargada si te mantienes dentro del Free Tier
+    \item Se realizará una autorización temporal de \$1 USD que será revertida
+\end{itemize}
+
+\textbf{Tipos de tarjeta aceptadas:}
+\begin{itemize}[leftmargin=*]
+    \item Tarjetas de crédito (Visa, Mastercard, American Express)
+    \item Tarjetas de débito con logo Visa o Mastercard
+    \item NO se aceptan tarjetas prepagadas en la mayoría de casos
+\end{itemize}
+
+\textbf{Formulario de pago:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|p{7cm}|}
+\hline
+\textbf{Campo} & \textbf{Descripción} \\
+\hline
+Credit or debit card number & Número de la tarjeta (16 dígitos típicamente) \\
+\hline
+Expiration date & Fecha de vencimiento (MM/YY) \\
+\hline
+Cardholder's name & Nombre exacto como aparece en la tarjeta \\
+\hline
+Security code (CVV) & Código de 3 o 4 dígitos al reverso \\
+\hline
+Billing address & Usar la misma dirección del paso anterior \\
+\hline
+\end{tabular}
+\caption{Información de Pago}
+\end{table}
+
+\textbf{Instrucciones:}
+\begin{enumerate}[leftmargin=*]
+    \item En "Credit or debit card number", ingresar los 16 dígitos de tu tarjeta
+    \item No incluir espacios ni guiones, solo números
+    \item En "Expiration date", seleccionar mes y año de vencimiento
+    \item En "Cardholder's name", escribir el nombre EXACTO que aparece en la tarjeta
+    \item Incluir todos los nombres y apellidos como están impresos
+    \item En "Security code", ingresar el CVV (3 dígitos en Visa/MC, 4 en Amex)
+    \item Para "Billing address", puedes:
+    \begin{itemize}
+        \item Seleccionar "Use contact address" si es la misma
+        \item O completar una dirección diferente si es necesario
+    \end{itemize}
+    \item Hacer clic en "Verify and Add" (Verificar y Agregar)
+\end{enumerate}
+
+\textbf{Verificación de la tarjeta:}
+\begin{enumerate}[leftmargin=*]
+    \item AWS realizará una autorización temporal de \$1 USD
+    \item Este cargo aparecerá como "pendiente" en tu estado de cuenta
+    \item Será cancelado automáticamente en 3-5 días hábiles
+    \item Es solo para verificar que la tarjeta es válida y activa
+    \item NO es un cobro real
+\end{enumerate}
+
+\textbf{Si la verificación falla:}
+\begin{itemize}[leftmargin=*]
+    \item Verificar que los datos estén correctos (número, fecha, CVV, nombre)
+    \item Asegurarse de que la tarjeta tenga fondos disponibles para la autorización
+    \item Contactar a tu banco si persiste el problema
+    \item Intentar con otra tarjeta si es posible
+\end{itemize}
+
+\subsubsection{1.7 Confirmar Identidad (Verificación Telefónica)}
+
+\textbf{Proceso de verificación:}
+\begin{enumerate}[leftmargin=*]
+    \item Serás redirigido a la página "Confirm your identity"
+    \item AWS te contactará por teléfono o SMS para verificar tu identidad
+    \item Seleccionar método de verificación:
+    \begin{itemize}
+        \item "Text message (SMS)" - Recibirás un código por mensaje de texto
+        \item "Voice call" - Recibirás una llamada automática
+    \end{itemize}
+    \item Se recomienda seleccionar "Text message (SMS)" (más rápido y fácil)
+\end{enumerate}
+
+\textbf{Verificación por SMS (recomendado):}
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar "Text message (SMS)"
+    \item Confirmar que el número de teléfono mostrado es correcto
+    \item Si no es correcto, hacer clic en "Edit" para modificarlo
+    \item En el campo "Security check", completar el CAPTCHA
+    \begin{itemize}
+        \item Escribir los caracteres que aparecen en la imagen distorsionada
+        \item Si no puedes leerlos, hacer clic en el ícono de refrescar
+    \end{itemize}
+    \item Hacer clic en "Send SMS" (Enviar SMS)
+    \item Esperar 30-60 segundos a recibir el mensaje
+    \item El mensaje contendrá un código de 4 dígitos
+    \item Ingresar el código en el campo "Verification code"
+    \item Hacer clic en "Verify Code" (Verificar Código)
+\end{enumerate}
+
+\textbf{Verificación por Llamada (alternativa):}
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar "Voice call"
+    \item Completar el CAPTCHA
+    \item Hacer clic en "Call me now"
+    \item Responder la llamada (puede tardar 1-2 minutos)
+    \item Escucharás un mensaje automático en inglés
+    \item El mensaje te dirá un código de 4 dígitos
+    \item Ingresar el código en el sitio web
+    \item Hacer clic en "Verify Code"
+\end{enumerate}
+
+\textbf{Solución de problemas:}
+\begin{itemize}[leftmargin=*]
+    \item Si no recibes el SMS en 2 minutos, hacer clic en "Resend SMS"
+    \item Verificar que tu teléfono tenga señal y pueda recibir mensajes internacionales
+    \item Algunos operadores bloquean SMS automáticos - contacta a tu operador
+    \item Si SMS no funciona, intentar con llamada telefónica
+\end{itemize}
+
+\subsubsection{1.8 Seleccionar Plan de Soporte}
+
+\textbf{Planes disponibles:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|c|p{6cm}|}
+\hline
+\textbf{Plan} & \textbf{Costo} & \textbf{Descripción} \\
+\hline
+Basic Support & \$0/mes & Acceso a foros, documentación y AWS Trusted Advisor básico \\
+\hline
+Developer & \$29/mes & Soporte técnico durante horario laboral \\
+\hline
+Business & \$100/mes & Soporte 24/7, tiempo de respuesta más rápido \\
+\hline
+Enterprise & \$15,000/mes & Account manager dedicado, soporte premium \\
+\hline
+\end{tabular}
+\caption{Planes de Soporte AWS}
+\end{table}
+
+\textbf{Instrucciones:}
+\begin{enumerate}[leftmargin=*]
+    \item En la página "Select a support plan", verás los 4 planes disponibles
+    \item Para este laboratorio y uso educativo, seleccionar \textbf{"Basic Support - Free"}
+    \item Este plan es completamente gratuito y suficiente para aprendizaje
+    \item Incluye:
+    \begin{itemize}
+        \item Acceso a documentación y whitepapers
+        \item Acceso a AWS Forums
+        \item AWS Personal Health Dashboard
+        \item 7 comprobaciones básicas de AWS Trusted Advisor
+    \end{itemize}
+    \item Hacer clic en el botón "Complete sign up" (Completar registro) debajo de "Basic Support"
+\end{enumerate}
+
+\textbf{¿Qué pasa después?}
+\begin{itemize}[leftmargin=*]
+    \item Verás una página de confirmación: "Congratulations! Your AWS account is ready"
+    \item AWS procesará tu cuenta (puede tomar 5-10 minutos)
+    \item Recibirás un correo de confirmación cuando esté lista
+    \item El correo tendrá el asunto: "Welcome to Amazon Web Services"
+\end{itemize}
+
+\textbf{Tiempo de espera:}
+\begin{itemize}[leftmargin=*]
+    \item Normalmente la cuenta se activa en 5-10 minutos
+    \item En algunos casos puede tomar hasta 24 horas
+    \item Durante este tiempo, puedes explorar la documentación de AWS
+    \item Recibirás un correo cuando tu cuenta esté completamente activa
+\end{itemize}
+
+\subsection{Paso 2: Primer Inicio de Sesión y Exploración de la Consola}
+
+\textbf{Objetivo:} Iniciar sesión en la consola de AWS y familiarizarse con la interfaz.
+
+\subsubsection{2.1 Acceder a la Consola de AWS}
+
+\textbf{Instrucciones:}
+\begin{enumerate}[leftmargin=*]
+    \item Una vez que recibas el correo de confirmación de cuenta activa
+    \item Abrir el navegador e ir a: \texttt{https://console.aws.amazon.com}
+    \item Alternativamente, ir a \texttt{https://aws.amazon.com} y hacer clic en "Sign In to the Console"
+    \item Verás la página de inicio de sesión de AWS
+\end{enumerate}
+
+\subsubsection{2.2 Iniciar Sesión como Usuario Root}
+
+\textbf{Proceso de inicio de sesión:}
+\begin{enumerate}[leftmargin=*]
+    \item En la página de inicio de sesión, seleccionar "Root user"
+    \item En el campo "Root user email address", ingresar el correo con el que creaste la cuenta
+    \item Hacer clic en "Next" (Siguiente)
+    \item En la siguiente pantalla, ingresar tu contraseña en "Password"
+    \item Resolver el CAPTCHA de seguridad si aparece
+    \item Hacer clic en "Sign in" (Iniciar sesión)
+    \item Serás redirigido a la consola de administración de AWS
+\end{enumerate}
+
+\textbf{Primera vista de la consola:}
+La consola de AWS se divide en varias secciones:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Barra superior:} Servicios, información de cuenta, región, notificaciones
+    \item \textbf{Barra de búsqueda:} Para buscar servicios rápidamente
+    \item \textbf{Panel central:} Widgets personalizables con información
+    \item \textbf{Recently visited:} Servicios usados recientemente
+    \item \textbf{Favorites:} Servicios marcados como favoritos
+\end{itemize}
+
+\subsubsection{2.3 Familiarizarse con la Navegación}
+
+\textbf{Menú "Services" (Servicios):}
+\begin{enumerate}[leftmargin=*]
+    \item En la esquina superior izquierda, hacer clic en "Services"
+    \item Verás una lista desplegable con todos los servicios de AWS
+    \item Los servicios están organizados por categorías:
+    \begin{itemize}
+        \item Compute (Cómputo): EC2, Lambda, Elastic Beanstalk
+        \item Storage (Almacenamiento): S3, EBS, Glacier
+        \item Database (Bases de datos): RDS, DynamoDB, Aurora
+        \item Networking \& Content Delivery (Redes): VPC, CloudFront, Route 53
+        \item Security, Identity \& Compliance: IAM, Cognito, WAF
+        \item Y muchas más categorías...
+    \end{itemize}
+    \item Explorar brevemente cada categoría para familiarizarte
+\end{enumerate}
+
+\textbf{Selector de Región:}
+\begin{enumerate}[leftmargin=*]
+    \item En la barra superior derecha, junto al nombre de tu cuenta
+    \item Verás el nombre de una región (ej: "N. Virginia", "Ohio", "Oregon")
+    \item Hacer clic en el nombre de la región
+    \item Se desplegará una lista con todas las regiones disponibles
+    \item Cada región está identificada con:
+    \begin{itemize}
+        \item Nombre descriptivo (ej: "US East (N. Virginia)")
+        \item Código de región (ej: "us-east-1")
+    \end{itemize}
+    \item Para este laboratorio, seleccionar una región cercana a tu ubicación
+    \item Recomendaciones por ubicación:
+    \begin{itemize}
+        \item Sudamérica: "South America (São Paulo)" - sa-east-1
+        \item Norte América: "US East (N. Virginia)" - us-east-1
+        \item Europa: "Europe (Ireland)" - eu-west-1
+    \end{itemize}
+    \item Hacer clic en la región deseada para seleccionarla
+\end{enumerate}
+
+\textbf{Importante sobre regiones:}
+\begin{itemize}[leftmargin=*]
+    \item La mayoría de recursos son específicos de región
+    \item Si creas un recurso en us-east-1, no lo verás si cambias a eu-west-1
+    \item Algunos servicios son globales (IAM, CloudFront, Route 53)
+    \item Siempre verifica en qué región estás trabajando
+\end{itemize}
+
+\subsubsection{2.4 Explorar el Panel de Control (Dashboard)}
+
+\textbf{AWS Management Console Home:}
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic en el logo de AWS (esquina superior izquierda) para volver al inicio
+    \item El dashboard muestra:
+    \begin{itemize}
+        \item \textbf{Build a solution:} Tutoriales para empezar
+        \item \textbf{Recently visited services:} Servicios que has usado
+        \item \textbf{Explore AWS:} Recursos de aprendizaje
+        \item \textbf{Cost and usage:} Vista rápida de costos (debe estar en \$0.00)
+    \end{itemize}
+    \item Puedes personalizar este dashboard agregando/removiendo widgets
+\end{enumerate}
+
+\textbf{Búsqueda rápida de servicios:}
+\begin{enumerate}[leftmargin=*]
+    \item En la barra superior, hay un campo de búsqueda
+    \item Escribir el nombre de un servicio (ej: "IAM", "EC2", "S3")
+    \item Aparecerán sugerencias mientras escribes
+    \item Hacer clic en el servicio deseado para acceder directamente
+    \item Esto es más rápido que navegar por menús
+\end{enumerate}
+
+\subsection{Paso 3: Configuración de Seguridad con IAM}
+
+\textbf{Objetivo:} Crear usuarios IAM, grupos y configurar políticas de seguridad siguiendo mejores prácticas.
+
+\subsubsection{3.1 Acceder al Servicio IAM}
+
+\textbf{Instrucciones:}
+\begin{enumerate}[leftmargin=*]
+    \item En la consola de AWS, hacer clic en "Services" (esquina superior izquierda)
+    \item Desplazarse hasta la categoría "Security, Identity, \& Compliance"
+    \item Hacer clic en "IAM"
+    \item Alternativamente, usar la búsqueda rápida: escribir "IAM" y hacer clic
+    \item Serás redirigido al dashboard de IAM
+\end{enumerate}
+
+\textbf{Dashboard de IAM:}
+El dashboard muestra:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{IAM Resources:} Número de usuarios, grupos, roles, políticas
+    \item \textbf{Security Status:} Recomendaciones de seguridad (5 inicialmente)
+    \item \textbf{Sign-in URL for IAM users:} URL personalizada para que usuarios IAM inicien sesión
+\end{itemize}
+
+\subsubsection{3.2 Eliminar Claves de Acceso de Root (Seguridad)}
+
+\textbf{Recomendación de seguridad AWS:}
+La cuenta root no debe tener claves de acceso activas para prevenir uso indebido.
+
+\textbf{Verificar claves de acceso:}
+\begin{enumerate}[leftmargin=*]
+    \item En el dashboard de IAM, buscar "Security recommendations"
+    \item Debería aparecer: "Add MFA for root user" (esto lo haremos después)
+    \item Si aparece "Delete your root user access keys", seguir estos pasos:
+    \begin{itemize}
+        \item Hacer clic en el menú de cuenta (esquina superior derecha)
+        \item Seleccionar "Security credentials"
+        \item Desplazarse hasta "Access keys"
+        \item Si hay alguna clave listada, hacer clic en "Delete"
+        \item Confirmar la eliminación
+    \end{itemize}
+    \item Si no hay claves, ¡perfecto! Continuar al siguiente paso
+\end{enumerate}
+
+\subsubsection{3.3 Crear un Alias de Cuenta (Opcional pero Recomendado)}
+
+\textbf{¿Qué es un alias de cuenta?}
+Un nombre personalizado para tu cuenta AWS que hace más fácil recordar la URL de inicio de sesión para usuarios IAM.
+
+\textbf{Crear alias:}
+\begin{enumerate}[leftmargin=*]
+    \item En el dashboard de IAM, buscar "AWS Account" en el panel derecho
+    \item Verás "Account Alias" con un enlace "Create" o "Edit"
+    \item Hacer clic en "Create" o "Edit"
+    \item Ingresar un alias único (solo letras minúsculas, números y guiones)
+    \item Ejemplo: "aws-estudiante-2025" o "proyecto-redes-aws"
+    \item Hacer clic en "Save changes"
+    \item El alias debe ser único globalmente en AWS
+    \item Si el alias ya existe, intentar con otro nombre
+\end{enumerate}
+
+\textbf{URL de inicio de sesión:}
+Después de crear el alias, tu URL personalizada será:
+\texttt{https://tu-alias.signin.aws.amazon.com/console}
+
+Por ejemplo: \texttt{https://aws-estudiante-2025.signin.aws.amazon.com/console}
+
+\subsubsection{3.4 Crear un Grupo de Administradores}
+
+\textbf{¿Por qué crear grupos?}
+Los grupos facilitan la gestión de permisos para múltiples usuarios. En lugar de asignar permisos individualmente, asignas permisos al grupo.
+
+\textbf{Crear grupo:}
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo del dashboard de IAM, hacer clic en "User groups"
+    \item Hacer clic en el botón "Create group" (Crear grupo)
+    \item En "User group name", ingresar: \texttt{Administradores}
+    \item En la sección "Attach permissions policies", buscar políticas:
+    \begin{itemize}
+        \item En el campo de búsqueda, escribir: "AdministratorAccess"
+        \item Marcar la casilla junto a "AdministratorAccess"
+        \item Esta política otorga acceso completo a todos los servicios de AWS
+    \end{itemize}
+    \item Hacer clic en "Create group" (Crear grupo) en la parte inferior
+    \item El grupo "Administradores" ahora aparecerá en la lista
+\end{enumerate}
+
+\textbf{Descripción de la política AdministratorAccess:}
+\begin{itemize}[leftmargin=*]
+    \item Proporciona acceso completo a todos los servicios y recursos de AWS
+    \item Equivalente a permisos de cuenta root (excepto tareas específicas de root)
+    \item Solo debe asignarse a usuarios que necesitan acceso administrativo completo
+\end{itemize}
+
+\subsubsection{3.5 Crear un Usuario IAM Administrador}
+
+\textbf{¿Por qué crear un usuario IAM?}
+\begin{itemize}[leftmargin=*]
+    \item La cuenta root solo debe usarse para tareas administrativas críticas
+    \item Los usuarios IAM son más seguros para el trabajo diario
+    \item Cada persona debe tener su propio usuario (no compartir credenciales)
+    \item Permite auditoría y control de acceso granular
+\end{itemize}
+
+\textbf{Crear usuario:}
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo de IAM, hacer clic en "Users" (Usuarios)
+    \item Hacer clic en "Create user" (Crear usuario)
+    \item En "User name", ingresar un nombre descriptivo
+    \begin{itemize}
+        \item Ejemplo: tu nombre (ej: "nicolas-admin" o "juan-admin")
+        \item O un nombre genérico: "admin-usuario"
+        \item Sin espacios, solo letras, números, guiones y guiones bajos
+    \end{itemize}
+    \item En "Provide user access to the AWS Management Console", marcar la casilla
+    \item Esto permite al usuario iniciar sesión en la consola web
+    \item Aparecerán más opciones:
+\end{enumerate}
+
+\textbf{Opciones de acceso a la consola:}
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar "I want to create an IAM user" (default)
+    \item En "Console password", elegir una opción:
+    \begin{itemize}
+        \item \textbf{Autogenerated password:} AWS genera una contraseña aleatoria
+        \item \textbf{Custom password:} Tú defines la contraseña
+    \end{itemize}
+    \item Recomendación: Seleccionar "Custom password" y crear una contraseña segura
+    \item Ejemplo de contraseña: \texttt{AdminAWS2025!Segura}
+    \item En "Users must create a new password at next sign-in":
+    \begin{itemize}
+        \item Marcar si quieres forzar cambio de contraseña en primer inicio
+        \item Para este laboratorio, puedes dejarla desmarcada
+    \end{itemize}
+    \item Hacer clic en "Next" (Siguiente)
+\end{enumerate}
+
+\textbf{Asignar permisos:}
+\begin{enumerate}[leftmargin=*]
+    \item En la página "Set permissions", seleccionar "Add user to group"
+    \item Marcar la casilla junto al grupo "Administradores" que creaste anteriormente
+    \item El usuario heredará todos los permisos del grupo
+    \item Hacer clic en "Next" (Siguiente)
+\end{enumerate}
+
+\textbf{Revisar y crear:}
+\begin{enumerate}[leftmargin=*]
+    \item Revisar la información del usuario:
+    \begin{itemize}
+        \item Nombre de usuario
+        \item Acceso a la consola: Habilitado
+        \item Grupos: Administradores
+        \item Políticas: AdministratorAccess (heredada del grupo)
+    \end{itemize}
+    \item Si todo es correcto, hacer clic en "Create user" (Crear usuario)
+    \item Verás una página de confirmación con las credenciales del usuario
+\end{enumerate}
+
+\textbf{Guardar credenciales de forma segura:}
+\begin{enumerate}[leftmargin=*]
+    \item En la página de confirmación, verás:
+    \begin{itemize}
+        \item Console sign-in URL (URL para iniciar sesión)
+        \item User name (nombre de usuario)
+        \item Console password (contraseña, si fue autogenerada)
+    \end{itemize}
+    \item Hacer clic en "Download .csv file" para descargar las credenciales
+    \item IMPORTANTE: Guardar este archivo en un lugar seguro
+    \item También puedes copiar y pegar la información en un documento
+    \item Hacer clic en "Return to users list" cuando hayas guardado todo
+\end{enumerate}
+
+\textbf{URL de inicio de sesión para usuarios IAM:}
+La URL será algo como:
+\begin{itemize}[leftmargin=*]
+    \item Si creaste un alias: \texttt{https://tu-alias.signin.aws.amazon.com/console}
+    \item Sin alias: \texttt{https://123456789012.signin.aws.amazon.com/console}
+\end{itemize}
+
+\subsection{Paso 4: Habilitar Autenticación Multifactor (MFA)}
+
+\textbf{Objetivo:} Configurar MFA para la cuenta root y el usuario IAM para mejorar significativamente la seguridad.
+
+\subsubsection{4.1 Instalar Aplicación MFA en tu Teléfono}
+
+\textbf{Aplicaciones MFA recomendadas (todas gratuitas):}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Google Authenticator:} Disponible para iOS y Android
+    \item \textbf{Microsoft Authenticator:} Disponible para iOS y Android
+    \item \textbf{Authy:} Disponible para iOS, Android y escritorio
+    \item \textbf{LastPass Authenticator:} Si ya usas LastPass
+\end{itemize}
+
+\textbf{Instalar la aplicación:}
+\begin{enumerate}[leftmargin=*]
+    \item Abrir la tienda de aplicaciones en tu teléfono
+    \begin{itemize}
+        \item iOS: App Store
+        \item Android: Google Play Store
+    \end{itemize}
+    \item Buscar "Google Authenticator" (o la aplicación que prefieras)
+    \item Descargar e instalar la aplicación
+    \item Abrir la aplicación después de instalarla
+    \item Si es la primera vez, puede pedir permisos de cámara (para escanear códigos QR)
+    \item Conceder los permisos necesarios
+    \item Mantener la aplicación abierta para el siguiente paso
+\end{enumerate}
+
+\subsubsection{4.2 Habilitar MFA para la Cuenta Root}
+
+\textbf{¿Por qué MFA en la cuenta root?}
+La cuenta root tiene acceso ilimitado a todos los recursos. MFA agrega una capa crítica de protección en caso de que la contraseña sea comprometida.
+
+\textbf{Configurar MFA para root:}
+\begin{enumerate}[leftmargin=*]
+    \item Asegurarte de estar iniciado sesión como usuario root (no usuario IAM)
+    \item Hacer clic en tu nombre de cuenta (esquina superior derecha)
+    \item Seleccionar "Security credentials" del menú desplegable
+    \item Serás llevado a la página de credenciales de seguridad
+    \item Desplazarse hasta la sección "Multi-factor authentication (MFA)"
+    \item Hacer clic en "Assign MFA device" (Asignar dispositivo MFA)
+\end{enumerate}
+
+\textbf{Seleccionar tipo de dispositivo MFA:}
+\begin{enumerate}[leftmargin=*]
+    \item En "Device name", ingresar un nombre descriptivo
+    \begin{itemize}
+        \item Ejemplo: "MiTelefono-MFA" o "GoogleAuth-Root"
+    \end{itemize}
+    \item En "Select MFA device", elegir "Authenticator app" (Aplicación autenticadora)
+    \item Hacer clic en "Next" (Siguiente)
+\end{enumerate}
+
+\textbf{Escanear código QR:}
+\begin{enumerate}[leftmargin=*]
+    \item AWS mostrará un código QR en la pantalla
+    \item En tu aplicación MFA del teléfono:
+    \begin{itemize}
+        \item Hacer clic en "+" o "Add account" (Agregar cuenta)
+        \item Seleccionar "Scan a QR code" (Escanear código QR)
+        \item Apuntar la cámara al código QR en la pantalla del computador
+        \item La aplicación automáticamente agregará la cuenta "AWS" o "Amazon Web Services"
+    \end{itemize}
+    \item La aplicación comenzará a generar códigos de 6 dígitos cada 30 segundos
+\end{enumerate}
+
+\textbf{Alternativa si no puedes escanear el QR:}
+\begin{enumerate}[leftmargin=*]
+    \item En la pantalla de AWS, hacer clic en "Show secret key" (Mostrar clave secreta)
+    \item Copiar el código largo que aparece
+    \item En la aplicación MFA, seleccionar "Enter a setup key" (Ingresar clave de configuración)
+    \item Pegar el código copiado
+    \item Ingresar un nombre para la cuenta (ej: "AWS Root")
+    \item La aplicación comenzará a generar códigos
+\end{enumerate}
+
+\textbf{Verificar configuración:}
+\begin{enumerate}[leftmargin=*]
+    \item En la pantalla de AWS, verás dos campos: "MFA code 1" y "MFA code 2"
+    \item En tu aplicación MFA, verás un código de 6 dígitos junto a "AWS"
+    \item Ingresar ese código en "MFA code 1"
+    \item ESPERAR a que el código cambie (aproximadamente 30 segundos)
+    \item Ingresar el NUEVO código en "MFA code 2"
+    \item Hacer clic en "Add MFA" (Agregar MFA)
+    \item Si todo es correcto, verás un mensaje de confirmación
+    \item El dispositivo MFA ahora aparecerá en tu lista de dispositivos
+\end{enumerate}
+
+\textbf{¿Qué pasa si el código es rechazado?}
+\begin{itemize}[leftmargin=*]
+    \item Verificar que la hora del teléfono esté sincronizada correctamente
+    \item Asegurarse de ingresar el código antes de que expire (30 segundos)
+    \item No reutilizar el mismo código dos veces
+    \item Si persiste el problema, eliminar la cuenta de la app y volver a escanear el QR
+\end{itemize}
+
+\subsubsection{4.3 Cerrar Sesión y Probar MFA}
+
+\textbf{Probar el inicio de sesión con MFA:}
+\begin{enumerate}[leftmargin=*]
+    \item Cerrar sesión de la consola de AWS:
+    \begin{itemize}
+        \item Hacer clic en tu nombre (esquina superior derecha)
+        \item Seleccionar "Sign out" (Cerrar sesión)
+    \end{itemize}
+    \item Ir nuevamente a \texttt{https://console.aws.amazon.com}
+    \item Seleccionar "Root user"
+    \item Ingresar tu correo electrónico
+    \item Hacer clic en "Next"
+    \item Ingresar tu contraseña
+    \item Hacer clic en "Sign in"
+    \item NUEVO: Aparecerá una pantalla pidiendo el código MFA
+    \item Abrir la aplicación MFA en tu teléfono
+    \item Ingresar el código de 6 dígitos que aparece junto a "AWS"
+    \item Hacer clic en "Submit" (Enviar)
+    \item Serás dirigido a la consola de AWS
+\end{enumerate}
+
+\textbf{¡Felicidades!} Ahora tu cuenta root está protegida con MFA. Incluso si alguien obtiene tu contraseña, no podrá acceder sin el código de tu teléfono.
+
+\subsection{Paso 5: Configurar Alertas de Facturación}
+
+\textbf{Objetivo:} Configurar alertas para ser notificado si el uso de AWS genera costos, previniendo cargos inesperados.
+
+\subsubsection{5.1 Habilitar Alertas de Facturación}
+
+\textbf{Acceder a la configuración de facturación:}
+\begin{enumerate}[leftmargin=*]
+    \item Hacer clic en tu nombre de cuenta (esquina superior derecha)
+    \item Seleccionar "Billing and Cost Management" del menú desplegable
+    \item Si aparece un mensaje sobre permisos, ignorarlo (estás usando root)
+    \item Serás dirigido al dashboard de facturación
+\end{enumerate}
+
+\textbf{Habilitar preferencias de facturación:}
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo, hacer clic en "Billing preferences"
+    \item Desplazarse hasta "Alert preferences"
+    \item Marcar las siguientes casillas:
+    \begin{itemize}
+        \item "Receive Free Tier Usage Alerts" - Te avisa si estás cerca de exceder Free Tier
+        \item "Receive CloudWatch Billing Alerts" - Permite crear alarmas personalizadas
+    \end{itemize}
+    \item En "Email" bajo Free Tier alerts, ingresar tu correo electrónico
+    \item Verificar que sea el correo que revisas frecuentemente
+    \item Hacer clic en "Save preferences" (Guardar preferencias)
+\end{enumerate}
+
+\subsubsection{5.2 Crear Alarma de Facturación en CloudWatch}
+
+\textbf{Acceder a CloudWatch:}
+\begin{enumerate}[leftmargin=*]
+    \item IMPORTANTE: Cambiar a la región "US East (N. Virginia)" - us-east-1
+    \item Las métricas de facturación solo están disponibles en esta región
+    \item En la barra superior derecha, verificar que dice "N. Virginia"
+    \item Si no, hacer clic y seleccionar "US East (N. Virginia)"
+\end{enumerate}
+
+\textbf{Navegar a CloudWatch:}
+\begin{enumerate}[leftmargin=*]
+    \item En el menú "Services", buscar "CloudWatch"
+    \item O usar la búsqueda rápida: escribir "CloudWatch"
+    \item Hacer clic en "CloudWatch" para abrir el servicio
+    \item Serás dirigido al dashboard de CloudWatch
+\end{enumerate}
+
+\textbf{Crear alarma de costos:}
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo, hacer clic en "Alarms" (Alarmas)
+    \item Hacer clic en "Create alarm" (Crear alarma)
+    \item Hacer clic en "Select metric" (Seleccionar métrica)
+    \item En la lista de namespaces, hacer clic en "Billing"
+    \item Hacer clic en "Total Estimated Charge" (Cargo total estimado)
+    \item Verás una métrica con "Currency: USD"
+    \item Marcar la casilla junto a esta métrica
+    \item Hacer clic en "Select metric" (parte inferior)
+\end{enumerate}
+
+\textbf{Configurar condiciones de la alarma:}
+\begin{enumerate}[leftmargin=*]
+    \item En "Metric name", deberías ver "EstimatedCharges"
+    \item En "Statistic", dejar "Maximum" (Máximo)
+    \item En "Period", dejar "6 hours" (6 horas)
+    \item En "Conditions", seleccionar "Static" (Estático)
+    \item En "Whenever EstimatedCharges is...", seleccionar "Greater" (Mayor que)
+    \item En "than...", ingresar un valor umbral
+    \begin{itemize}
+        \item Para estar muy seguro: \texttt{1} (te alertará con \$1 USD)
+        \item Para un poco más de margen: \texttt{5} (te alertará con \$5 USD)
+        \item Recomendación: usar \texttt{1} para máxima seguridad
+    \end{itemize}
+    \item Hacer clic en "Next" (Siguiente)
+\end{enumerate}
+
+\textbf{Configurar notificación:}
+\begin{enumerate}[leftmargin=*]
+    \item En "Notification", dejar "In alarm" seleccionado
+    \item En "Select an SNS topic":
+    \begin{itemize}
+        \item Seleccionar "Create new topic" (Crear nuevo tema)
+        \item En "Create a new topic", dejar el nombre sugerido o cambiarlo
+        \item Ejemplo: "Billing-Alarm-Topic"
+    \end{itemize}
+    \item En "Email endpoints that will receive the notification":
+    \begin{itemize}
+        \item Ingresar tu correo electrónico
+        \item Puedes agregar múltiples correos separados por comas
+    \end{itemize}
+    \item Hacer clic en "Create topic" (Crear tema)
+    \item Hacer clic en "Next" (Siguiente)
+\end{enumerate}
+
+\textbf{Nombrar la alarma:}
+\begin{enumerate}[leftmargin=*]
+    \item En "Alarm name", ingresar un nombre descriptivo
+    \item Ejemplo: "Alerta-Costo-Mayor-1USD"
+    \item En "Alarm description" (opcional), agregar descripción
+    \item Ejemplo: "Me notifica si los costos de AWS superan \$1 USD"
+    \item Hacer clic en "Next" (Siguiente)
+    \item Revisar toda la configuración
+    \item Hacer clic en "Create alarm" (Crear alarma)
+\end{enumerate}
+
+\textbf{Confirmar suscripción por correo:}
+\begin{enumerate}[leftmargin=*]
+    \item Revisar tu bandeja de entrada
+    \item Buscar un correo de "AWS Notifications"
+    \item Asunto: "AWS Notification - Subscription Confirmation"
+    \item Hacer clic en "Confirm subscription" en el correo
+    \item Verás una página de confirmación
+    \item La alarma ahora está activa y funcional
+\end{enumerate}
+
+\textbf{Importante:}
+\begin{itemize}[leftmargin=*]
+    \item Recibirás un correo si tu factura supera el umbral definido
+    \item La métrica de facturación se actualiza cada 6 horas aproximadamente
+    \item No es en tiempo real, puede haber un retraso
+    \item Si recibes la alerta, revisa inmediatamente qué servicios están generando costos
+\end{itemize}
+
+\subsection{Paso 6: Verificación de Configuración}
+
+\textbf{Objetivo:} Verificar que todas las configuraciones se realizaron correctamente.
+
+\subsubsection{6.1 Verificar Configuración de IAM}
+
+\textbf{Checklist de verificación:}
+\begin{enumerate}[leftmargin=*]
+    \item Ir al dashboard de IAM (Services $\rightarrow$ IAM)
+    \item Verificar "Security Status" (debe estar en verde mayormente):
+    \begin{itemize}
+        \item ✓ Delete your root access keys - Completado
+        \item ✓ Activate MFA on your root account - Completado
+        \item ✓ Create individual IAM users - Completado (al menos 1 usuario)
+        \item ✓ Use groups to assign permissions - Completado (grupo Administradores)
+        \item ✓ Apply an IAM password policy - Opcional (puedes configurarlo después)
+    \end{itemize}
+    \item En "IAM Resources", deberías ver:
+    \begin{itemize}
+        \item Users: 1 (tu usuario administrador)
+        \item User groups: 1 (Administradores)
+        \item Roles: números variables (algunos creados por defecto)
+        \item Policies: números altos (políticas de AWS + las tuyas)
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{6.2 Verificar MFA}
+
+\textbf{Para cuenta root:}
+\begin{enumerate}[leftmargin=*]
+    \item Click en tu nombre (esquina superior derecha)
+    \item Seleccionar "Security credentials"
+    \item Desplazarse a "Multi-factor authentication (MFA)"
+    \item Deberías ver un dispositivo MFA listado con estado "Active"
+\end{enumerate}
+
+\subsubsection{6.3 Verificar Alarmas de Facturación}
+
+\textbf{Verificar alarma en CloudWatch:}
+\begin{enumerate}[leftmargin=*]
+    \item Asegurarse de estar en región "US East (N. Virginia)"
+    \item Ir a CloudWatch (Services $\rightarrow$ CloudWatch)
+    \item Click en "Alarms" en el panel izquierdo
+    \item Deberías ver tu alarma listada
+    \item Estado debería ser "OK" (verde) si los costos son \$0
+    \item Si está en "Insufficient data", esperar unas horas
+\end{enumerate}
+
+\textbf{Verificar costo actual:}
+\begin{enumerate}[leftmargin=*]
+    \item Click en tu nombre (esquina superior derecha)
+    \item Seleccionar "Billing and Cost Management"
+    \item En el dashboard, verás "Month-to-date costs"
+    \item Debe decir "\$0.00" o un valor muy pequeño
+    \item Si hay costos, investigar qué servicios los están generando
+\end{enumerate}
+
+\subsubsection{6.4 Probar Inicio de Sesión con Usuario IAM}
+
+\textbf{Cerrar sesión de root:}
+\begin{enumerate}[leftmargin=*]
+    \item Click en tu nombre (esquina superior derecha)
+    \item Seleccionar "Sign out"
+\end{enumerate}
+
+\textbf{Iniciar sesión como usuario IAM:}
+\begin{enumerate}[leftmargin=*]
+    \item Ir a la URL de inicio de sesión de IAM que guardaste anteriormente
+    \item Ejemplo: \texttt{https://tu-alias.signin.aws.amazon.com/console}
+    \item O: \texttt{https://123456789012.signin.aws.amazon.com/console}
+    \item En "IAM user name", ingresar el nombre del usuario que creaste
+    \item Ingresar la contraseña del usuario IAM
+    \item Si configuraste MFA para el usuario, ingresar el código MFA
+    \item Hacer clic en "Sign in"
+    \item Deberías acceder a la consola de AWS normalmente
+    \item Verificar que puedes navegar por los servicios
+\end{enumerate}
+
+\textbf{Diferencia entre root e IAM user:}
+\begin{itemize}[leftmargin=*]
+    \item En la esquina superior derecha, verás tu nombre de usuario IAM (no el correo)
+    \item Ejemplo: "nicolas-admin @ tu-alias" o "admin-usuario @ 123456789012"
+    \item Esto confirma que estás usando el usuario IAM, no root
+\end{itemize}
+
+\newpage
+
+\subsection{Paso 7: Limpieza y Consideraciones Finales}
+
+\textbf{Objetivo:} Asegurar que no quedan recursos que puedan generar costos.
+
+\subsubsection{7.1 Verificación de Recursos}
+
+\textbf{¿Qué limpiamos en este laboratorio?}
+En este laboratorio solo configuramos servicios que son completamente gratuitos:
+\begin{itemize}[leftmargin=*]
+    \item IAM - Siempre gratuito
+    \item CloudWatch (Alarmas básicas) - 10 alarmas gratis incluidas en Free Tier
+    \item SNS (Notificaciones) - 1,000 notificaciones gratis al mes
+\end{itemize}
+
+\textbf{NO hay nada que limpiar}, pero es buena práctica verificar:
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a "Billing and Cost Management"
+    \item Verificar que "Month-to-date costs" sea \$0.00
+    \item Si hay algún costo, revisar en "Bill details" qué lo generó
+\end{enumerate}
+
+\subsubsection{7.2 Mejores Prácticas Aprendidas}
+
+\textbf{Resumen de mejores prácticas de seguridad:}
+\begin{enumerate}[leftmargin=*]
+    \item ✓ NO usar la cuenta root para tareas diarias
+    \item ✓ Crear usuarios IAM individuales para cada persona
+    \item ✓ Habilitar MFA en cuenta root (obligatorio)
+    \item ✓ Habilitar MFA en usuarios IAM (muy recomendado)
+    \item ✓ No crear access keys para root (a menos que sea absolutamente necesario)
+    \item ✓ Usar grupos para asignar permisos (no directamente a usuarios)
+    \item ✓ Aplicar principio de mínimo privilegio
+    \item ✓ Configurar alertas de facturación
+    \item ✓ Revisar costos regularmente
+    \item ✓ Eliminar recursos no utilizados
+\end{enumerate}
+
+\subsubsection{7.3 Próximos Pasos Recomendados}
+
+\textbf{Después de completar este laboratorio, puedes:}
+\begin{itemize}[leftmargin=*]
+    \item Explorar otros servicios de AWS (EC2, S3, VPC) en laboratorios siguientes
+    \item Configurar AWS CLI en tu computadora local
+    \item Leer documentación oficial de AWS
+    \item Tomar cursos gratuitos en AWS Skill Builder
+    \item Practicar con tutoriales de AWS Hands-On
+\end{itemize}
+
+\newpage
+
+\section{Cuestionario de Evaluación}
+
+\textbf{Instrucciones:} Selecciona la respuesta correcta para cada pregunta. Las respuestas están al final.
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Cuál es la principal diferencia entre IaaS, PaaS y SaaS?}
+\begin{enumerate}[label=\alph*)]
+    \item IaaS proporciona aplicaciones completas, PaaS infraestructura, y SaaS plataformas
+    \item IaaS ofrece infraestructura virtualizada, PaaS plataforma de desarrollo, SaaS aplicaciones listas para usar
+    \item IaaS es para empresas grandes, PaaS para medianas, SaaS para pequeñas
+    \item Todos son lo mismo, solo cambia el nombre
+\end{enumerate}
+
+\item \textbf{¿Qué modelo de despliegue de nube describe una infraestructura dedicada exclusivamente a una organización?}
+\begin{enumerate}[label=\alph*)]
+    \item Nube pública
+    \item Nube privada
+    \item Nube híbrida
+    \item Nube comunitaria
+\end{enumerate}
+
+\item \textbf{¿Cuántas regiones tiene AWS aproximadamente a nivel mundial?}
+\begin{enumerate}[label=\alph*)]
+    \item 10 regiones
+    \item 20 regiones
+    \item Más de 30 regiones
+    \item 5 regiones
+\end{enumerate}
+
+\item \textbf{¿Cuántas Zonas de Disponibilidad (AZs) mínimo tiene cada región de AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item 1 AZ
+    \item 2 AZs
+    \item 3 AZs o más
+    \item 10 AZs
+\end{enumerate}
+
+\item \textbf{¿Cuál de los siguientes servicios de AWS es SIEMPRE gratuito (no solo 12 meses)?}
+\begin{enumerate}[label=\alph*)]
+    \item Amazon EC2 t2.micro con 750 horas al mes
+    \item Amazon S3 con 5 GB de almacenamiento
+    \item AWS IAM (Identity and Access Management)
+    \item Amazon RDS con 750 horas de db.t2.micro
+\end{enumerate}
+
+\item \textbf{¿Por cuánto tiempo están disponibles los beneficios del nivel gratuito de AWS Free Tier para servicios como EC2 y RDS?}
+\begin{enumerate}[label=\alph*)]
+    \item 6 meses desde el registro
+    \item 12 meses desde el registro
+    \item 24 meses desde el registro
+    \item Son permanentemente gratuitos
+\end{enumerate}
+
+\item \textbf{¿Qué es IAM en AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item Un servicio de almacenamiento de archivos
+    \item Un servicio de gestión de identidades y accesos
+    \item Un servicio de bases de datos
+    \item Un servicio de máquinas virtuales
+\end{enumerate}
+
+\item \textbf{¿Por qué NO se recomienda usar la cuenta root de AWS para tareas diarias?}
+\begin{enumerate}[label=\alph*)]
+    \item Porque es más lenta que los usuarios IAM
+    \item Porque tiene acceso ilimitado y comprometerla sería catastrófico
+    \item Porque no puede acceder a todos los servicios
+    \item Porque AWS cobra por usarla
+\end{enumerate}
+
+\item \textbf{¿Qué significa MFA?}
+\begin{enumerate}[label=\alph*)]
+    \item Multi-Factor Authentication (Autenticación de Múltiples Factores)
+    \item Multiple File Access
+    \item Managed Firewall Application
+    \item Master Function Administrator
+\end{enumerate}
+
+\item \textbf{¿Cuántos códigos de verificación consecutivos debes ingresar al configurar MFA en AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item 1 código
+    \item 2 códigos consecutivos (esperando que cambie entre el primero y el segundo)
+    \item 3 códigos
+    \item No se requieren códigos
+\end{enumerate}
+
+\item \textbf{¿Qué tipo de MFA es más común y económico para proteger cuentas de AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item Hardware MFA (llave física)
+    \item SMS al teléfono
+    \item Aplicación de autenticación virtual (Google Authenticator, Microsoft Authenticator, etc.)
+    \item Llamada telefónica automatizada
+\end{enumerate}
+
+\item \textbf{¿En qué región deben configurarse las alarmas de facturación de CloudWatch?}
+\begin{enumerate}[label=\alph*)]
+    \item En cualquier región que elijas
+    \item En la región más cercana a tu ubicación
+    \item Solo en US East (N. Virginia) us-east-1
+    \item En todas las regiones simultáneamente
+\end{enumerate}
+
+\item \textbf{Si configuras una alarma de facturación con umbral de \$1 USD, ¿cuándo recibirás la notificación?}
+\begin{enumerate}[label=\alph*)]
+    \item Inmediatamente cuando gastes exactamente \$1.00
+    \item Cuando el cargo estimado supere \$1.00
+    \item Antes de que llegues a \$1.00 (predicción)
+    \item Solo al final del mes si superaste \$1.00
+\end{enumerate}
+
+\item \textbf{¿Qué política de AWS otorga acceso administrativo completo a todos los servicios?}
+\begin{enumerate}[label=\alph*)]
+    \item PowerUserAccess
+    \item ReadOnlyAccess
+    \item AdministratorAccess
+    \item FullAccess
+\end{enumerate}
+
+\item \textbf{¿Cuál es la mejor práctica para asignar permisos a usuarios IAM?}
+\begin{enumerate}[label=\alph*)]
+    \item Adjuntar políticas directamente a cada usuario individual
+    \item Crear grupos con políticas y agregar usuarios a esos grupos
+    \item Dar acceso root a todos los usuarios
+    \item No usar políticas, solo roles
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Respuestas del Cuestionario}
+
+\begin{enumerate}
+\item \textbf{Respuesta correcta: b)} IaaS ofrece infraestructura virtualizada (servidores, almacenamiento, redes), PaaS ofrece plataformas de desarrollo (donde despliegas aplicaciones sin gestionar infraestructura), y SaaS ofrece aplicaciones completas listas para usar (como Gmail, Office 365).
+
+\item \textbf{Respuesta correcta: b)} Una nube privada es una infraestructura de nube dedicada exclusivamente a una organización, proporcionando mayor control y seguridad. La nube pública es compartida entre múltiples clientes, la híbrida combina ambas, y la comunitaria es compartida por varias organizaciones con intereses comunes.
+
+\item \textbf{Respuesta correcta: c)} AWS tiene más de 30 regiones distribuidas globalmente (el número exacto aumenta constantemente). Cada región es un área geográfica separada que contiene múltiples Zonas de Disponibilidad.
+
+\item \textbf{Respuesta correcta: c)} Cada región de AWS tiene al menos 3 Zonas de Disponibilidad, aunque algunas regiones tienen más. Esto garantiza alta disponibilidad y tolerancia a fallos.
+
+\item \textbf{Respuesta correcta: c)} AWS IAM es siempre gratuito, sin límite de tiempo. Los demás servicios mencionados son gratuitos solo durante 12 meses como parte del Free Tier, después comienzan a generar cargos.
+
+\item \textbf{Respuesta correcta: b)} Los servicios del nivel gratuito como EC2 t2.micro (750 horas/mes) y RDS db.t2.micro están disponibles durante 12 meses desde la fecha de registro de la cuenta AWS.
+
+\item \textbf{Respuesta correcta: b)} IAM (Identity and Access Management) es el servicio de AWS para gestionar identidades (usuarios, grupos, roles) y controlar el acceso a recursos de AWS mediante políticas de permisos.
+
+\item \textbf{Respuesta correcta: b)} La cuenta root tiene acceso completo e ilimitado a todos los recursos y servicios de AWS. Si esta cuenta es comprometida, un atacante tendría control total. Por eso se recomienda usarla solo para tareas administrativas críticas y usar usuarios IAM para operaciones diarias.
+
+\item \textbf{Respuesta correcta: a)} MFA significa Multi-Factor Authentication (Autenticación de Múltiples Factores). Es un método de seguridad que requiere dos o más factores de verificación: algo que sabes (contraseña) y algo que tienes (código de teléfono).
+
+\item \textbf{Respuesta correcta: b)} AWS requiere que ingreses 2 códigos consecutivos al configurar MFA. Debes esperar a que el primer código cambie (aproximadamente 30 segundos) y luego ingresar el nuevo código. Esto verifica que el dispositivo MFA esté correctamente sincronizado.
+
+\item \textbf{Respuesta correcta: c)} Las aplicaciones de autenticación virtual como Google Authenticator, Microsoft Authenticator, o Authy son la opción más común y económica. Son gratuitas, funcionan sin conexión a internet, y son más seguras que SMS.
+
+\item \textbf{Respuesta correcta: c)} Las métricas de facturación de AWS solo están disponibles en la región US East (N. Virginia) us-east-1. Debes cambiar a esta región antes de crear alarmas de facturación en CloudWatch.
+
+\item \textbf{Respuesta correcta: b)} Recibirás una notificación cuando el cargo estimado total supere el umbral configurado (\$1.00 en este caso). La métrica se actualiza cada 6 horas aproximadamente, por lo que puede haber un pequeño retraso.
+
+\item \textbf{Respuesta correcta: c)} AdministratorAccess es la política administrada de AWS que otorga acceso completo a todos los servicios y recursos. PowerUserAccess da acceso amplio pero sin permisos de gestión de usuarios/grupos IAM.
+
+\item \textbf{Respuesta correcta: b)} La mejor práctica es crear grupos de IAM con las políticas necesarias y luego agregar usuarios a esos grupos. Esto facilita la gestión de permisos a escala y sigue el principio de privilegio mínimo.
+
+\end{enumerate}
+
+\newpage
+
+\section{Conclusiones}
+
+Al finalizar este laboratorio, has dado los primeros pasos fundamentales en el ecosistema de Amazon Web Services, estableciendo una base sólida de seguridad y gestión que te acompañará en todos tus proyectos futuros en la nube. Las competencias adquiridas no solo son aplicables a AWS, sino que representan mejores prácticas universales en computación en nube.
+
+\subsection{Logros Principales}
+
+\textbf{1. Comprensión de Fundamentos de Cloud Computing}
+
+Has desarrollado una comprensión conceptual de los modelos de servicio en la nube (IaaS, PaaS, SaaS) y los modelos de despliegue (público, privado, híbrido). Comprendes cómo AWS se posiciona como proveedor líder de infraestructura en la nube y conoces su arquitectura global basada en regiones y zonas de disponibilidad.
+
+\textbf{2. Creación y Configuración de Cuenta AWS}
+
+Has creado exitosamente una cuenta de AWS, completando el proceso de registro que incluye verificación de correo electrónico, configuración de información de pago (sin cargos en Free Tier), y verificación de identidad por teléfono. Conoces las diferentes opciones de soporte y has seleccionado el plan Basic gratuito adecuado para aprendizaje.
+
+\textbf{3. Implementación de Seguridad con IAM}
+
+Has aplicado el principio de mínimo privilegio creando usuarios IAM separados en lugar de usar la cuenta root para tareas diarias. Comprendes la estructura de IAM (usuarios, grupos, roles, políticas) y has configurado un grupo de administradores con permisos completos, demostrando que entiendes cómo delegar acceso de manera controlada.
+
+\textbf{4. Protección con Autenticación Multifactor (MFA)}
+
+Has implementado una capa adicional de seguridad configurando MFA tanto en la cuenta root como en tu usuario IAM administrador. Esta habilidad es crítica en entornos de producción y demuestra tu comprensión de que la seguridad en capas es esencial para proteger recursos en la nube.
+
+\textbf{5. Gestión Financiera y Control de Costos}
+
+Has configurado alertas de facturación en CloudWatch, estableciendo un sistema de monitoreo proactivo que te notificará si se generan costos inesperados. Esta competencia es fundamental para cualquier profesional de nube, ya que la gestión de costos es una responsabilidad crítica en proyectos reales.
+
+\subsection{Habilidades Técnicas Desarrolladas}
+
+\begin{itemize}[leftmargin=*]
+    \item Navegación eficiente en la Consola de Administración de AWS
+    \item Gestión de identidades y accesos (IAM)
+    \item Configuración de autenticación multifactor (MFA)
+    \item Creación de grupos y asignación de políticas
+    \item Configuración de servicios de monitoreo (CloudWatch)
+    \item Configuración de notificaciones (SNS)
+    \item Gestión de facturación y costos
+    \item Aplicación de mejores prácticas de seguridad
+\end{itemize}
+
+\subsection{Competencias Profesionales}
+
+Más allá de las habilidades técnicas, has desarrollado competencias profesionales valiosas:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Pensamiento en seguridad:} Comprendes que la seguridad no es un agregado posterior, sino una consideración desde el primer momento
+    \item \textbf{Responsabilidad financiera:} Entiendes que en la nube, cada recurso tiene un costo y debe ser monitoreado
+    \item \textbf{Mejores prácticas:} Has aprendido que seguir estándares de la industria (como no usar root, habilitar MFA) es fundamental
+    \item \textbf{Documentación y verificación:} Has practicado el seguimiento de pasos documentados y la verificación sistemática de configuraciones
+\end{itemize}
+
+\subsection{Preparación para Siguientes Laboratorios}
+
+Este laboratorio es la piedra angular sobre la que construirás conocimientos más avanzados:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Laboratorio 2 - VPC:} Crearás redes virtuales privadas, aplicando los conceptos de IAM para controlar quién puede gestionar recursos de red
+    \item \textbf{Laboratorio 3 - Internet Gateway:} Conectarás redes privadas a internet, entendiendo flujos de tráfico
+    \item \textbf{Laboratorio 4 - EC2 y Security Groups:} Lanzarás máquinas virtuales protegidas con reglas de firewall
+    \item \textbf{Laboratorios 5-8:} Integrarás seguridad avanzada, monitoreo, y arquitecturas completas
+\end{itemize}
+
+En cada laboratorio futuro, las credenciales IAM que configuraste hoy te permitirán trabajar de manera segura, y las alarmas de facturación te protegerán de costos inesperados.
+
+\subsection{Reflexión Final}
+
+La computación en nube ha transformado la manera en que se diseñan, despliegan y operan sistemas de información. AWS, como líder en este espacio, ofrece un ecosistema completo de servicios que potencian la innovación. Sin embargo, con gran poder viene gran responsabilidad: la seguridad y el control de costos deben ser prioridades constantes.
+
+Has demostrado que comprendes estos principios fundamentales. La configuración que realizaste hoy - cuenta protegida con MFA, usuario IAM con permisos adecuados, alertas de facturación activas - es el sello distintivo de un profesional responsable que entiende que la excelencia técnica debe ir acompañada de rigurosidad en seguridad y gestión.
+
+Continúa aplicando estos principios en todos tus proyectos en AWS, y estarás preparado para diseñar e implementar soluciones en la nube que sean no solo funcionales, sino también seguras, eficientes y sostenibles económicamente.
+
+\textbf{¡Felicidades por completar exitosamente este primer laboratorio!}
+
+\newpage
+
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{AWS General}
+\begin{itemize}[leftmargin=*]
+    \item AWS Documentation - Página principal de documentación \\
+    \url{https://docs.aws.amazon.com/}
+    \item AWS Getting Started Resource Center \\
+    \url{https://aws.amazon.com/getting-started/}
+    \item AWS Global Infrastructure - Regiones y Zonas de Disponibilidad \\
+    \url{https://aws.amazon.com/about-aws/global-infrastructure/}
+\end{itemize}
+
+\item \textbf{AWS Free Tier}
+\begin{itemize}[leftmargin=*]
+    \item AWS Free Tier - Información completa sobre servicios gratuitos \\
+    \url{https://aws.amazon.com/free/}
+    \item AWS Free Tier FAQs \\
+    \url{https://aws.amazon.com/free/free-tier-faqs/}
+\end{itemize}
+
+\item \textbf{AWS Identity and Access Management (IAM)}
+\begin{itemize}[leftmargin=*]
+    \item AWS IAM Documentation \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/}
+    \item IAM Best Practices \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html}
+    \item IAM Users Guide \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html}
+    \item IAM Groups Guide \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/id_groups.html}
+    \item IAM Policies and Permissions \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html}
+\end{itemize}
+
+\item \textbf{Multi-Factor Authentication (MFA)}
+\begin{itemize}[leftmargin=*]
+    \item Using Multi-Factor Authentication (MFA) in AWS \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html}
+    \item Enable a Virtual MFA Device for Your AWS Account Root User \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html}
+    \item Enable a Virtual MFA Device for an IAM User \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html}
+\end{itemize}
+
+\item \textbf{AWS Billing and Cost Management}
+\begin{itemize}[leftmargin=*]
+    \item AWS Billing and Cost Management Documentation \\
+    \url{https://docs.aws.amazon.com/account-billing/}
+    \item Creating a Billing Alarm to Monitor Your Estimated AWS Charges \\
+    \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/monitor_estimated_charges_with_cloudwatch.html}
+    \item Avoiding Unexpected Charges \\
+    \url{https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/checklistforunwantedcharges.html}
+\end{itemize}
+
+\item \textbf{Amazon CloudWatch}
+\begin{itemize}[leftmargin=*]
+    \item Amazon CloudWatch Documentation \\
+    \url{https://docs.aws.amazon.com/cloudwatch/}
+    \item Using Amazon CloudWatch Alarms \\
+    \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html}
+\end{itemize}
+
+\item \textbf{Amazon SNS (Simple Notification Service)}
+\begin{itemize}[leftmargin=*]
+    \item Amazon SNS Documentation \\
+    \url{https://docs.aws.amazon.com/sns/}
+    \item Getting Started with Amazon SNS \\
+    \url{https://docs.aws.amazon.com/sns/latest/dg/sns-getting-started.html}
+\end{itemize}
+
+\end{enumerate}
+
+\subsection{Recursos de Aprendizaje AWS}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{AWS Training and Certification}
+\begin{itemize}[leftmargin=*]
+    \item AWS Skill Builder - Cursos gratuitos y de pago \\
+    \url{https://skillbuilder.aws/}
+    \item AWS Cloud Practitioner Essentials (curso gratuito) \\
+    \url{https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/}
+\end{itemize}
+
+\item \textbf{AWS Whitepapers y Guías}
+\begin{itemize}[leftmargin=*]
+    \item AWS Well-Architected Framework \\
+    \url{https://aws.amazon.com/architecture/well-architected/}
+    \item Security Pillar - AWS Well-Architected Framework \\
+    \url{https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html}
+    \item Overview of Amazon Web Services (Whitepaper) \\
+    \url{https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html}
+\end{itemize}
+
+\end{enumerate}
+
+\subsection{Libros y Publicaciones Académicas}
+
+\begin{enumerate}[leftmargin=*]
+
+\item Velte, A. T., Velte, T. J., \& Elsenpeter, R. (2010). \textit{Cloud Computing: A Practical Approach}. McGraw-Hill. \\
+Proporciona una introducción práctica a los conceptos fundamentales de computación en nube.
+
+\item Erl, T., Mahmood, Z., \& Puttini, R. (2013). \textit{Cloud Computing: Concepts, Technology \& Architecture}. Prentice Hall. \\
+Explica en detalle los modelos de servicio (IaaS, PaaS, SaaS) y patrones de arquitectura en la nube.
+
+\item Wittig, A., \& Wittig, M. (2018). \textit{Amazon Web Services in Action} (2nd ed.). Manning Publications. \\
+Guía práctica completa de AWS con ejemplos paso a paso.
+
+\item NIST Special Publication 800-145. (2011). \textit{The NIST Definition of Cloud Computing}. \\
+\url{https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf} \\
+Definición estándar de computación en nube del National Institute of Standards and Technology.
+
+\end{enumerate}
+
+\subsection{Aplicaciones de Autenticación MFA}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{Google Authenticator}
+\begin{itemize}[leftmargin=*]
+    \item iOS: \url{https://apps.apple.com/app/google-authenticator/id388497605}
+    \item Android: \url{https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2}
+\end{itemize}
+
+\item \textbf{Microsoft Authenticator}
+\begin{itemize}[leftmargin=*]
+    \item iOS: \url{https://apps.apple.com/app/microsoft-authenticator/id983156458}
+    \item Android: \url{https://play.google.com/store/apps/details?id=com.azure.authenticator}
+\end{itemize}
+
+\item \textbf{Authy}
+\begin{itemize}[leftmargin=*]
+    \item Multiplataforma: \url{https://authy.com/download/}
+\end{itemize}
+
+\end{enumerate}
+
+\subsection{Herramientas y Recursos Adicionales}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{AWS CLI (Command Line Interface)}
+\begin{itemize}[leftmargin=*]
+    \item Documentación: \url{https://docs.aws.amazon.com/cli/}
+    \item Instalación: \url{https://aws.amazon.com/cli/}
+\end{itemize}
+
+\item \textbf{AWS SDKs} (Software Development Kits)
+\begin{itemize}[leftmargin=*]
+    \item Página principal de SDKs: \url{https://aws.amazon.com/tools/}
+\end{itemize}
+
+\item \textbf{AWS Architecture Center}
+\begin{itemize}[leftmargin=*]
+    \item Diagramas de referencia y mejores prácticas: \url{https://aws.amazon.com/architecture/}
+\end{itemize}
+
+\end{enumerate}
+
+\vspace{1cm}
+
+\textbf{Nota:} Todas las URLs fueron verificadas y están activas al momento de la creación de este documento. AWS actualiza constantemente su documentación, por lo que se recomienda buscar en \url{https://docs.aws.amazon.com/} si algún enlace cambia en el futuro.
+
+\end{document}

@@ -1,0 +1,1409 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#3}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 3 - Internet Gateway},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+% Comandos personalizados para respuestas
+\newcommand{\correcta}[1]{\textcolor{green!70!black}{\textbf{#1}}}
+\newcommand{\incorrecta}[1]{\textcolor{red}{#1}}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#3\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Internet Gateway - Conectando VPC a Internet\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 45-60 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio se enfoca en la configuración de conectividad a internet para Amazon Virtual Private Cloud (VPC) mediante la implementación de un Internet Gateway (IGW). Los estudiantes aprenderán a transformar subredes privadas en subredes públicas funcionales, permitiendo comunicación bidireccional entre recursos en AWS e internet.
+
+A través de actividades prácticas completamente textuales utilizando el nivel gratuito de AWS, se abordará la creación, adjunto y configuración de un Internet Gateway, la modificación de tablas de enrutamiento para agregar rutas hacia internet, y la comprensión del flujo de tráfico de red entre VPC e internet. Se explicará detalladamente la diferencia entre direcciones IP públicas y privadas, el papel del Network Address Translation (NAT) implícito en AWS, y cómo el Internet Gateway permite que instancias con direcciones IP públicas sean accesibles desde internet.
+
+El laboratorio construye directamente sobre la infraestructura de VPC creada en el Laboratorio 2, agregando la capa de conectividad externa necesaria para que las aplicaciones web puedan servir tráfico público. Los estudiantes comprenderán conceptos críticos como el enrutamiento a nivel de VPC, la asimetría entre tráfico entrante y saliente, y las consideraciones de seguridad al exponer recursos a internet.
+
+Al finalizar, los participantes habrán creado una arquitectura de red funcional donde las subredes públicas pueden comunicarse con internet mientras las subredes privadas permanecen aisladas, preparando el terreno para el despliegue de instancias EC2 y aplicaciones web en laboratorios posteriores.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} Internet Gateway, IGW, Conectividad Internet, Enrutamiento, Direcciones IP Públicas, NAT, Subredes Públicas, Tráfico Bidireccional, AWS Networking
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Implementar conectividad a internet en una Amazon VPC mediante la creación, configuración y adjunto de un Internet Gateway, modificando las tablas de enrutamiento apropiadas para permitir tráfico bidireccional entre subredes públicas e internet, y comprendiendo los fundamentos de direccionamiento IP público, enrutamiento de red, y las implicaciones de seguridad al exponer recursos de AWS a internet público.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Comprender el funcionamiento del Internet Gateway:} Estudiar el papel del IGW como puerta de enlace entre VPC e internet, entender su arquitectura de alta disponibilidad, y conocer las diferencias entre IGW y otros componentes de conectividad como NAT Gateway.
+    
+    \item \textbf{Crear y adjuntar Internet Gateway a VPC:} Implementar un Internet Gateway desde la consola de AWS, adjuntarlo correctamente a la VPC existente, y verificar el estado de conexión del recurso.
+    
+    \item \textbf{Configurar enrutamiento para acceso a internet:} Modificar tablas de enrutamiento de subredes públicas agregando la ruta por defecto (0.0.0.0/0) apuntando al Internet Gateway, permitiendo que el tráfico destinado a internet sea correctamente enrutado.
+    
+    \item \textbf{Diferenciar entre subredes públicas y privadas operacionalmente:} Comprender cómo la presencia o ausencia de ruta a IGW determina la naturaleza pública o privada de una subred, y las implicaciones para recursos desplegados en cada tipo.
+    
+    \item \textbf{Comprender direccionamiento IP público vs privado:} Entender la diferencia entre direcciones IP privadas (RFC 1918) usadas dentro de VPC y direcciones IP públicas necesarias para comunicación con internet, incluyendo el papel del NAT implícito de AWS.
+    
+    \item \textbf{Analizar flujos de tráfico de red:} Trazar el camino que sigue el tráfico desde una instancia EC2 en subred pública hacia internet y viceversa, identificando cada salto de enrutamiento y transformación de direcciones.
+    
+    \item \textbf{Verificar conectividad sin instancias EC2:} Utilizar herramientas de la consola de AWS para confirmar que la configuración de red es correcta antes de desplegar recursos computacionales.
+    
+    \item \textbf{Aplicar principios de seguridad en conectividad internet:} Entender que exponer subredes a internet requiere configuración adicional de Security Groups y Network ACLs, preparando la arquitectura para despliegues seguros.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+
+\textbf{Competencias Técnicas:}
+\begin{itemize}[leftmargin=*]
+    \item Configuración de componentes de conectividad en arquitecturas de nube
+    \item Gestión de tablas de enrutamiento y rutas de red
+    \item Comprensión de direccionamiento IP y Network Address Translation
+    \item Diseño de arquitecturas de red con separación público/privado
+    \item Verificación y troubleshooting de conectividad de red
+    \item Implementación de mejores prácticas de seguridad en redes expuestas
+\end{itemize}
+
+\textbf{Competencias Profesionales:}
+\begin{itemize}[leftmargin=*]
+    \item Toma de decisiones sobre cuándo exponer recursos a internet
+    \item Documentación de flujos de tráfico de red
+    \item Comprensión de trade-offs entre accesibilidad y seguridad
+    \item Aplicación de principios de defensa en profundidad
+    \item Planificación de arquitecturas de conectividad escalables
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{¿Qué es un Internet Gateway?}
+
+\subsubsection{Definición y Propósito}
+
+Un \textbf{Internet Gateway (IGW)} es un componente de VPC horizontalmente escalado, redundante y de alta disponibilidad que permite la comunicación entre instancias en tu VPC e internet. Funciona como una "puerta de enlace" que conecta tu red privada virtual con la internet pública.
+
+\textbf{Características principales:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Administrado por AWS:} No requieres gestionar servidores ni preocuparte por disponibilidad
+    \item \textbf{Alta disponibilidad:} Diseñado para no tener punto único de fallo
+    \item \textbf{Escalabilidad automática:} Se adapta al ancho de banda requerido sin intervención
+    \item \textbf{Sin costo:} El IGW en sí es gratuito, solo pagas por transferencia de datos
+    \item \textbf{Funciones duales:} Permite tráfico saliente (de VPC a internet) y entrante (de internet a VPC)
+\end{itemize}
+
+\subsubsection{¿Cómo Funciona un Internet Gateway?}
+
+El Internet Gateway realiza dos funciones críticas:
+
+\textbf{1. Proporcionar un objetivo de ruta para tráfico a internet:}
+
+Cuando configuras una tabla de enrutamiento con una ruta \texttt{0.0.0.0/0 $\rightarrow$ igw-xxxxx}, estás diciéndole a tu VPC: "Todo tráfico destinado a direcciones que no están en mi red local (10.0.0.0/16), envíalo al Internet Gateway".
+
+\textbf{2. Realizar traducción de direcciones de red (NAT) para instancias con IP pública:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Tráfico saliente:} IGW traduce la dirección IP privada de tu instancia (por ejemplo, 10.0.1.50) a su dirección IP pública (por ejemplo, 54.123.45.67) antes de enviar paquetes a internet
+    
+    \item \textbf{Tráfico entrante:} IGW traduce la dirección IP pública de destino de vuelta a la dirección IP privada de la instancia cuando llegan paquetes desde internet
+\end{itemize}
+
+Este proceso de NAT es completamente transparente y administrado por AWS. Tu instancia nunca "ve" su dirección IP pública en su interfaz de red; solo conoce su IP privada.
+
+\subsubsection{Analogía con Redes Tradicionales}
+
+En una red empresarial tradicional:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Internet Gateway} $\equiv$ Router de borde + Firewall NAT
+    \item Conecta tu red interna (LAN) con internet (WAN)
+    \item Realiza NAT para permitir que múltiples dispositivos internos compartan una IP pública
+    \item Proporciona punto de entrada/salida controlado
+\end{itemize}
+
+La diferencia es que en AWS, el IGW es completamente administrado, altamente disponible, y no requiere configuración de hardware.
+
+\subsection{Conceptos de Direccionamiento IP}
+
+\subsubsection{Direcciones IP Privadas (RFC 1918)}
+
+Son direcciones IP usadas dentro de redes privadas que NO son enrutables en internet público:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Rango} & \textbf{Uso en VPC} \\ \hline
+10.0.0.0/8 & Usamos 10.0.0.0/16 en nuestros labs \\ \hline
+172.16.0.0/12 & AWS Default VPC usa 172.31.0.0/16 \\ \hline
+192.168.0.0/16 & Común en redes domésticas \\ \hline
+\end{tabular}
+\caption{Rangos de IP privadas según RFC 1918}
+\end{table}
+
+\textbf{Importante:} Cada instancia EC2 en una VPC SIEMPRE tiene una dirección IP privada. Esta IP es persistente durante toda la vida de la instancia.
+
+\subsubsection{Direcciones IP Públicas}
+
+Son direcciones IP enrutables en internet que permiten comunicación directa con recursos fuera de tu VPC:
+
+\textbf{Tipos de IP públicas en AWS:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Public IP (dinámica):}
+    \begin{itemize}
+        \item Asignada automáticamente si "Auto-assign Public IP" está habilitado en subred
+        \item Cambia si detienes/inicias la instancia
+        \item Se libera cuando terminas la instancia
+        \item Gratuita
+    \end{itemize}
+    
+    \item \textbf{Elastic IP (estática):}
+    \begin{itemize}
+        \item Dirección IP pública que puedes reservar y asociar/desasociar libremente
+        \item Persiste incluso si detienes la instancia
+        \item Gratuita SOLO mientras está asociada a una instancia corriendo
+        \item \$0.005/hora si está reservada pero NO asociada (para prevenir acaparamiento)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{En este laboratorio:} Trabajaremos con Public IPs dinámicas (gratuitas).
+
+\subsubsection{Network Address Translation (NAT)}
+
+\textbf{¿Qué es NAT?}
+
+Network Address Translation (NAT) es el proceso de modificar direcciones IP en paquetes de red mientras atraviesan un router o gateway. Permite que dispositivos en una red privada compartan una dirección IP pública para acceder a internet.
+
+\textbf{NAT en Internet Gateway:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Instancia EC2 con IP privada 10.0.1.50 e IP pública 54.123.45.67
+    \item Instancia envía solicitud HTTP a www.google.com (172.217.164.196)
+    \item Paquete sale con IP origen: 10.0.1.50
+    \item Internet Gateway intercepta el paquete
+    \item IGW cambia IP origen a: 54.123.45.67 (NAT)
+    \item Paquete llega a Google con origen 54.123.45.67
+    \item Google responde a 54.123.45.67
+    \item IGW recibe respuesta, traduce destino de vuelta a 10.0.1.50
+    \item Instancia recibe respuesta en su IP privada
+\end{enumerate}
+
+\textbf{Importante:} La instancia EC2 nunca "sabe" que tiene IP pública. Si ejecutas \texttt{ifconfig} o \texttt{ip addr} en la instancia, solo verás la IP privada. La IP pública solo existe "fuera" de la instancia, gestionada por AWS.
+
+\subsection{Componentes de Conectividad en AWS}
+
+\subsubsection{Internet Gateway vs NAT Gateway}
+
+Es importante no confundir estos dos componentes:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|p{5cm}|p{5cm}|}
+\hline
+\textbf{Característica} & \textbf{Internet Gateway (IGW)} & \textbf{NAT Gateway} \\ \hline
+Propósito & Conectividad bidireccional entre VPC e internet & Solo salida: recursos privados acceden a internet \\ \hline
+Tráfico entrante & Sí (si instancia tiene IP pública) & No \\ \hline
+Tráfico saliente & Sí & Sí \\ \hline
+Casos de uso & Servidores web, APIs públicas, bastion hosts & Actualizaciones de software, acceso APIs externas desde recursos privados \\ \hline
+Costo & \$0.00 & \$0.045/hora + \$0.045/GB \\ \hline
+Disponibilidad & Altamente disponible automáticamente & Alta disponibilidad (pero 1 por AZ) \\ \hline
+Usado en & Subredes públicas & Subredes privadas \\ \hline
+\end{tabular}
+\caption{Comparación Internet Gateway vs NAT Gateway}
+\end{table}
+
+\textbf{En este laboratorio:} Solo usaremos Internet Gateway (gratuito).
+
+\subsubsection{Flujo Completo de Tráfico}
+
+\textbf{Escenario:} Usuario en internet accede a servidor web en subred pública.
+
+\textbf{Paso a paso del tráfico:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Usuario escribe en navegador: \texttt{http://54.123.45.67}
+    \item Navegador envía solicitud HTTP a 54.123.45.67:80
+    \item Paquete llega a Internet Gateway de AWS
+    \item IGW verifica tabla de enrutamiento de VPC
+    \item IGW traduce IP destino: 54.123.45.67 $\rightarrow$ 10.0.1.50
+    \item Paquete enrutado a subred pública (10.0.1.0/24)
+    \item Security Group de instancia evalúa: ¿permitir puerto 80? $\rightarrow$ Sí
+    \item Network ACL de subred evalúa: ¿permitir tráfico entrante? $\rightarrow$ Sí
+    \item Paquete llega a instancia EC2 (10.0.1.50)
+    \item Instancia procesa solicitud HTTP, genera respuesta
+    \item Respuesta sale con IP origen: 10.0.1.50
+    \item Tabla de enrutamiento: destino no es 10.0.0.0/16 $\rightarrow$ enviar a IGW
+    \item IGW traduce IP origen: 10.0.1.50 $\rightarrow$ 54.123.45.67
+    \item Respuesta llega al navegador del usuario
+\end{enumerate}
+
+Este flujo demuestra la importancia de:
+\begin{itemize}[leftmargin=*]
+    \item Ruta correcta en tabla de enrutamiento (0.0.0.0/0 $\rightarrow$ IGW)
+    \item Instancia con IP pública asignada
+    \item Security Groups configurados para permitir tráfico deseado
+\end{itemize}
+
+\subsection{Arquitectura de Subredes Públicas vs Privadas}
+
+\subsubsection{¿Qué Hace a una Subred "Pública"?}
+
+Una subred es "pública" cuando cumple TODAS estas condiciones:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Tiene ruta a Internet Gateway:} Su tabla de enrutamiento incluye \texttt{0.0.0.0/0 $\rightarrow$ igw-xxxxx}
+    \item \textbf{Auto-asignación de IP pública habilitada:} Configuración "Auto-assign public IPv4 address" = Yes
+    \item \textbf{Internet Gateway adjunto a VPC:} El IGW está creado y asociado a la VPC
+\end{enumerate}
+
+\textbf{Si falta cualquiera de estos elementos, la subred NO funcionará como pública.}
+
+\subsubsection{¿Qué Hace a una Subred "Privada"?}
+
+Una subred es "privada" cuando:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{NO tiene ruta a Internet Gateway}
+    \item \textbf{Instancias NO tienen IP pública}
+    \item Opcionalmente: puede tener ruta a NAT Gateway para salida a internet (Lab futuro)
+\end{enumerate}
+
+\textbf{Importante:} "Privada" no significa "sin conectividad". Subredes privadas pueden:
+\begin{itemize}[leftmargin=*]
+    \item Comunicarse con otras subredes en la VPC (ruta local)
+    \item Acceder a internet vía NAT Gateway (solo salida)
+    \item Conectarse a redes corporativas vía VPN/Direct Connect
+    \item Alojar bases de datos, servidores de aplicación backend, etc.
+\end{itemize}
+
+\subsubsection{Patrón de Arquitectura Recomendado}
+
+\textbf{Mejores prácticas de AWS para arquitecturas de producción:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Capa pública (subredes públicas):}
+    \begin{itemize}
+        \item Balanceadores de carga (ALB, NLB)
+        \item Bastion hosts / Jump boxes para administración
+        \item NAT Gateways (para dar salida a subredes privadas)
+        \item Servidores web que deben ser accesibles públicamente
+    \end{itemize}
+    
+    \item \textbf{Capa privada (subredes privadas):}
+    \begin{itemize}
+        \item Servidores de aplicación backend
+        \item Bases de datos (RDS, DynamoDB con endpoints VPC)
+        \item Servicios internos de API
+        \item Colas de mensajes, workers de procesamiento
+    \end{itemize}
+\end{itemize}
+
+\textbf{Principio fundamental:} Exponer a internet solo lo absolutamente necesario. Todo lo demás debe estar en subredes privadas.
+
+\subsection{Costos y Consideraciones}
+
+\subsubsection{Costos de Internet Gateway}
+
+\textbf{¡Buenas noticias!} El Internet Gateway en sí es \textbf{completamente gratuito}. No hay cargo por:
+\begin{itemize}[leftmargin=*]
+    \item Crear un Internet Gateway
+    \item Adjuntarlo a una VPC
+    \item Mantenerlo activo 24/7
+    \item Procesar paquetes a través de él
+\end{itemize}
+
+\subsubsection{Costos de Transferencia de Datos}
+
+\textbf{Lo que SÍ tiene costo es la transferencia de datos:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tipo de Tráfico} & \textbf{Primeros 100 GB/mes} & \textbf{Después de 100 GB} \\ \hline
+Entrada a AWS (ingress) & \$0.00 & \$0.00 (siempre gratis) \\ \hline
+Salida de AWS (egress) & \$0.00 & \$0.09/GB \\ \hline
+Entre regiones AWS & - & \$0.02/GB \\ \hline
+\end{tabular}
+\caption{Costos de transferencia de datos en AWS}
+\end{table}
+
+\textbf{En este laboratorio:}
+\begin{itemize}[leftmargin=*]
+    \item No desplegaremos instancias EC2 que generen tráfico significativo
+    \item Solo verificaremos configuración
+    \item Costo esperado: \textbf{\$0.00}
+\end{itemize}
+
+\textbf{Para proyectos futuros:} Los primeros 100 GB/mes de transferencia saliente son gratuitos, suficiente para aplicaciones pequeñas/medianas.
+
+\subsection{Mejores Prácticas de Seguridad}
+
+\subsubsection{Defensa en Profundidad}
+
+Exponer recursos a internet requiere múltiples capas de seguridad:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Capa 1 - Segregación de subredes:}
+    \begin{itemize}
+        \item Solo subredes públicas tienen ruta a IGW
+        \item Recursos sensibles en subredes privadas sin acceso directo desde internet
+    \end{itemize}
+    
+    \item \textbf{Capa 2 - Security Groups:}
+    \begin{itemize}
+        \item Firewall stateful a nivel de instancia
+        \item Permitir solo puertos necesarios (80, 443 para web)
+        \item Denegar todo por defecto, permitir explícitamente
+    \end{itemize}
+    
+    \item \textbf{Capa 3 - Network ACLs:}
+    \begin{itemize}
+        \item Firewall stateless a nivel de subred
+        \item Reglas adicionales de entrada/salida
+        \item Útil para bloquear rangos IP maliciosos
+    \end{itemize}
+    
+    \item \textbf{Capa 4 - IAM:}
+    \begin{itemize}
+        \item Control de quién puede modificar IGW, tablas de enrutamiento
+        \item Auditoría con CloudTrail
+    \end{itemize}
+\end{enumerate}
+
+\textbf{En este lab:} Configuramos la Capa 1 (segregación). Las demás capas se abordarán en laboratorios posteriores.
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Requeridos}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Laboratorio 1 completado:}
+    \begin{itemize}
+        \item Cuenta AWS activa con usuario IAM
+        \item Familiaridad con consola de AWS
+        \item Alertas de facturación configuradas
+    \end{itemize}
+    
+    \item \textbf{Laboratorio 2 completado (CRÍTICO):}
+    \begin{itemize}
+        \item VPC creada: 10.0.0.0/16
+        \item 4 subredes: 2 públicas, 2 privadas
+        \item Tablas de enrutamiento: Public-Route-Table, Private-Route-Table
+        \item Subredes con auto-asignación de IP pública habilitada
+    \end{itemize}
+    
+    \item \textbf{Conceptos de redes:}
+    \begin{itemize}
+        \item Enrutamiento y tablas de rutas
+        \item Direcciones IP públicas vs privadas
+        \item Concepto de gateway/puerta de enlace
+        \item NAT (Network Address Translation)
+    \end{itemize}
+\end{itemize}
+
+\subsection{Recursos Técnicos}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cuenta AWS} con VPC del Lab 2 (NO eliminar)
+    \item \textbf{Usuario IAM} con permisos de administrador
+    \item \textbf{Conexión a internet} estable
+    \item \textbf{Navegador web} moderno
+    \item \textbf{Documentación del Lab 2} (IDs de VPC, subredes, route tables)
+\end{itemize}
+
+\subsection{Verificación de Infraestructura Existente}
+
+\textbf{Antes de comenzar, confirmar que tienes:}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Recurso} & \textbf{Valor Esperado} & \textbf{✓} \\ \hline
+VPC & Lab2-VPC (10.0.0.0/16) & $\square$ \\ \hline
+Subred Pública 1 & Public-Subnet-1A (10.0.1.0/24, us-east-1a) & $\square$ \\ \hline
+Subred Pública 2 & Public-Subnet-1B (10.0.2.0/24, us-east-1b) & $\square$ \\ \hline
+Subred Privada 1 & Private-Subnet-1A (10.0.11.0/24, us-east-1a) & $\square$ \\ \hline
+Subred Privada 2 & Private-Subnet-1B (10.0.12.0/24, us-east-1b) & $\square$ \\ \hline
+Tabla Ruta Pública & Public-Route-Table (asociada a subredes públicas) & $\square$ \\ \hline
+Tabla Ruta Privada & Private-Route-Table (Main, asociada a privadas) & $\square$ \\ \hline
+\end{tabular}
+\caption{Checklist de infraestructura requerida del Lab 2}
+\end{table}
+
+\textbf{Si falta alguno de estos recursos, debes completar el Laboratorio 2 primero.}
+
+\subsection{Verificación de Costos}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Servicio} & \textbf{Costo} & \textbf{Nota} \\ \hline
+Internet Gateway & \$0.00 & Siempre gratuito \\ \hline
+Modificación Route Tables & \$0.00 & Sin cargo \\ \hline
+Transferencia datos (este lab) & \$0.00 & No habrá tráfico significativo \\ \hline
+\textbf{TOTAL} & \textbf{\$0.00} & 100\% Free Tier \\ \hline
+\end{tabular}
+\caption{Costos del Laboratorio 3}
+\end{table}
+
+\subsection{Tiempo Estimado}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Lectura y comprensión de conceptos:} 15-20 minutos
+    \item \textbf{Creación de Internet Gateway:} 5 minutos
+    \item \textbf{Adjunto a VPC:} 3 minutos
+    \item \textbf{Modificación de tablas de enrutamiento:} 10 minutos
+    \item \textbf{Verificación de configuración:} 10 minutos
+    \item \textbf{Cuestionario:} 5-10 minutos
+    \item \textbf{TOTAL:} 45-60 minutos
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+\subsection{Paso 1: Verificar Infraestructura Existente}
+
+\textbf{Objetivo:} Confirmar que la VPC del Lab 2 está lista para agregar Internet Gateway.
+
+\subsubsection{1.1 Iniciar Sesión como Usuario IAM}
+
+\begin{enumerate}[leftmargin=*]
+    \item Abrir navegador web
+    \item Ir a la URL de inicio de sesión IAM
+    \item Ingresar credenciales de usuario IAM administrador
+    \item Si tienes MFA habilitado, ingresar código de 6 dígitos
+    \item Hacer clic en "Sign in"
+\end{enumerate}
+
+\subsubsection{1.2 Verificar Región}
+
+\begin{enumerate}[leftmargin=*]
+    \item En barra superior derecha, verificar que estés en la región correcta
+    \item Debe decir "N. Virginia" (us-east-1) o la región que usaste en Lab 2
+    \item Si está en otra región, cambiarla ahora
+    \item \textbf{MUY IMPORTANTE:} Todos los recursos deben estar en la misma región
+\end{enumerate}
+
+\subsubsection{1.3 Navegar al Servicio VPC}
+
+\begin{enumerate}[leftmargin=*]
+    \item En consola de AWS, hacer clic en "Services"
+    \item Buscar y hacer clic en "VPC"
+    \item Se abrirá el dashboard de VPC
+\end{enumerate}
+
+\subsubsection{1.4 Verificar VPC Existente}
+
+\begin{enumerate}[leftmargin=*]
+    \item En panel izquierdo, hacer clic en "Your VPCs"
+    \item Buscar "Lab2-VPC" en la lista
+    \item Verificar:
+    \begin{itemize}
+        \item State: Available (verde)
+        \item IPv4 CIDR: 10.0.0.0/16
+        \item Anotar el VPC ID (ejemplo: vpc-0a1b2c3d4e5f67890)
+    \end{itemize}
+    \item Si no encuentras la VPC, DETENTE y completa Lab 2 primero
+\end{enumerate}
+
+\subsubsection{1.5 Verificar Subredes}
+
+\begin{enumerate}[leftmargin=*]
+    \item En panel izquierdo, hacer clic en "Subnets"
+    \item Filtrar por VPC: seleccionar "Lab2-VPC"
+    \item Confirmar que existen 4 subredes:
+    \begin{itemize}
+        \item Public-Subnet-1A (10.0.1.0/24, us-east-1a)
+        \item Public-Subnet-1B (10.0.2.0/24, us-east-1b)
+        \item Private-Subnet-1A (10.0.11.0/24, us-east-1a)
+        \item Private-Subnet-1B (10.0.12.0/24, us-east-1b)
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{1.6 Verificar Tablas de Enrutamiento}
+
+\begin{enumerate}[leftmargin=*]
+    \item En panel izquierdo, hacer clic en "Route Tables"
+    \item Filtrar por VPC: "Lab2-VPC"
+    \item Confirmar que existen 2 tablas:
+    \begin{itemize}
+        \item Public-Route-Table (asociada a 2 subredes públicas)
+        \item Private-Route-Table (Main = Yes, asociada a 2 subredes privadas)
+    \end{itemize}
+    \item Seleccionar "Public-Route-Table"
+    \item Hacer clic en pestaña "Routes"
+    \item Verificar que SOLO existe ruta: 10.0.0.0/16 $\rightarrow$ local
+    \item NO debe haber ruta 0.0.0.0/0 (la agregaremos en este lab)
+\end{enumerate}
+
+\textbf{Si todo está correcto, estás listo para continuar. Si falta algo, revisar Lab 2.}
+
+\subsection{Paso 2: Crear Internet Gateway}
+
+\textbf{Objetivo:} Crear un Internet Gateway que posteriormente adjuntaremos a nuestra VPC.
+
+\subsubsection{2.1 Navegar a Internet Gateways}
+
+\begin{enumerate}[leftmargin=*]
+    \item En el dashboard de VPC, buscar en panel izquierdo la sección "Virtual private cloud"
+    \item Hacer clic en "Internet Gateways"
+    \item Se abrirá la lista de Internet Gateways existentes
+    \item Probablemente no veas ninguno (a menos que hayas creado previamente)
+\end{enumerate}
+
+\subsubsection{2.2 Iniciar Creación de IGW}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la parte superior, hacer clic en el botón naranja "Create internet gateway"
+    \item Se abrirá el formulario de creación
+\end{enumerate}
+
+\textbf{Formulario de creación de Internet Gateway:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Name tag:} Ingresar nombre descriptivo
+    \begin{itemize}
+        \item Ejemplo: \texttt{Lab3-IGW}
+        \item O: \texttt{Internet-Gateway-Lab2-VPC}
+        \item El nombre debe ser claro para identificar su propósito
+    \end{itemize}
+    
+    \item \textbf{Tags adicionales (opcional pero recomendado):}
+    \begin{itemize}
+        \item Hacer clic en "Add new tag"
+        \item Key: \texttt{Environment}, Value: \texttt{development}
+        \item Hacer clic en "Add new tag" nuevamente
+        \item Key: \texttt{Project}, Value: \texttt{AWS-Labs}
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Nota importante:} A diferencia de otros recursos, NO seleccionas la VPC durante la creación del IGW. Primero creas el IGW "independiente" y luego lo adjuntas a una VPC.
+
+\subsubsection{2.3 Confirmar Creación}
+
+\begin{enumerate}[leftmargin=*]
+    \item Revisar la configuración
+    \item Verificar que el nombre sea correcto: "Lab3-IGW"
+    \item Hacer clic en el botón naranja "Create internet gateway" (parte inferior)
+    \item AWS procesará la solicitud (tarda 1-2 segundos)
+    \item Verás banner verde de éxito: "Created internet gateway igw-xxxxx"
+\end{enumerate}
+
+\subsubsection{2.4 Verificar Estado del IGW}
+
+\textbf{Después de la creación:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Serás redirigido automáticamente a la página de detalles del IGW
+    \item O puedes hacer clic en el IGW ID en el banner verde
+    \item Observar la información mostrada:
+    \begin{itemize}
+        \item \textbf{Internet gateway ID:} igw-0123456789abcdef (ejemplo)
+        \item \textbf{State:} "detached" (en amarillo/naranja)
+        \item \textbf{VPC ID:} "-" (todavía no adjunto a ninguna VPC)
+        \item \textbf{Owner ID:} Tu account ID
+    \end{itemize}
+\end{enumerate}
+
+\textbf{¿Por qué dice "detached"?}
+
+\begin{itemize}[leftmargin=*]
+    \item El Internet Gateway se crea como recurso independiente
+    \item Debe ser explícitamente "adjuntado" (attached) a una VPC
+    \item Un IGW solo puede estar adjunto a 1 VPC a la vez
+    \item Una VPC solo puede tener 1 IGW adjunto a la vez (relación 1:1)
+    \item Estado "detached" significa: creado pero sin asociar
+\end{itemize}
+
+\subsubsection{2.5 Anotar Internet Gateway ID}
+
+\textbf{Importante para siguientes pasos:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Copiar el Internet Gateway ID
+    \item Ejemplo: \texttt{igw-0123456789abcdef}
+    \item Guardarlo en documento temporal junto con VPC ID
+    \item Lo necesitarás para:
+    \begin{itemize}
+        \item Adjuntarlo a la VPC (siguiente paso)
+        \item Agregar ruta en tabla de enrutamiento
+        \item Verificación final
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 3: Adjuntar Internet Gateway a VPC}
+
+\textbf{Objetivo:} Asociar el IGW creado con nuestra VPC del Lab 2.
+
+\subsubsection{3.1 Iniciar Proceso de Adjunto}
+
+\textbf{Desde la página de detalles del IGW:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Si no estás ya en la página de detalles, ir a "Internet Gateways"
+    \item Seleccionar tu IGW "Lab3-IGW" (casilla izquierda)
+    \item En la parte superior, hacer clic en el menú desplegable "Actions"
+    \item Seleccionar "Attach to VPC"
+    \item Se abrirá una ventana modal / nueva página
+\end{enumerate}
+
+\textbf{Alternativa (desde la lista):}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la lista de Internet Gateways
+    \item Encontrar tu IGW con estado "detached"
+    \item Hacer clic derecho sobre él
+    \item Seleccionar "Attach to VPC" del menú contextual
+\end{enumerate}
+
+\subsubsection{3.2 Seleccionar VPC}
+
+\textbf{Formulario "Attach to VPC":}
+
+\begin{enumerate}[leftmargin=*]
+    \item Verás el campo "Available VPCs"
+    \item Hacer clic en el campo desplegable
+    \item Buscar por nombre: "Lab2-VPC"
+    \item O buscar por VPC ID: vpc-0a1b2c3d4e5f67890
+    \item Seleccionar tu VPC
+    \item Verificar que el CIDR mostrado sea: 10.0.0.0/16
+\end{enumerate}
+
+\textbf{¿Qué VPCs aparecen en la lista?}
+
+\begin{itemize}[leftmargin=*]
+    \item Solo VPCs que NO tienen IGW adjunto actualmente
+    \item Si una VPC ya tiene IGW, NO aparecerá (límite 1 IGW por VPC)
+    \item Si no ves tu Lab2-VPC, verifica:
+    \begin{itemize}
+        \item ¿Estás en la región correcta?
+        \item ¿La VPC ya tiene un IGW? (revisar en detalles de VPC)
+        \item ¿La VPC fue eliminada por error?
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{3.3 Confirmar Adjunto}
+
+\begin{enumerate}[leftmargin=*]
+    \item Verificar que seleccionaste "Lab2-VPC (10.0.0.0/16)"
+    \item Hacer clic en el botón "Attach internet gateway"
+    \item AWS procesará la solicitud (tarda 2-3 segundos)
+    \item Verás banner verde: "Internet gateway igw-xxxxx attached to VPC vpc-xxxxx"
+\end{enumerate}
+
+\subsubsection{3.4 Verificar Estado Después del Adjunto}
+
+\textbf{Cambios visibles inmediatamente:}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la lista de Internet Gateways, el estado cambió:
+    \begin{itemize}
+        \item \textbf{Antes:} State = "detached" (amarillo/naranja)
+        \item \textbf{Ahora:} State = "attached" (verde)
+    \end{itemize}
+    
+    \item Hacer clic en tu IGW para ver detalles
+    \item Verificar:
+    \begin{itemize}
+        \item \textbf{State:} "attached"
+        \item \textbf{VPC ID:} vpc-0a1b2c3d4e5f67890 (tu VPC)
+        \item Ahora muestra el nombre "Lab2-VPC" asociado
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{3.5 Verificar desde la VPC}
+
+\textbf{Vista desde el recurso VPC:}
+
+\begin{enumerate}[leftmargin=*]
+    \item Navegar a "Your VPCs" en panel izquierdo
+    \item Seleccionar "Lab2-VPC"
+    \item En la parte inferior, buscar detalles de la VPC
+    \item NO hay una pestaña específica "Internet Gateway"
+    \item Pero puedes ver en la columna "Internet gateway" de la lista
+    \item Debería mostrar: igw-0123456789abcdef (tu IGW ID)
+\end{enumerate}
+
+\textbf{¿Por qué esta relación es 1:1?}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{1 VPC = 1 IGW máximo:} Simplifica enrutamiento y arquitectura
+    \item \textbf{1 IGW = 1 VPC:} Un IGW no puede compartirse entre VPCs
+    \item Si necesitas múltiples VPCs con internet, crea 1 IGW por VPC
+    \item Esta restricción es por diseño de AWS para claridad y seguridad
+\end{itemize}
+
+\subsubsection{3.6 Entender el Estado Actual}
+
+\textbf{¿Qué acabas de lograr?}
+
+\begin{itemize}[leftmargin=*]
+    \item ✓ Internet Gateway creado
+    \item ✓ IGW adjunto a Lab2-VPC
+    \item ✓ AWS ahora tiene la "puerta de enlace" lista
+\end{itemize}
+
+\textbf{¿Qué NO está funcionando todavía?}
+
+\begin{itemize}[leftmargin=*]
+    \item ✗ Subredes NO pueden acceder a internet aún
+    \item ✗ Razón: falta configurar RUTAS en tablas de enrutamiento
+    \item ✗ Las tablas de enrutamiento no saben que deben enviar tráfico al IGW
+\end{itemize}
+
+\textbf{Analogía:}
+\begin{itemize}[leftmargin=*]
+    \item Instalaste una puerta (IGW) en tu casa (VPC)
+    \item Pero no le dijiste a nadie (subredes) que usen esa puerta para salir
+    \item Ahora debes actualizar las "instrucciones" (tablas de enrutamiento)
+\end{itemize}
+
+\textbf{Siguiente paso crítico:} Agregar ruta 0.0.0.0/0 $\rightarrow$ IGW en tabla pública.
+
+\subsection{Paso 4: Configurar Ruta por Defecto en la Tabla de Enrutamiento Pública}
+
+\textbf{Objetivo:} Enviar todo el tráfico destinado fuera de la VPC (IPv4) al Internet Gateway para las subredes públicas.
+
+\subsubsection{4.1 Identificar la Tabla de Enrutamiento Pública}
+
+\begin{enumerate}[leftmargin=*]
+    \item En el panel izquierdo, hacer clic en "Route Tables"
+    \item Filtrar por VPC: seleccionar \texttt{Lab2-VPC}
+    \item Seleccionar \textbf{Public-Route-Table}
+    \item Ir a la pestaña \textbf{Subnet associations} y confirmar que están asociadas:
+    \begin{itemize}
+        \item \texttt{Public-Subnet-1A} (10.0.1.0/24)
+        \item \texttt{Public-Subnet-1B} (10.0.2.0/24)
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{4.2 Editar Rutas para Agregar la Ruta por Defecto}
+
+\begin{enumerate}[leftmargin=*]
+    \item Con \textbf{Public-Route-Table} seleccionada, abrir la pestaña \textbf{Routes}
+    \item Hacer clic en \textbf{Edit routes}
+    \item Hacer clic en \textbf{Add route}
+    \item En \textbf{Destination}, escribir: \texttt{0.0.0.0/0}
+    \item En \textbf{Target}, desplegar y elegir: \textbf{Internet Gateway}
+    \item Seleccionar tu IGW: \texttt{igw-xxxxxxxxxxxxxxxx (Lab3-IGW)}
+\end{enumerate}
+
+\textbf{Notas:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{0.0.0.0/0} es la \textbf{ruta por defecto} que coincide con cualquier destino IPv4 fuera del espacio local \texttt{10.0.0.0/16}
+    \item Asegúrate de no eliminar la ruta local \texttt{10.0.0.0/16 \rightarrow local}
+    \item Si ves IPv6 habilitado en tu VPC, la ruta por defecto IPv6 sería \texttt{::/0} (no aplica en este lab)
+\end{itemize}
+
+\subsubsection{4.3 Guardar Cambios}
+
+\begin{enumerate}[leftmargin=*]
+    \item Verificar que ahora ves dos rutas:
+    \begin{itemize}
+        \item \texttt{10.0.0.0/16 \rightarrow local}
+        \item \texttt{0.0.0.0/0 \rightarrow igw-xxxxxxxxxxxxxxxx}
+    \end{itemize}
+    \item Hacer clic en \textbf{Save changes}
+    \item Esperar confirmación (banner verde)
+\end{enumerate}
+
+\subsubsection{4.4 Verificar Auto-asignación de IP Pública en Subredes}
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{Subnets} en el panel izquierdo
+    \item Abrir \texttt{Public-Subnet-1A} \rightarrow pestaña \textbf{Details}
+    \item Confirmar: \textbf{Auto-assign public IPv4 address} = \texttt{Yes}
+    \item Repetir para \texttt{Public-Subnet-1B}
+    \item Si alguna dice \texttt{No}:
+    \begin{itemize}
+        \item Hacer clic en \textbf{Edit subnet settings}
+        \item Marcar \textbf{Enable auto-assign public IPv4 address}
+        \item Guardar cambios
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Resultado esperado:} Las subredes públicas ahora tienen una ruta por defecto a internet y asignarán IP pública a futuras instancias.
+
+\subsection{Paso 5: Verificación de la Configuración}
+
+\textbf{Objetivo:} Confirmar que la VPC, el IGW y las tablas de rutas quedaron correctamente configurados sin afectar las subredes privadas.
+
+\subsubsection{5.1 Verificar Rutas en la Tabla Pública}
+
+\begin{enumerate}[leftmargin=*]
+    \item En \textbf{Route Tables} \rightarrow seleccionar \textbf{Public-Route-Table}
+    \item Pestaña \textbf{Routes}: confirmar presencia de \texttt{0.0.0.0/0 \rightarrow igw-...}
+    \item Pestaña \textbf{Subnet associations}: confirmar subredes públicas asociadas
+\end{enumerate}
+
+\subsubsection{5.2 Verificar la Tabla Privada No Cambió}
+
+\begin{enumerate}[leftmargin=*]
+    \item Seleccionar \textbf{Private-Route-Table}
+    \item Pestaña \textbf{Routes}: debe tener SOLO \texttt{10.0.0.0/16 \rightarrow local}
+    \item \textbf{No} debe existir \texttt{0.0.0.0/0} en esta tabla
+    \item Pestaña \textbf{Subnet associations}: confirmar que están \texttt{Private-Subnet-1A} y \texttt{Private-Subnet-1B}
+\end{enumerate}
+
+\subsubsection{5.3 Verificar Adjunto del IGW}
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{Internet Gateways}
+    \item Seleccionar \texttt{Lab3-IGW}
+    \item Confirmar: \textbf{State} = \texttt{attached} y \textbf{VPC} = \texttt{Lab2-VPC}
+\end{enumerate}
+
+\subsubsection{5.4 Verificaciones Adicionales Recomendadas}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Reachability Analyzer (opcional):} Puedes crear un análisis desde una IP pública hipotética hacia una instancia en subred pública (se usará en Lab 4)
+    \item \textbf{Flujos esperados:} Tráfico desde subred pública hacia internet debe salir por IGW; desde internet hacia IP pública de una instancia regresará por IGW
+    \item \textbf{Costos:} Sin instancias corriendo, el costo permanece \textbf{$\$0.00}
+\end{itemize}
+
+\vspace{0.3cm}
+\noindent\textbf{Estado actual:}
+\begin{itemize}[leftmargin=*]
+    \item Subredes públicas listas para conectividad a internet
+    \item Subredes privadas siguen aisladas (sin ruta por defecto)
+    \item Preparado para lanzar EC2 en Lab 4 y probar conectividad real
+\end{itemize}
+
+\subsection{Paso 6: Documentación y Limpieza (Opcional)}
+
+\textbf{Recomendado:}
+\begin{itemize}[leftmargin=*]
+    \item Registrar IDs: \texttt{VPC ID}, \texttt{IGW ID}, \texttt{Route Table IDs}
+    \item Dibujar un pequeño diagrama del flujo: Subred pública \(\rightarrow\) IGW \(\rightarrow\) Internet
+    \item Anotar decisiones: por qué solo las subredes públicas tienen ruta por defecto
+\end{itemize}
+
+\textbf{NO eliminar:} Este IGW y las rutas se utilizarán en el Laboratorio 4 para probar conectividad de instancias EC2.
+
+\newpage
+
+% ================== CUESTIONARIO ==================
+\section{Cuestionario}
+
+\subsection{Instrucciones}
+
+Responde las siguientes preguntas basándote en los conceptos y procedimientos desarrollados en este laboratorio. Selecciona la opción correcta para cada pregunta de opción múltiple.
+
+\subsection{Preguntas}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{¿Cuál es la función principal del Internet Gateway (IGW) en una VPC de AWS?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Solo permite tráfico saliente desde la VPC hacia internet
+    \item Únicamente maneja la traducción de direcciones IP privadas
+    \item Permite comunicación bidireccional entre instancias en VPC e internet
+    \item Funciona como firewall entre subredes públicas y privadas
+\end{enumerate}
+
+\item \textbf{¿Qué ocurre cuando AWS crea un Internet Gateway?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Se crea automáticamente adjunto a la VPC especificada
+    \item Se crea en estado "detached" y debe adjuntarse manualmente a una VPC
+    \item Se asocia automáticamente con todas las subredes de la región
+    \item Requiere configuración de hardware específico
+\end{enumerate}
+
+\item \textbf{¿Cuántos Internet Gateways puede tener una VPC simultáneamente?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Ilimitados
+    \item Hasta 5 por región
+    \item Solo 1 (relación 1:1)
+    \item Depende del plan de AWS utilizado
+\end{enumerate}
+
+\item \textbf{¿Qué significa la ruta "0.0.0.0/0" en una tabla de enrutamiento?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Ruta solo para direcciones IP locales
+    \item Bloqueo de todo el tráfico externo
+    \item Ruta por defecto que coincide con cualquier destino IPv4 no especificado
+    \item Configuración exclusiva para IPv6
+\end{enumerate}
+
+\item \textbf{Para que una subred sea funcionalmente "pública", ¿cuáles condiciones son OBLIGATORIAS?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Solo tener Internet Gateway adjunto a la VPC
+    \item IGW adjunto + ruta 0.0.0.0/0 al IGW + auto-asignación IP pública habilitada
+    \item Solo configurar auto-asignación de IP pública
+    \item Únicamente agregar la ruta por defecto
+\end{enumerate}
+
+\item \textbf{¿Qué tipo de traducción de direcciones realiza automáticamente el Internet Gateway?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Solo NAT para tráfico saliente
+    \item NAT bidireccional entre IP privadas de instancias e IP públicas
+    \item Únicamente enrutamiento sin traducción
+    \item Solo para protocolos HTTP/HTTPS
+\end{enumerate}
+
+\item \textbf{¿Cuál es el costo de utilizar un Internet Gateway en AWS?}
+
+\begin{enumerate}[label=\alph*)]
+    \item \$0.05 por hora de uso
+    \item \$0.00 - El IGW es completamente gratuito
+    \item \$0.10 por GB de datos procesados
+    \item Varía según la región
+\end{enumerate}
+
+\item \textbf{¿Qué sucede si una instancia EC2 en subred pública ejecuta el comando "ifconfig"?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Muestra tanto la IP privada como la IP pública
+    \item Solo muestra la IP privada; la IP pública es gestionada por AWS externamente
+    \item Solo muestra la IP pública
+    \item Muestra error porque no tiene conectividad
+\end{enumerate}
+
+\item \textbf{¿Cuál es la diferencia principal entre Internet Gateway y NAT Gateway?}
+
+\begin{enumerate}[label=\alph*)]
+    \item No hay diferencia, son sinónimos
+    \item IGW permite tráfico bidireccional; NAT Gateway solo permite salida
+    \item NAT Gateway es más barato que IGW
+    \item IGW solo funciona con IPv6
+\end{enumerate}
+
+\item \textbf{¿Qué debe hacer una subred privada para acceder a internet?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Agregar ruta 0.0.0.0/0 apuntando al Internet Gateway
+    \item Usar NAT Gateway en subred pública (no implementado en este lab)
+    \item Habilitar auto-asignación de IP pública
+    \item Las subredes privadas nunca pueden acceder a internet
+\end{enumerate}
+
+\item \textbf{¿En qué orden se debe realizar la configuración completa de conectividad internet?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Rutas primero, luego crear IGW, finalmente adjuntar a VPC
+    \item Crear IGW, adjuntarlo a VPC, modificar tabla de rutas, verificar auto-assign IP
+    \item Solo crear el IGW es suficiente
+    \item Modificar rutas, crear subredes, luego IGW
+\end{enumerate}
+
+\item \textbf{¿Qué arquitectura de seguridad recomienda AWS para aplicaciones en producción?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Todas las instancias en subredes públicas para máximo rendimiento
+    \item Separación: load balancers/bastion en públicas, aplicaciones/DB en privadas
+    \item Solo usar subredes privadas sin conectividad externa
+    \item Colocar todo en una sola subred para simplificar
+\end{enumerate}
+
+\item \textbf{¿Cuál es la configuración de la tabla de enrutamiento después de completar este laboratorio?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Ambas tablas (pública y privada) tienen ruta 0.0.0.0/0
+    \item Solo tabla pública tiene 0.0.0.0/0 → IGW; privada solo tiene ruta local
+    \item Solo la tabla privada tiene ruta por defecto
+    \item No se modifican las rutas, solo se crea el IGW
+\end{enumerate}
+
+\item \textbf{¿Qué verificaciones son esenciales al finalizar la configuración del Internet Gateway?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Solo verificar que el IGW esté en estado "attached"
+    \item IGW attached, rutas correctas en tabla pública, tabla privada intacta, auto-assign IP habilitado
+    \item Únicamente verificar conectividad lanzando instancias EC2
+    \item Solo confirmar que no hay errores de facturación
+\end{enumerate}
+
+\item \textbf{¿Por qué es importante mantener los recursos del Lab 3 para el Lab 4?}
+
+\begin{enumerate}[label=\alph*)]
+    \item Para evitar costos adicionales de recreación
+    \item Porque el Lab 4 utilizará esta conectividad para probar instancias EC2
+    \item Los recursos se eliminan automáticamente
+    \item No es necesario mantenerlos
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Respuestas}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \textbf{Respuesta: c)} Permite comunicación bidireccional entre instancias en VPC e internet
+
+\textbf{Justificación:} El Internet Gateway es un componente que permite tanto tráfico entrante (desde internet hacia instancias con IP pública) como saliente (desde instancias hacia internet). Realiza NAT automáticamente y proporciona conectividad completa, no solo en una dirección como los NAT Gateways.
+
+\item \textbf{Respuesta: b)} Se crea en estado "detached" y debe adjuntarse manualmente a una VPC
+
+\textbf{Justificación:} El IGW se crea como recurso independiente en estado "detached" y debe ser explícitamente adjuntado a una VPC mediante la acción "Attach to VPC". Esta separación permite flexibilidad en la gestión de recursos.
+
+\item \textbf{Respuesta: c)} Solo 1 (relación 1:1)
+
+\textbf{Justificación:} AWS establece una relación 1:1 entre VPC e Internet Gateway. Una VPC solo puede tener un IGW adjunto, y un IGW solo puede estar asociado a una VPC. Esta restricción simplifica el enrutamiento y mejora la seguridad.
+
+\item \textbf{Respuesta: c)} Ruta por defecto que coincide con cualquier destino IPv4 no especificado
+
+\textbf{Justificación:} La ruta "0.0.0.0/0" es la ruta por defecto que captura todo el tráfico destinado a direcciones IP que no coinciden con otras rutas más específicas en la tabla. Es esencial para enviar tráfico a internet.
+
+\item \textbf{Respuesta: b)} IGW adjunto + ruta 0.0.0.0/0 al IGW + auto-asignación IP pública habilitada
+
+\textbf{Justificación:} Una subred pública requiere TODAS estas condiciones: (1) IGW adjunto a la VPC, (2) tabla de enrutamiento con ruta 0.0.0.0/0 apuntando al IGW, y (3) auto-asignación de IP pública habilitada. Sin cualquiera de estos elementos, no funcionará como pública.
+
+\item \textbf{Respuesta: b)} NAT bidireccional entre IP privadas de instancias e IP públicas
+
+\textbf{Justificación:} El IGW realiza NAT automático en ambas direcciones: traduce IP privada a pública para tráfico saliente, y IP pública a privada para tráfico entrante. Este proceso es transparente para las instancias.
+
+\item \textbf{Respuesta: b)} \$0.00 - El IGW es completamente gratuito
+
+\textbf{Justificación:} El Internet Gateway no tiene costo alguno. AWS solo cobra por transferencia de datos (primeros 100 GB/mes gratuitos, luego \$0.09/GB para datos salientes). El IGW en sí, su creación y mantenimiento son gratuitos.
+
+\item \textbf{Respuesta: b)} Solo muestra la IP privada; la IP pública es gestionada por AWS externamente
+
+\textbf{Justificación:} La instancia EC2 solo "conoce" su IP privada. La IP pública existe solo en la infraestructura de AWS y es utilizada por el IGW para realizar NAT. La instancia nunca ve su IP pública en sus interfaces de red.
+
+\item \textbf{Respuesta: b)} IGW permite tráfico bidireccional; NAT Gateway solo permite salida
+
+\textbf{Justificación:} Internet Gateway permite tráfico entrante y saliente (bidireccional), mientras NAT Gateway solo permite tráfico saliente desde subredes privadas. IGW es gratuito, NAT Gateway cuesta \$0.045/hora + \$0.045/GB.
+
+\item \textbf{Respuesta: b)} Usar NAT Gateway en subred pública (no implementado en este lab)
+
+\textbf{Justificación:} Las subredes privadas mantienen su privacidad usando NAT Gateway ubicado en una subred pública. Esto permite salida a internet sin exposición de retorno. Agregar ruta directa al IGW las convertiría en públicas.
+
+\item \textbf{Respuesta: b)} Crear IGW, adjuntarlo a VPC, modificar tabla de rutas, verificar auto-assign IP
+
+\textbf{Justificación:} El orden correcto es: (1) crear IGW independiente, (2) adjuntarlo a VPC específica, (3) agregar ruta 0.0.0.0/0 en tabla pública, (4) verificar auto-asignación IP en subredes públicas. Seguir este orden evita errores de dependencias.
+
+\item \textbf{Respuesta: b)} Separación: load balancers/bastion en públicas, aplicaciones/DB en privadas
+
+\textbf{Justificación:} AWS recomienda arquitectura de defensa en profundidad: exponer solo lo necesario (load balancers, bastion hosts) en subredes públicas, mantener aplicaciones y bases de datos en subredes privadas para minimizar superficie de ataque.
+
+\item \textbf{Respuesta: b)} Solo tabla pública tiene 0.0.0.0/0 → IGW; privada solo tiene ruta local
+
+\textbf{Justificación:} Public-Route-Table queda con dos rutas: 10.0.0.0/16 → local y 0.0.0.0/0 → IGW. Private-Route-Table mantiene solo 10.0.0.0/16 → local, preservando la privacidad de las subredes asociadas.
+
+\item \textbf{Respuesta: b)} IGW attached, rutas correctas en tabla pública, tabla privada intacta, auto-assign IP habilitado
+
+\textbf{Justificación:} Una verificación completa incluye: (1) IGW en estado "attached", (2) ruta 0.0.0.0/0 presente solo en tabla pública, (3) tabla privada sin cambios, (4) auto-asignación IP habilitada en subredes públicas, (5) costo mantenido en \$0.00.
+
+\item \textbf{Respuesta: b)} Porque el Lab 4 utilizará esta conectividad para probar instancias EC2
+
+\textbf{Justificación:} La infraestructura creada (IGW + rutas configuradas) será la base para el Lab 4, donde se lanzarán instancias EC2 en subredes públicas y privadas para probar la conectividad real a internet. Eliminar estos recursos requeriría reconfigurarlos.
+
+\end{enumerate}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+\subsection{Logros Alcanzados}
+
+Al completar este laboratorio, hemos logrado implementar exitosamente la conectividad a internet para una Amazon VPC, transformando subredes aisladas en infraestructura de red funcional capaz de soportar aplicaciones web y servicios accesibles públicamente. Los principales logros incluyen:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Configuración completa de Internet Gateway:} Creación, adjunto y verificación de un IGW funcional asociado a la VPC del Lab 2, estableciendo la puerta de enlace necesaria para comunicación bidireccional con internet.
+    
+    \item \textbf{Implementación de enrutamiento diferenciado:} Configuración exitosa de tablas de enrutamiento que distinguen claramente entre subredes públicas (con ruta 0.0.0.0/0 hacia IGW) y privadas (solo ruta local), manteniendo la segregación de red apropiada.
+    
+    \item \textbf{Comprensión de NAT automático:} Dominio del concepto de traducción de direcciones de red implementado transparentemente por AWS, donde las instancias mantienen IPs privadas mientras el IGW gestiona la comunicación externa.
+    
+    \item \textbf{Verificación de configuración sin costos:} Completación de todas las verificaciones necesarias mantieniendo el laboratorio en \$0.00, demostrando eficiencia en el uso de recursos del nivel gratuito.
+\end{itemize}
+
+\subsection{Competencias Desarrolladas}
+
+\textbf{Competencias Técnicas Adquiridas:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Gestión de componentes de conectividad:} Capacidad para crear, configurar y gestionar Internet Gateways como componentes críticos de arquitecturas de nube escalables y seguras.
+    
+    \item \textbf{Administración avanzada de enrutamiento:} Habilidad para diseñar, implementar y verificar tablas de enrutamiento complejas que soporten arquitecturas multi-tier con separación público/privado.
+    
+    \item \textbf{Comprensión de direccionamiento IP:} Dominio profundo de la diferencia entre direcciones IP públicas y privadas, incluyendo su gestión automática por parte de AWS y las implicaciones para el diseño de aplicaciones.
+    
+    \item \textbf{Análisis de flujos de tráfico:} Capacidad para trazar y entender el camino completo que sigue el tráfico de red desde instancias hacia internet y viceversa, identificando cada punto de traducción y enrutamiento.
+    
+    \item \textbf{Verificación de conectividad:} Desarrollo de metodologías sistemáticas para verificar configuraciones de red antes del despliegue de recursos computacionales, reduciendo errores y troubleshooting posterior.
+\end{itemize}
+
+\textbf{Competencias Profesionales Fortalecidas:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Toma de decisiones arquitectónicas:} Capacidad para determinar cuándo y cómo exponer recursos a internet, balanceando accesibilidad con requisitos de seguridad organizacional.
+    
+    \item \textbf{Implementación de mejores prácticas:} Aplicación consistente de principios de defensa en profundidad, manteniendo recursos sensibles en capas privadas mientras se habilita conectividad necesaria.
+    
+    \item \textbf{Documentación técnica:} Desarrollo de habilidades para documentar configuraciones de red complejas, incluyendo IDs de recursos, flujos de tráfico y decisiones de diseño.
+    
+    \item \textbf{Gestión de costos:} Comprensión profunda del modelo de costos de AWS para componentes de red, optimizando configuraciones para minimizar gastos sin comprometer funcionalidad.
+\end{itemize}
+
+\subsection{Integración con el Ecosistema de Laboratorios}
+
+Este laboratorio constituye un eslabón crítico en la secuencia de aprendizaje diseñada:
+
+\textbf{Consolidación de conocimientos previos:}
+\begin{itemize}[leftmargin=*]
+    \item Utilización efectiva de la infraestructura IAM establecida en el Lab 1 para gestión segura de recursos
+    \item Aprovechamiento completo de la arquitectura VPC multi-AZ creada en el Lab 2 como base para conectividad externa
+    \item Aplicación práctica de conceptos de redes aprendidos en laboratorios anteriores
+\end{itemize}
+
+\textbf{Preparación para laboratorios futuros:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Lab 4 - Instancias EC2:} La conectividad establecida permitirá desplegar y probar servidores web accesibles desde internet
+    \item \textbf{Lab 5 - Seguridad Avanzada:} La separación público/privada configurada será base para implementar Security Groups y NACLs
+    \item \textbf{Labs 6-8:} La arquitectura de conectividad soportará patrones avanzados como VPC Peering, monitoreo con CloudWatch, y proyectos de integración
+\end{itemize}
+
+\subsection{Consideraciones de Seguridad y Mejores Prácticas}
+
+La implementación realizada incorpora principios fundamentales de seguridad de redes:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Principio de menor privilegio:} Solo las subredes que requieren acceso público tienen ruta al IGW, manteniendo recursos sensibles aislados
+    \item \textbf{Segregación de capas:} Separación clara entre capa de presentación (subredes públicas) y capas de aplicación/datos (subredes privadas)
+    \item \textbf{Preparación para defensa en profundidad:} Arquitectura lista para implementar múltiples capas de seguridad en laboratorios posteriores
+    \item \textbf{Auditoría y trazabilidad:} Configuración documentada que permite auditoría de cambios y troubleshooting sistemático
+\end{itemize}
+
+\subsection{Impacto en el Desarrollo Profesional}
+
+La completación de este laboratorio contribuye significativamente al perfil profesional en tecnologías de nube:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Competencias en demanda:} Las habilidades de configuración de conectividad AWS son altamente valoradas en el mercado laboral actual
+    \item \textbf{Fundamentos sólidos:} Comprensión profunda de conceptos que trascienden AWS y se aplican a otras plataformas de nube
+    \item \textbf{Experiencia práctica:} Experiencia hands-on con herramientas y procesos utilizados en entornos empresariales reales
+    \item \textbf{Preparación para certificaciones:} Conocimientos directamente aplicables a exámenes de certificación AWS como Solutions Architect Associate
+\end{itemize}
+
+\subsection{Reflexión Final}
+
+Este laboratorio demuestra cómo la correcta implementación de componentes de conectividad fundamenta arquitecturas de nube robustas y escalables. La transformación de una VPC aislada en infraestructura con conectividad internet controlada ilustra la potencia de AWS para soportar aplicaciones empresariales complejas.
+
+La experiencia adquirida en la gestión de Internet Gateways, tablas de enrutamiento y arquitecturas de red diferenciadas proporciona una base sólida para el desarrollo de soluciones de nube más sofisticadas. La metodología sistemática aplicada - desde la planificación inicial hasta la verificación final - establece patrones de trabajo que serán invaluables en proyectos profesionales futuros.
+
+La preparación cuidadosa para laboratorios subsecuentes asegura una progresión de aprendizaje coherente, donde cada componente construye sobre conocimientos anteriores mientras introduce nuevas capacidades técnicas. Esta aproximación holística al aprendizaje de tecnologías de nube refleja las mejores prácticas de la industria y prepara para desafíos del mundo real en arquitectura y administración de sistemas distribuidos.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{itemize}[leftmargin=*]
+    \item Amazon Web Services. (2024). \textit{Internet Gateways - Amazon VPC User Guide.} Documentación oficial de AWS. \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html}
+    
+    \item Amazon Web Services. (2024). \textit{Route Tables - Amazon VPC User Guide.} Documentación oficial de AWS. \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html}
+    
+    \item Amazon Web Services. (2024). \textit{Subnets for your VPC - Amazon VPC User Guide.} \url{https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html}
+    
+    \item Amazon Web Services. (2024). \textit{Security Groups for your VPC - Amazon VPC User Guide.} \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html}
+    
+    \item Amazon Web Services. (2024). \textit{AWS Free Tier - VPC Pricing.} \url{https://aws.amazon.com/vpc/pricing/}
+    
+    \item Amazon Web Services. (2024). \textit{AWS Well-Architected Framework - Security Pillar.} \url{https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/}
+    
+    \item Amazon Web Services. (2024). \textit{VPC Flow Logs - Amazon VPC User Guide.} \url{https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html}
+\end{itemize}
+
+\subsection{Estándares y RFCs de Red}
+
+\begin{itemize}[leftmargin=*]
+    \item Rekhter, Y., Moskowitz, B., Karrenberg, D., de Groot, G. J., \& Lear, E. (1996). \textit{RFC 1918 - Address Allocation for Private Internets.} Internet Engineering Task Force. \url{https://www.rfc-editor.org/rfc/rfc1918}
+    
+    \item Postel, J. (1981). \textit{RFC 791 - Internet Protocol - DARPA Internet Program Protocol Specification.} Internet Engineering Task Force. \url{https://www.rfc-editor.org/rfc/rfc791}
+    
+    \item Srisuresh, P., \& Holdrege, M. (1999). \textit{RFC 2663 - IP Network Address Translator (NAT) Terminology and Considerations.} Internet Engineering Task Force. \url{https://www.rfc-editor.org/rfc/rfc2663}
+    
+    \item Fuller, V., Li, T., Yu, J., \& Varadhan, K. (1993). \textit{RFC 1519 - Classless Inter-Domain Routing (CIDR).} Internet Engineering Task Force. \url{https://www.rfc-editor.org/rfc/rfc1519}
+\end{itemize}
+
+\subsection{Libros y Recursos Académicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Wittig, A., \& Wittig, M. (2022). \textit{Amazon Web Services in Action, Third Edition.} Manning Publications. Capítulos 6-8: VPC, Subredes, y Conectividad.
+    
+    \item Piper, B., \& Clinton, D. (2020). \textit{AWS Certified Solutions Architect Study Guide: Associate (SAA-C02) Exam.} Sybex. Capítulo 4: VPC y Redes.
+    
+    \item Kurose, J. F., \& Ross, K. W. (2021). \textit{Computer Networking: A Top-Down Approach, 8th Edition.} Pearson. Capítulos 4-5: Capa de Red y Enrutamiento.
+    
+    \item Tanenbaum, A. S., \& Wetherall, D. J. (2021). \textit{Computer Networks, 6th Edition.} Pearson. Capítulo 5: La Capa de Red.
+    
+    \item García-Martínez, A., \& Burriel, V. (2019). \textit{Redes de Computadoras y Arquitecturas de Comunicación.} Editorial Paraninfo. Capítulo 8: Interconexión de Redes.
+\end{itemize}
+
+\subsection{Artículos y Whitepapers Técnicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Amazon Web Services. (2023). \textit{AWS Architecture Center - VPC Connectivity Options Whitepaper.} \url{https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/}
+    
+    \item Amazon Web Services. (2023). \textit{Security Best Practices for Amazon VPC.} AWS Security Blog. \url{https://aws.amazon.com/blogs/security/}
+    
+    \item Varia, J., \& Mathew, S. (2014). \textit{Overview of Amazon Web Services - AWS Whitepaper.} Amazon Web Services. Sección: Redes y Entrega de Contenido.
+    
+    \item NIST. (2020). \textit{SP 800-145 - The NIST Definition of Cloud Computing.} National Institute of Standards and Technology. Consideraciones de Seguridad de Red.
+\end{itemize}
+
+\subsection{Herramientas y Recursos de Laboratorio}
+
+\begin{itemize}[leftmargin=*]
+    \item AWS CLI Documentation. (2024). \textit{VPC Commands Reference.} \url{https://docs.aws.amazon.com/cli/latest/reference/ec2/}
+    
+    \item AWS CloudFormation. (2024). \textit{VPC Resource Templates.} \url{https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-vpc.html}
+    
+    \item Terraform AWS Provider. (2024). \textit{VPC Resources Documentation.} HashiCorp. \url{https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc}
+    
+    \item AWS Cost Calculator. (2024). \textit{VPC and Data Transfer Pricing Calculator.} \url{https://calculator.aws/}
+\end{itemize}
+
+\subsection{Recursos de Certificación y Aprendizaje}
+
+\begin{itemize}[leftmargin=*]
+    \item AWS Training and Certification. (2024). \textit{AWS Certified Solutions Architect - Associate Exam Guide.} Dominio 3: Diseño de Arquitecturas Seguras.
+    
+    \item AWS Training and Certification. (2024). \textit{AWS Certified Advanced Networking - Specialty Exam Guide.} Dominios de Conectividad Híbrida.
+    
+    \item Linux Academy / A Cloud Guru. (2024). \textit{AWS Networking Deep Dive Course.} Módulos de VPC y Conectividad.
+    
+    \item AWS re:Invent Sessions. (2023). \textit{Advanced VPC Design and Implementation.} Sesiones técnicas de conferencia anual.
+\end{itemize}
+
+\subsection{Recursos de Troubleshooting y Monitoreo}
+
+\begin{itemize}[leftmargin=*]
+    \item AWS Support. (2024). \textit{VPC Connectivity Troubleshooting Guide.} \url{https://aws.amazon.com/premiumsupport/knowledge-center/}
+    
+    \item AWS CloudWatch. (2024). \textit{VPC Flow Logs Analysis and Monitoring.} \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/}
+    
+    \item AWS X-Ray. (2024). \textit{Distributed Network Tracing for VPC Applications.} \url{https://docs.aws.amazon.com/xray/}
+    
+    \item AWS Config. (2024). \textit{VPC Configuration Compliance and Auditing.} \url{https://docs.aws.amazon.com/config/}
+\end{itemize}
+
+\vspace{1cm}
+\noindent\textbf{Nota:} Todas las URLs fueron verificadas como activas al momento de la elaboración de este laboratorio (Diciembre 2025). La documentación oficial de AWS se actualiza regularmente; se recomienda consultar las versiones más recientes para obtener información actualizada sobre nuevas funcionalidades y mejores prácticas.
+
+\end{document}
+

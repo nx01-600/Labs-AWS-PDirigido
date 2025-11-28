@@ -1,0 +1,324 @@
+CHECKLIST PARA ENTREGA DEL PROYECTO
+====================================
+
+FASE 1: DOCUMENTOS PRINCIPALES
+□ 12 laboratorios completos en LaTeX (archivos .tex)
+□ 12 PDFs compilados de los laboratorios
+□ Documento de cuestionarios completo (PDF)
+□ Archivo proyecto.txt con datos del proyecto actualizado
+
+FASE 2: CADA LABORATORIO DEBE INCLUIR
+□ Portada con información completa
+□ Índice de contenidos
+□ Objetivos (general, específicos, competencias)
+□ Marco teórico completo
+□ Requisitos previos y costos estimados
+□ Procedimiento paso a paso (mínimo 8-12 pasos)
+□ Mínimo 5-8 capturas de pantalla por lab
+□ Comandos CLI cuando aplique
+□ Sección de verificación y pruebas
+□ Guía de limpieza de recursos
+□ Preguntas de reflexión
+□ Referencias y recursos adicionales
+□ Diagramas de arquitectura (mínimo 2 por lab)
+
+FASE 3: CUESTIONARIOS
+□ 150+ preguntas totales (12-15 por lab)
+□ Mezcla de tipos: múltiple, V/F, escenarios
+□ Respuestas correctas marcadas
+□ Explicaciones para respuestas
+□ Niveles de dificultad indicados
+□ Formato adaptable para Kahoot/Quizizz
+
+FASE 4: MATERIAL COMPLEMENTARIO
+□ Scripts de CloudFormation o Terraform (opcional)
+□ Diagramas de arquitectura en alta resolución
+□ Guía rápida de comandos AWS CLI
+□ Glosario de términos técnicos
+□ Troubleshooting guide común
+
+FASE 5: DOCUMENTACIÓN PARA INSTRUCTORES
+□ Manual del instructor
+□ Guía de implementación en curso
+□ Rúbricas de evaluación
+□ Cronograma sugerido de 16 semanas
+□ Estimación de costos por estudiante
+
+FASE 6: PRESENTACIÓN FINAL
+□ Documento memoria del proyecto
+□ Presentación PowerPoint/PDF (15-20 slides)
+□ Demo en vivo de 2-3 laboratorios
+□ Video de 5-10 minutos (overview)
+
+FASE 7: ORGANIZACIÓN DE ARCHIVOS
+□ Estructura de carpetas clara
+□ README.md con instrucciones
+□ Nomenclatura consistente
+□ Archivos comprimidos para entrega
+
+FASE 8: CALIDAD Y REVISIÓN
+□ Ortografía y gramática revisadas
+□ Formato LaTeX consistente
+□ PDFs generados correctamente
+□ Enlaces funcionando
+□ Capturas legibles y relevantes
+□ Código probado y funcional
+
+FASE 9: VALIDACIÓN TÉCNICA
+□ Todos los labs probados en AWS
+□ Costos verificados (Free Tier)
+□ Comandos validados
+□ Procedimientos reproducibles
+□ Tiempos estimados realistas
+
+FASE 10: ENTREGA FINAL
+□ Todo en repositorio Git (opcional)
+□ Carpeta ZIP para entrega física
+□ Carta de presentación
+□ Formulario de entrega completo
+□ Autoevaluación del proyecto
+
+
+ESTRUCTURA DE CARPETAS SUGERIDA:
+=================================
+
+proyectodirigidi/
+│
+├── proyecto.txt (Datos del proyecto)
+├── PLAN_PROYECTO.txt (Este documento)
+├── README.md (Instrucciones generales)
+│
+├── laboratorios/
+│   ├── plantilla_lab.tex
+│   ├── CONTENIDO_LABORATORIOS.txt
+│   ├── lab01_introduccion_aws.tex
+│   ├── lab01_introduccion_aws.pdf
+│   ├── lab02_vpc_fundamentos.tex
+│   ├── lab02_vpc_fundamentos.pdf
+│   ├── ... (hasta lab12)
+│   │
+│   └── capturas/
+│       ├── lab01/
+│       ├── lab02/
+│       └── ... (hasta lab12)
+│
+├── cuestionarios/
+│   ├── banco_cuestionarios.tex
+│   ├── banco_cuestionarios.pdf
+│   └── cuestionarios_kahoot.csv (opcional)
+│
+├── recursos/
+│   ├── diagramas/
+│   │   ├── arquitectura_general.png
+│   │   ├── lab01_diagrama.png
+│   │   └── ...
+│   │
+│   ├── scripts/
+│   │   ├── vpc_basica.yaml (CloudFormation)
+│   │   ├── cleanup_resources.sh
+│   │   └── ...
+│   │
+│   └── guias/
+│       ├── comandos_cli_aws.pdf
+│       ├── glosario_terminos.pdf
+│       └── troubleshooting_comun.pdf
+│
+├── documentacion/
+│   ├── manual_instructor.pdf
+│   ├── memoria_proyecto.pdf
+│   ├── presentacion_final.pdf
+│   └── guia_implementacion.pdf
+│
+└── videos/ (opcional)
+    ├── overview_proyecto.mp4
+    └── scripts_videos.txt
+
+
+CRONOGRAMA DETALLADO (16 SEMANAS):
+===================================
+
+SEMANA 1: Planificación
+- Definir alcance exacto
+- Crear estructura de carpetas
+- Configurar plantilla LaTeX
+- Revisar documentación AWS
+
+SEMANA 2: Lab 1 + Infraestructura
+- Desarrollar Lab 1 completo
+- Tomar capturas
+- Probar procedimiento
+- Crear primeras preguntas
+
+SEMANA 3: Labs 2 y 3
+- Desarrollar Lab 2 (VPC Fundamentos)
+- Desarrollar Lab 3 (Internet Gateway)
+- Diagramas de arquitectura
+
+SEMANA 4: Labs 4 y 5
+- Desarrollar Lab 4 (EC2 y Seguridad)
+- Desarrollar Lab 5 (Alta Disponibilidad)
+- Refinar procedimientos
+
+SEMANA 5: Labs 6 y 7
+- Desarrollar Lab 6 (VPC Peering)
+- Desarrollar Lab 7 (VPN)
+- Documentar casos de uso
+
+SEMANA 6: Labs 8 y 9
+- Desarrollar Lab 8 (Transit Gateway)
+- Desarrollar Lab 9 (Seguridad Avanzada)
+- Scripts de automatización
+
+SEMANA 7: Labs 10 y 11
+- Desarrollar Lab 10 (Monitoreo)
+- Desarrollar Lab 11 (Direct Connect)
+- Troubleshooting guides
+
+SEMANA 8: Lab 12 (Proyecto Integrador)
+- Diseñar proyecto final complejo
+- Múltiples escenarios
+- Rúbricas de evaluación
+
+SEMANA 9: Revisión de Laboratorios (Parte 1)
+- Revisar Labs 1-6
+- Corregir errores
+- Mejorar capturas
+- Validar comandos
+
+SEMANA 10: Revisión de Laboratorios (Parte 2)
+- Revisar Labs 7-12
+- Uniformar formato
+- Verificar costos
+- Probar en cuenta limpia
+
+SEMANA 11: Cuestionarios (Parte 1)
+- Crear 75 preguntas (Labs 1-6)
+- Validar respuestas
+- Explicaciones detalladas
+
+SEMANA 12: Cuestionarios (Parte 2)
+- Crear 75+ preguntas (Labs 7-12)
+- Formatear documento
+- Preparar versión Kahoot
+
+SEMANA 13: Material Complementario
+- Diagramas finales
+- Scripts de automatización
+- Guías rápidas
+- Glosario
+
+SEMANA 14: Documentación de Instructor
+- Manual del instructor
+- Guía de implementación
+- Cronograma de curso
+- Rúbricas
+
+SEMANA 15: Memoria y Presentación
+- Escribir memoria del proyecto
+- Crear presentación
+- Preparar demo en vivo
+- Video overview (opcional)
+
+SEMANA 16: Revisión Final y Entrega
+- Revisión completa
+- Correcciones finales
+- Empaquetar entrega
+- Presentación al profesor
+
+
+TIPS PARA ÉXITO DEL PROYECTO:
+==============================
+
+1. CONSISTENCIA
+   - Usar siempre la misma plantilla
+   - Nomenclatura uniforme
+   - Estilo de redacción similar
+
+2. CALIDAD VISUAL
+   - Capturas en alta resolución
+   - Diagramas profesionales (draw.io, Lucidchart)
+   - Formato limpio y legible
+
+3. PRACTICIDAD
+   - Todos los labs deben ser reproducibles
+   - Tiempos estimados realistas
+   - Costos claramente especificados
+
+4. DOCUMENTACIÓN
+   - Explicaciones claras
+   - Referencias a documentación oficial
+   - Contexto del mundo real
+
+5. PEDAGOGÍA
+   - Progresión lógica de dificultad
+   - Conceptos construyen sobre anteriores
+   - Variedad de tipos de aprendizaje
+
+6. VERIFICACIÓN
+   - Probar cada lab al menos 2 veces
+   - Validar con cuenta AWS nueva
+   - Verificar límites de Free Tier
+
+7. INNOVACIÓN
+   - Incluir casos de uso modernos
+   - Arquitecturas actuales
+   - Mejores prácticas 2025
+
+
+SUGERENCIAS DE HERRAMIENTAS:
+============================
+
+LaTeX:
+- Overleaf (online, colaborativo)
+- TeXstudio (desktop)
+- VS Code con extensión LaTeX Workshop
+
+Diagramas:
+- Draw.io / Diagrams.net (gratis)
+- Lucidchart (versión educativa)
+- AWS Architecture Icons (oficiales)
+
+Capturas:
+- Snagit (avanzado)
+- ShareX (gratis, Windows)
+- Lightshot (simple)
+
+Video:
+- OBS Studio (gratis, grabación)
+- DaVinci Resolve (edición gratis)
+- Loom (screen recording simple)
+
+Cuestionarios:
+- Kahoot
+- Quizizz
+- Google Forms
+- Microsoft Forms
+
+
+CRITERIOS DE CALIDAD:
+=====================
+
+Un laboratorio es de calidad si:
+□ Se puede completar en el tiempo estimado
+□ Funciona con Free Tier
+□ Las instrucciones son claras
+□ Los diagramas son precisos
+□ Las capturas son legibles
+□ Los comandos están validados
+□ Incluye troubleshooting
+□ Enseña conceptos útiles
+□ Es reproducible por otra persona
+□ Tiene valor pedagógico real
+
+
+PRÓXIMOS PASOS INMEDIATOS:
+===========================
+
+1. Revisar este plan con el profesor Carlos Olarte
+2. Ajustar alcance si es necesario
+3. Comenzar con Lab 1 completo (prototipo)
+4. Validar formato y estilo
+5. Iterar basado en feedback
+6. Continuar con labs restantes
+
+¿Estás listo para comenzar?
