@@ -1,0 +1,1013 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#5}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 5 - Seguridad Avanzada en Redes},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#5\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Seguridad Avanzada en Redes en AWS\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 90 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito - Free Tier)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio está orientado a la \textbf{seguridad avanzada en redes sobre AWS}, utilizando como base la infraestructura construida en laboratorios anteriores (VPC, subredes, instancias EC2 y grupos de seguridad básicos). El objetivo principal es diseñar y aplicar una arquitectura de \textbf{defensa en profundidad} que combine \textbf{Security Groups multicapa}, \textbf{VPC Flow Logs} y \textbf{CloudWatch Logs Insights} para mejorar la visibilidad, detectar tráfico anómalo y aplicar el \textbf{principio de mínimo privilegio} de forma práctica.
+
+A lo largo del laboratorio, el estudiante configurará múltiples grupos de seguridad para las diferentes capas (bastion, capa web y capa privada), habilitará y analizará VPC Flow Logs, ejecutará consultas básicas con CloudWatch Logs Insights para inspeccionar tráfico permitido/denegado y ajustará las reglas para reducir la superficie de ataque. Finalmente, se valida el correcto funcionamiento de la arquitectura y se realiza la limpieza de recursos usados.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} Security Groups, VPC Flow Logs, CloudWatch Logs Insights, Defense in Depth, Mínimo Privilegio, Seguridad en Redes, AWS, Tráfico Anómalo.
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+Diseñar y aplicar una arquitectura de \textbf{seguridad avanzada en redes sobre AWS} basada en \textbf{defensa en profundidad}, utilizando \textbf{Security Groups multicapa}, \textbf{VPC Flow Logs} y \textbf{CloudWatch Logs Insights} para monitorear, analizar y proteger el tráfico de red conforme al principio de mínimo privilegio.
+
+\subsection{Objetivos Específicos}
+\begin{itemize}[leftmargin=*]
+    \item Comprender el papel de los Security Groups dentro de la arquitectura de red de AWS y su relación con NACLs.
+    \item Implementar \textbf{Security Groups multicapa} para separar y proteger las distintas zonas (bastion, capa web, capa privada).
+    \item Habilitar y configurar \textbf{VPC Flow Logs} para registrar el tráfico de red a nivel de VPC/subred/ENI.
+    \item Utilizar \textbf{CloudWatch Logs Insights} para ejecutar consultas básicas que permitan identificar patrones de tráfico, intentos de acceso no autorizados y tráfico anómalo.
+    \item Aplicar de forma práctica el \textbf{principio de mínimo privilegio} en las reglas de seguridad.
+    \item Diseñar una arquitectura coherente con el enfoque de \textbf{defense in depth}, combinando capas de protección y monitoreo.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Seguridad en Redes de Nueva Generación:} Diseño de arquitecturas segmentadas y protegidas mediante controles de red y monitoreo continuo.
+    \item \textbf{Gestión de Seguridad en la Nube:} Configuración de reglas de acceso, logging de tráfico y análisis de eventos de red en AWS.
+    \item \textbf{Análisis de Tráfico:} Capacidad para interpretar registros de VPC Flow Logs e identificar tráfico legítimo, sospechoso y potencialmente malicioso.
+    \item \textbf{Aplicación de Principios de Seguridad:} Implementación práctica de mínimo privilegio y defensa en profundidad.
+    \item \textbf{Uso de Herramientas de Observabilidad:} Manejo de CloudWatch Logs e Insights para consultar y visualizar información relevante de seguridad.
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{Seguridad en Redes en AWS y Defense in Depth}
+
+La \textbf{defensa en profundidad} (defense in depth) es una estrategia de seguridad que consiste en implementar \textbf{múltiples capas de protección} alrededor de los activos críticos. En lugar de depender de un solo control (por ejemplo, un firewall perimetral), se combinan controles de red, controles de identidad, monitoreo, registro de eventos, segmentación y endurecimiento de sistemas.
+
+En AWS, la defensa en profundidad se materializa a través de:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Controles de red:} VPC, subredes públicas y privadas, \textit{Security Groups}, \textit{Network ACLs}.
+    \item \textbf{Controles de identidad:} IAM, roles, políticas y autenticación multifactor.
+    \item \textbf{Controles de monitoreo:} CloudWatch, CloudTrail, \textit{VPC Flow Logs}, AWS Config.
+    \item \textbf{Controles de aplicación:} WAF, validación de entradas, cifrado de datos en tránsito y en reposo.
+\end{itemize}
+
+El objetivo es que, aun si una capa es vulnerada, las demás sigan ofreciendo protección.
+
+\subsection{Security Groups}
+
+Los \textbf{Security Groups (SG)} son \textbf{firewalls virtuales a nivel de instancia} que controlan el tráfico entrante (ingress) y saliente (egress). Cada instancia EC2 debe estar asociada al menos a un Security Group, y este grupo define qué tráfico está permitido según:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Protocolo:} TCP, UDP, ICMP, etc.
+    \item \textbf{Puerto o rango de puertos:} por ejemplo, 22 (SSH), 80 (HTTP), 443 (HTTPS).
+    \item \textbf{Origen/Destino:} rangos CIDR (ej: 0.0.0.0/0, 10.0.1.0/24) o \textit{otros Security Groups}.
+\end{itemize}
+
+\subsubsection{Características Clave}
+\begin{itemize}[leftmargin=*]
+    \item Son \textbf{stateful}: si se permite tráfico de entrada, la respuesta de salida se permite automáticamente (y viceversa).
+    \item Se aplican a nivel de interfaz de red (ENI) de la instancia.
+    \item Pueden referenciar otros Security Groups como origen/destino, permitiendo diseños multicapa.
+    \item Soportan múltiples reglas y múltiples SG por instancia.
+\end{itemize}
+
+\subsubsection{Security Groups Multicapa}
+
+En una arquitectura de aplicación típica de tres capas (bastion, web, aplicación/base de datos) se recomienda usar \textbf{SGs separados por función}, por ejemplo:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{SG\_Bastion:} Permite SSH (22) solo desde una IP pública confiable.
+    \item \textbf{SG\_Web:} Permite HTTP/HTTPS desde internet (0.0.0.0/0) y SSH únicamente desde SG\_Bastion.
+    \item \textbf{SG\_Privado:} Permite tráfico de base de datos (ej. 3306) únicamente desde SG\_Web.
+\end{itemize}
+
+De esta forma, ningún cliente externo puede conectarse directamente a la capa privada, y el acceso administrativo pasa únicamente por el bastion.
+
+\subsection{Network ACLs (NACLs) vs Security Groups}
+
+Los \textbf{Network ACLs} son listas de control de acceso a nivel de subred, mientras que los Security Groups se aplican a nivel de instancia. Algunas diferencias importantes:
+\begin{itemize}[leftmargin=*]
+    \item Los NACLs son \textbf{stateless}: se deben crear reglas para tráfico entrante y saliente.
+    \item Los Security Groups son \textbf{stateful}: la respuesta es automáticamente permitida.
+    \item Un NACL se asocia a una subred; un SG se asocia a una interfaz de red/instancia.
+\end{itemize}
+
+En este laboratorio, el enfoque principal está en \textbf{Security Groups} y \textbf{VPC Flow Logs}, asumiendo que los NACLs mantienen una configuración por defecto o alineada con buenas prácticas.
+
+\subsection{VPC Flow Logs}
+
+\textbf{VPC Flow Logs} es una funcionalidad que permite capturar información sobre el tráfico IP que entra y sale de:
+\begin{itemize}[leftmargin=*]
+    \item Interfaces de red (ENI).
+    \item Subredes.
+    \item La VPC completa.
+\end{itemize}
+
+Cada registro de Flow Log incluye, entre otros:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{srcaddr}, \texttt{dstaddr}: IP de origen y destino.
+    \item \texttt{srcport}, \texttt{dstport}: puertos de origen y destino.
+    \item \texttt{protocol}: protocolo (6=TCP, 17=UDP, etc.).
+    \item \texttt{action}: \texttt{ACCEPT} o \texttt{REJECT}, según lo que determinen SGs y NACLs.
+    \item \texttt{log-status}: estado del registro.
+\end{itemize}
+
+Los Flow Logs pueden enviarse a:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{CloudWatch Logs}.
+    \item \textbf{S3}.
+\end{itemize}
+
+En este laboratorio se usarán \textbf{CloudWatch Logs}, lo que permite consultas con \textbf{CloudWatch Logs Insights}.
+
+\subsection{CloudWatch Logs Insights}
+
+\textbf{CloudWatch Logs Insights} es un motor de consultas interactivo para analizar grandes volúmenes de logs en tiempo casi real. Permite:
+\begin{itemize}[leftmargin=*]
+    \item Ejecutar consultas con una sintaxis similar a SQL adaptada a logs.
+    \item Filtrar por campos (por ejemplo, solo \texttt{action = "REJECT"}).
+    \item Agrupar por IP origen/destino, puerto o protocolo.
+    \item Visualizar tendencias de tráfico.
+\end{itemize}
+
+\subsubsection{Ejemplo de Consulta para VPC Flow Logs}
+
+\begin{lstlisting}[language={}, caption=Ejemplo de consulta básica en CloudWatch Logs Insights]
+fields srcAddr, dstAddr, srcPort, dstPort, action, protocol
+| filter action = 'REJECT'
+| stats count(*) as intentos_bloqueados by srcAddr, dstPort
+| sort intentos_bloqueados desc
+| limit 20
+\end{lstlisting}
+
+Esta consulta permite identificar las direcciones IP que más intentos de conexión bloqueados han generado y hacia qué puertos se dirigían.
+
+\subsection{Principio de Mínimo Privilegio}
+
+El \textbf{principio de mínimo privilegio} establece que cada entidad (usuario, servicio, instancia) debe tener únicamente los permisos (o puertos) indispensables para realizar su función, y nada más. Aplicado a redes:
+\begin{itemize}[leftmargin=*]
+    \item Abrir solo los puertos estrictamente necesarios.
+    \item Limitar el origen a rangos específicos (por ejemplo, una IP fija o un SG específico).
+    \item Evitar reglas amplias como \texttt{0.0.0.0/0} salvo que sean imprescindibles (ej: HTTP público).
+\end{itemize}
+
+\subsection{Tráfico Anómalo}
+
+Se considera \textbf{tráfico anómalo} aquel que:
+\begin{itemize}[leftmargin=*]
+    \item No corresponde al uso esperado de la aplicación.
+    \item Presenta volúmenes inusualmente altos.
+    \item Intenta acceder a puertos no expuestos o no utilizados.
+    \item Proviene de rangos geográficos inesperados.
+\end{itemize}
+
+VPC Flow Logs junto con CloudWatch Logs Insights permiten detectar este tipo de patrones para tomar acciones (ajustar SGs, bloquear rangos, endurecer la arquitectura, etc.).
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Necesarios}
+\begin{itemize}[leftmargin=*]
+    \item Laboratorios previos completados (VPC, subredes, IGW, EC2 y Security Groups básicos).
+    \item Conocimientos fundamentales de redes IP (subredes, puertos, protocolos).
+    \item Familiaridad con la consola de AWS.
+    \item Conocimiento básico de CloudWatch (dashboard y navegación).
+\end{itemize}
+
+\subsection{Recursos Técnicos}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Computadora:} PC, Mac o Linux con navegador actualizado.
+    \item \textbf{Cuenta AWS:} Activa y configurada con Free Tier.
+    \item \textbf{Usuario IAM:} Con permisos administrativos según mejores prácticas de los laboratorios anteriores.
+    \item \textbf{Infraestructura base:}
+    \begin{itemize}
+        \item VPC creada (por ejemplo, \texttt{10.0.0.0/16}).
+        \item Subred pública (ej: \texttt{10.0.1.0/24}) con acceso a internet.
+        \item Subred privada (ej: \texttt{10.0.2.0/24}).
+        \item Una instancia EC2 en subred pública (capa \textit{web}).
+        \item Una instancia EC2 en subred privada (capa \textit{app/bd}), opcional según diseño previo.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Costos Estimados}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Concepto} & \textbf{Costo Estimado} \\
+\hline
+Uso de Security Groups & \$0.00 \\
+VPC Flow Logs (nivel de laboratorio, bajo volumen) & \$0.00 (dentro de Free Tier) \\
+CloudWatch Logs e Insights (bajo volumen) & \$0.00 (dentro de Free Tier) \\
+Instancias EC2 t2.micro/t3.micro & Incluidas en Free Tier si se respeta el límite de horas \\
+\hline
+\textbf{TOTAL} & \textbf{\$0.00} \\
+\hline
+\end{tabular}
+\caption{Costos del Laboratorio 5}
+\end{table}
+
+\textbf{NOTA:} Este laboratorio está diseñado para ejecutarse dentro de los límites del Free Tier. Es fundamental seguir la sección de limpieza para evitar costos.
+
+\subsection{Tiempo Estimado}
+\begin{itemize}[leftmargin=*]
+    \item Lectura del marco teórico: 20 minutos.
+    \item Configuración de Security Groups multicapa: 20 minutos.
+    \item Habilitación de VPC Flow Logs: 15 minutos.
+    \item Consultas en CloudWatch Logs Insights: 20 minutos.
+    \item Verificación y limpieza: 15 minutos.
+    \item \textbf{TOTAL ESTIMADO:} 90 minutos.
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+En este laboratorio se asumirá que ya existe una VPC creada en laboratorios anteriores. Si tu arquitectura difiere, adapta los nombres de recursos manteniendo la lógica del ejercicio.
+
+\subsection{Paso 1: Definir el Escenario de Seguridad}
+
+\textbf{Objetivo:} Definir una arquitectura lógica de capas para aplicar Security Groups multicapa y registrar el tráfico con VPC Flow Logs.
+
+\subsubsection*{Descripción}
+Se trabajará con una VPC que tenga:
+\begin{itemize}[leftmargin=*]
+    \item Una \textbf{subred pública} donde reside una instancia EC2 de la capa web.
+    \item Una \textbf{subred privada} donde puede residir una instancia EC2 de aplicación o base de datos.
+    \item Un \textbf{bastion host} opcional (en subred pública) desde el cual se administran las instancias por SSH.
+\end{itemize}
+
+\subsubsection*{Valores de Referencia a Utilizar}
+\begin{itemize}[leftmargin=*]
+    \item Nombre VPC: \texttt{VPC-RNG-Lab5}
+    \item CIDR VPC: \texttt{10.0.0.0/16}
+    \item Subred pública: \texttt{10.0.1.0/24}
+    \item Subred privada: \texttt{10.0.2.0/24}
+    \item Instancia web: \texttt{WebServer-Lab5}
+    \item Instancia privada (opcional): \texttt{AppServer-Lab5}
+\end{itemize}
+
+\subsection{Paso 2: Crear Security Group para Bastion (SG\_Bastion)}
+
+\textbf{Objetivo:} Crear un Security Group que limite el acceso SSH a una IP de administración específica, evitando SSH abierto a todo el mundo.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item Iniciar sesión en la consola de AWS con tu usuario IAM administrador.
+    \item En la barra de búsqueda, escribir \texttt{EC2} y seleccionar el servicio.
+    \item En el panel izquierdo, hacer clic en \textbf{Security Groups}.
+    \item Hacer clic en \textbf{Create security group}.
+    \item Completar el formulario:
+    \begin{itemize}
+        \item \textbf{Security group name:} \texttt{SG\_Bastion\_Lab5}
+        \item \textbf{Description:} \texttt{Security Group para bastion host (SSH desde IP de administración).}
+        \item \textbf{VPC:} Seleccionar \texttt{VPC-RNG-Lab5} (o la VPC utilizada en tus labs).
+    \end{itemize}
+    \item En la sección \textbf{Inbound rules}, hacer clic en \textbf{Add rule}:
+    \begin{itemize}
+        \item \textbf{Type:} SSH
+        \item \textbf{Port range:} 22
+        \item \textbf{Source:} \texttt{My IP} (la consola rellenará tu IP pública actual).
+        \item \textbf{Description:} \texttt{SSH solo desde IP de administración.}
+    \end{itemize}
+    \item En \textbf{Outbound rules}, dejar la regla por defecto:
+    \begin{itemize}
+        \item \textbf{Type:} All traffic
+        \item \textbf{Destination:} \texttt{0.0.0.0/0}
+    \end{itemize}
+    \item Hacer clic en \textbf{Create security group}.
+\end{enumerate}
+
+\subsubsection*{Qué esperar}
+\begin{itemize}[leftmargin=*]
+    \item El SG \texttt{SG\_Bastion\_Lab5} aparecerá en la lista.
+    \item Solo permitirá SSH desde tu IP pública actual.
+\end{itemize}
+
+\subsection{Paso 3: Crear Security Group para Capa Web (SG\_Web)}
+
+\textbf{Objetivo:} Proteger la instancia web permitiendo solo HTTP/HTTPS desde internet y SSH exclusivamente desde el bastion.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item Desde la misma sección de \textbf{Security Groups}, hacer clic en \textbf{Create security group}.
+    \item Completar:
+    \begin{itemize}
+        \item \textbf{Security group name:} \texttt{SG\_Web\_Lab5}
+        \item \textbf{Description:} \texttt{Security Group para capa web con acceso HTTP/HTTPS y SSH desde bastion.}
+        \item \textbf{VPC:} \texttt{VPC-RNG-Lab5}
+    \end{itemize}
+    \item En \textbf{Inbound rules}:
+    \begin{itemize}
+        \item Regla 1:
+        \begin{itemize}
+            \item \textbf{Type:} HTTP
+            \item \textbf{Port range:} 80
+            \item \textbf{Source:} \texttt{0.0.0.0/0}
+            \item \textbf{Description:} \texttt{Tráfico web HTTP público.}
+        \end{itemize}
+        \item Regla 2:
+        \begin{itemize}
+            \item \textbf{Type:} HTTPS
+            \item \textbf{Port range:} 443
+            \item \textbf{Source:} \texttt{0.0.0.0/0}
+            \item \textbf{Description:} \texttt{Tráfico web HTTPS público.}
+        \end{itemize}
+        \item Regla 3:
+        \begin{itemize}
+            \item \textbf{Type:} SSH
+            \item \textbf{Port range:} 22
+            \item \textbf{Source:} Seleccionar la opción \texttt{Custom} y en el campo escribir el ID del SG \texttt{SG\_Bastion\_Lab5} (puedes buscarlo por nombre).
+            \item \textbf{Description:} \texttt{SSH solo desde bastion.}
+        \end{itemize}
+    \end{itemize}
+    \item En \textbf{Outbound rules}, dejar:
+    \begin{itemize}
+        \item \textbf{Type:} All traffic
+        \item \textbf{Destination:} \texttt{0.0.0.0/0}
+    \end{itemize}
+    \item Crear el Security Group.
+\end{enumerate}
+
+\subsubsection*{Qué esperar}
+\begin{itemize}[leftmargin=*]
+    \item La instancia web sólo aceptará:
+    \begin{itemize}
+        \item HTTP/HTTPS desde internet.
+        \item SSH únicamente desde instancias que tengan asignado \texttt{SG\_Bastion\_Lab5}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Paso 4: Crear Security Group para Capa Privada (SG\_Privado)}
+
+\textbf{Objetivo:} Crear un SG para la capa interna (aplicación o base de datos) permitiendo únicamente tráfico desde la capa web.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item Crear un nuevo Security Group:
+    \begin{itemize}
+        \item \textbf{Security group name:} \texttt{SG\_Privado\_Lab5}
+        \item \textbf{Description:} \texttt{Security Group para capa privada (app/bd) accesible solo desde capa web.}
+        \item \textbf{VPC:} \texttt{VPC-RNG-Lab5}
+    \end{itemize}
+    \item En \textbf{Inbound rules}, según el tipo de servicio interno:
+    \begin{itemize}
+        \item Ejemplo: base de datos MySQL:
+        \begin{itemize}
+            \item \textbf{Type:} MySQL/Aurora
+            \item \textbf{Port range:} 3306
+            \item \textbf{Source:} \texttt{SG\_Web\_Lab5} (seleccionarlo como origen).
+            \item \textbf{Description:} \texttt{MySQL solo desde capa web.}
+        \end{itemize}
+    \end{itemize}
+    \item Opcionalmente, permitir ICMP desde la capa web para pruebas de \texttt{ping}:
+    \begin{itemize}
+        \item \textbf{Type:} All ICMP - IPv4
+        \item \textbf{Source:} \texttt{SG\_Web\_Lab5}
+        \item \textbf{Description:} \texttt{Pruebas de conectividad desde web.}
+    \end{itemize}
+    \item En \textbf{Outbound rules}, dejar por defecto (All traffic a 0.0.0.0/0) o restringir según necesidades.
+\end{enumerate}
+
+\subsection{Paso 5: Asociar los Security Groups a las Instancias}
+
+\textbf{Objetivo:} Aplicar los SGs creados a las instancias correspondientes.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item En EC2, ir a \textbf{Instances}.
+    \item Seleccionar la instancia de bastion (si existe).
+    \item En el panel inferior, pestaña \textbf{Security}.
+    \item Hacer clic en el icono de edición de \textbf{Security groups}.
+    \item Asignar \texttt{SG\_Bastion\_Lab5} (manteniendo otros SGs necesarios).
+    \item Repetir el proceso para:
+    \begin{itemize}
+        \item Instancia \texttt{WebServer-Lab5}: asignar \texttt{SG\_Web\_Lab5}.
+        \item Instancia \texttt{AppServer-Lab5} (si existe): asignar \texttt{SG\_Privado\_Lab5}.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 6: Habilitar VPC Flow Logs}
+
+\textbf{Objetivo:} Registrar el tráfico de red de la VPC (o subred) en un grupo de logs de CloudWatch para su posterior análisis.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la barra de búsqueda, escribir \texttt{VPC} y abrir el servicio.
+    \item En el panel izquierdo, hacer clic en \textbf{Your VPCs}.
+    \item Seleccionar \texttt{VPC-RNG-Lab5}.
+    \item En el panel inferior, ir a la pestaña \textbf{Flow logs}.
+    \item Hacer clic en \textbf{Create flow log}.
+    \item Completar:
+    \begin{itemize}
+        \item \textbf{Filter:} \texttt{ALL} (para registrar ACCEPT y REJECT).
+        \item \textbf{Maximum aggregation interval:} 1 minute.
+        \item \textbf{Destination:} \texttt{Send to CloudWatch Logs}.
+        \item \textbf{Destination log group:} \texttt{/aws/vpc/flowlogs/lab5} (si no existe, se creará).
+        \item \textbf{IAM role:} Crear un rol nuevo usando la opción \texttt{Set up permissions} automática.
+    \end{itemize}
+    \item Confirmar la creación del Flow Log.
+\end{enumerate}
+
+\subsubsection*{Qué esperar}
+\begin{itemize}[leftmargin=*]
+    \item Aparecerá un Flow Log con estado \texttt{ACTIVE} en la pestaña \textbf{Flow logs}.
+    \item En pocos minutos se comenzarán a recibir registros en CloudWatch Logs.
+\end{itemize}
+
+\subsection{Paso 7: Consultar VPC Flow Logs desde CloudWatch Logs Insights}
+
+\textbf{Objetivo:} Ejecutar consultas básicas en CloudWatch Logs Insights para analizar tráfico aceptado y rechazado.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la barra de búsqueda, escribir \texttt{CloudWatch} y abrir el servicio.
+    \item En el panel izquierdo, hacer clic en \textbf{Logs} $\rightarrow$ \textbf{Log groups}.
+    \item Localizar el grupo de logs \texttt{/aws/vpc/flowlogs/lab5}.
+    \item Hacer clic en el nombre del log group.
+    \item Hacer clic en el botón \textbf{Actions} y seleccionar \textbf{View in Logs Insights}.
+    \item Verificar que en la parte superior aparezca el log group correcto.
+\end{enumerate}
+
+\subsubsection*{Consulta 1: Ver tráfico rechazado}
+\begin{lstlisting}[language={}, caption=Tráfico rechazado por reglas de seguridad]
+fields @timestamp, srcAddr, dstAddr, srcPort, dstPort, protocol, action
+| filter action = 'REJECT'
+| sort @timestamp desc
+| limit 20
+\end{lstlisting}
+
+\subsubsection*{Consulta 2: Contar intentos bloqueados por IP de origen}
+\begin{lstlisting}[language={}, caption=Conteo de intentos bloqueados por IP]
+fields srcAddr, dstPort, action
+| filter action = 'REJECT'
+| stats count(*) as intentos_bloqueados by srcAddr, dstPort
+| sort intentos_bloqueados desc
+| limit 10
+\end{lstlisting}
+
+\subsubsection*{Qué esperar}
+\begin{itemize}[leftmargin=*]
+    \item Verás registros donde \texttt{action} es \texttt{ACCEPT} o \texttt{REJECT}.
+    \item Al ejecutar las consultas, deberías observar:
+    \begin{itemize}
+        \item Intentos de acceso a puertos no permitidos (REJECT).
+        \item Tráfico legítimo hacia puertos HTTP/HTTPS (ACCEPT).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Paso 8: Simular Tráfico Anómalo y Ajustar Reglas}
+
+\textbf{Objetivo:} Generar tráfico hacia puertos no permitidos, observar cómo se registran en los Flow Logs y ajustar las reglas de SG para endurecer la arquitectura.
+
+\subsubsection{Simulación Básica (desde tu propia máquina)}
+
+\begin{enumerate}[leftmargin=*]
+    \item Obtener la \textbf{IP pública} de la instancia web \texttt{WebServer-Lab5}.
+    \item Desde tu máquina, generar tráfico a un puerto no permitido, por ejemplo 23 (Telnet):
+\end{enumerate}
+
+\begin{lstlisting}[language=bash, caption=Intento de conexión a puerto no permitido]
+telnet IP_PUBLICA_WEB 23
+\end{lstlisting}
+
+\begin{enumerate}[leftmargin=*]
+    \setcounter{enumi}{2}
+    \item El intento fallará (no se establecerá conexión).
+    \item Esperar 2-3 minutos e ir nuevamente a CloudWatch Logs Insights.
+    \item Ejecutar la Consulta 1 de tráfico rechazado.
+\end{enumerate}
+
+\subsubsection*{Análisis}
+\begin{itemize}[leftmargin=*]
+    \item Deberías ver registros con \texttt{dstPort = 23} y \texttt{action = REJECT}.
+    \item Puedes identificar desde qué IP se generó el tráfico (tu IP pública).
+\end{itemize}
+
+\subsubsection{Ajuste de Reglas (Endurecimiento)}
+
+Aunque el tráfico ya era rechazado, en arquitecturas más complejas se pueden:
+\begin{itemize}[leftmargin=*]
+    \item Cerrar aún más los puertos salientes desde la capa web.
+    \item Restringir SSH sólo a bastion y no a otras fuentes.
+    \item Identificar IPs que generen muchos \texttt{REJECT} y, si se considera necesario, bloquearlas mediante NACLs.
+\end{itemize}
+
+\newpage
+
+% ================== TABLAS DE CONFIGURACIÓN ==================
+\section{Tablas de Configuración}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Recurso} & \textbf{Parámetro} & \textbf{Valor} & \textbf{Propósito} \\
+\hline
+VPC & CIDR & 10.0.0.0/16 & Red lógica principal del laboratorio \\
+\hline
+Subred pública & CIDR & 10.0.1.0/24 & Alojar capa web y bastion \\
+\hline
+Subred privada & CIDR & 10.0.2.0/24 & Alojar capa de aplicación/bd \\
+\hline
+SG\_Bastion\_Lab5 & Inbound & SSH (22) desde IP de admin & Acceso administrativo controlado \\
+\hline
+SG\_Web\_Lab5 & Inbound & HTTP (80) y HTTPS (443) desde 0.0.0.0/0 & Acceso web público \\
+\hline
+SG\_Web\_Lab5 & Inbound & SSH (22) desde SG\_Bastion\_Lab5 & Administración solo vía bastion \\
+\hline
+SG\_Privado\_Lab5 & Inbound & MySQL (3306) desde SG\_Web\_Lab5 & Tráfico de app hacia base de datos \\
+\hline
+VPC Flow Logs & Filter & ALL & Registrar ACCEPT y REJECT \\
+\hline
+VPC Flow Logs & Destino & /aws/vpc/flowlogs/lab5 (CloudWatch Logs) & Análisis con Logs Insights \\
+\hline
+\end{tabular}
+\caption{Resumen de parámetros de configuración del Laboratorio 5}
+\end{table}
+
+\newpage
+
+% ================== VERIFICACIÓN ==================
+\section{Verificación del Funcionamiento}
+
+\subsection{Verificación de Security Groups}
+
+\begin{enumerate}[leftmargin=*]
+    \item Desde la consola EC2, seleccionar \texttt{WebServer-Lab5}.
+    \item En la pestaña \textbf{Security}, verificar que:
+    \begin{itemize}
+        \item El SG adjunto incluye \texttt{SG\_Web\_Lab5}.
+        \item Las reglas de entrada son exactamente las definidas (HTTP, HTTPS y SSH desde bastion).
+    \end{itemize}
+    \item Intentar conectarse por SSH desde tu máquina directamente a la IP pública de \texttt{WebServer-Lab5}:
+\end{enumerate}
+
+\begin{lstlisting}[language=bash, caption=Intento de SSH directo (debería fallar)]
+ssh ec2-user@IP_PUBLICA_WEB
+\end{lstlisting}
+
+\begin{enumerate}[leftmargin=*]
+    \setcounter{enumi}{3}
+    \item El intento debería ser rechazado si tu IP no corresponde al bastion (según diseño).
+\end{enumerate}
+
+\subsection{Verificación de VPC Flow Logs}
+
+\begin{enumerate}[leftmargin=*]
+    \item En el servicio VPC, ir a \textbf{Your VPCs}.
+    \item Seleccionar \texttt{VPC-RNG-Lab5}, pestaña \textbf{Flow logs}.
+    \item Verificar que el estado del Flow Log sea \texttt{ACTIVE}.
+    \item Ir a CloudWatch $\rightarrow$ \textbf{Log groups}.
+    \item Confirmar la existencia del grupo \texttt{/aws/vpc/flowlogs/lab5}.
+    \item Abrir Logs Insights y ejecutar la consulta de tráfico rechazado.
+\end{enumerate}
+
+\subsection{Verificación de Tráfico Anómalo}
+
+\begin{enumerate}[leftmargin=*]
+    \item Generar algunos intentos de conexión a puertos no permitidos (por ejemplo, 21, 23, 3389).
+    \item Esperar unos minutos.
+    \item Ejecutar en Logs Insights una consulta filtrando por \texttt{action = 'REJECT'}.
+    \item Verificar que los puertos usados aparecen con acción \texttt{REJECT}.
+    \item Analizar qué IPs han generado más intentos y hacia qué puertos.
+\end{enumerate}
+
+\subsection{Troubleshooting Común}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{No aparecen registros en Flow Logs:}
+    \begin{itemize}
+        \item Verificar que el Flow Log esté en estado \texttt{ACTIVE}.
+        \item Confirmar que hay tráfico real en la VPC (generar pings o curl a la instancia web).
+        \item Revisar el rol IAM asociado al Flow Log.
+    \end{itemize}
+    \item \textbf{No se puede acceder por HTTP/HTTPS a la instancia web:}
+    \begin{itemize}
+        \item Verificar que la instancia esté en ejecución.
+        \item Verificar que el SG asignado tenga reglas HTTP/HTTPS desde 0.0.0.0/0.
+        \item Revisar NACLs de la subred pública (que no bloqueen tráfico).
+    \end{itemize}
+\end{itemize}
+
+\newpage
+
+% ================== LIMPIEZA DE RECURSOS ==================
+\section{Limpieza de Recursos}
+
+\textbf{Objetivo:} Asegurar que los recursos creados específicamente para este laboratorio no generen costos posteriores.
+
+\subsection{Pasos de Limpieza}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Instancias EC2 de Prueba}
+    \begin{itemize}
+        \item Si creaste instancias temporales para este lab, detenlas y \textbf{termina} aquellas que no se reutilizarán en otros laboratorios.
+    \end{itemize}
+    \item \textbf{Security Groups}
+    \begin{itemize}
+        \item Verificar si \texttt{SG\_Bastion\_Lab5}, \texttt{SG\_Web\_Lab5} y \texttt{SG\_Privado\_Lab5} serán reutilizados.
+        \item Si NO se reutilizarán y ya no están asociados a ninguna instancia:
+        \begin{enumerate}[leftmargin=*]
+            \item Ir a EC2 $\rightarrow$ Security Groups.
+            \item Seleccionar el SG.
+            \item Hacer clic en \textbf{Actions} $\rightarrow$ \textbf{Delete security group}.
+        \end{enumerate}
+    \end{itemize}
+    \item \textbf{VPC Flow Logs}
+    \begin{itemize}
+        \item Si solo se usan para este laboratorio:
+        \begin{enumerate}[leftmargin=*]
+            \item Ir a VPC $\rightarrow$ Your VPCs.
+            \item Seleccionar la VPC.
+            \item Pestaña \textbf{Flow logs}.
+            \item Seleccionar el Flow Log creado.
+            \item Hacer clic en \textbf{Actions} $\rightarrow$ \textbf{Delete flow log}.
+        \end{enumerate}
+    \end{itemize}
+    \item \textbf{CloudWatch Logs}
+    \begin{itemize}
+        \item Ir a CloudWatch $\rightarrow$ \textbf{Log groups}.
+        \item Seleccionar \texttt{/aws/vpc/flowlogs/lab5}.
+        \item Hacer clic en \textbf{Actions} $\rightarrow$ \textbf{Delete log group}.
+        \item Confirmar la eliminación.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Comando de Verificación de Instancias (CLI Opcional)}
+
+\begin{lstlisting}[language=bash, caption=Verificar instancias EC2 en ejecución]
+aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags]' --output table
+\end{lstlisting}
+
+\newpage
+
+% ================== CUESTIONARIO INTEGRADO ==================
+\section{Cuestionario de Evaluación}
+
+\textbf{Instrucciones:} Selecciona la respuesta correcta o marca Verdadero/Falso según corresponda. Al final se incluyen las respuestas sugeridas.
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Qué afirma mejor el concepto de \textit{defense in depth} en AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item Proteger solo la capa perimetral de la VPC.
+    \item Usar un único firewall muy fuerte es suficiente.
+    \item Implementar varias capas de controles de seguridad y monitoreo.
+    \item Usar únicamente IAM para proteger recursos.
+\end{enumerate}
+
+\item \textbf{Los Security Groups en AWS son:}
+\begin{enumerate}[label=\alph*)]
+    \item Firewalls a nivel de subred, stateless.
+    \item Firewalls a nivel de instancia, stateful.
+    \item Firewalls físicos en los data centers.
+    \item Únicamente listas de control de acceso globales.
+\end{enumerate}
+
+\item \textbf{¿Cuál de las siguientes afirmaciones sobre Security Groups es correcta?}
+\begin{enumerate}[label=\alph*)]
+    \item Pueden permitir tráfico de salida, pero no de entrada.
+    \item No pueden referenciar otros Security Groups.
+    \item Siempre se aplican a nivel de VPC, no de instancia.
+    \item Pueden usar como origen/destino otros Security Groups.
+\end{enumerate}
+
+\item \textbf{¿Qué campo de VPC Flow Logs indica si el tráfico fue permitido o bloqueado?}
+\begin{enumerate}[label=\alph*)]
+    \item \texttt{log-status}
+    \item \texttt{action}
+    \item \texttt{srcport}
+    \item \texttt{protocol}
+\end{enumerate}
+
+\item \textbf{¿Cuál es el destino más usado en este laboratorio para VPC Flow Logs?}
+\begin{enumerate}[label=\alph*)]
+    \item Amazon S3
+    \item Amazon RDS
+    \item CloudWatch Logs
+    \item DynamoDB
+\end{enumerate}
+
+\item \textbf{En una arquitectura de tres capas (bastion, web, bd), cuál es una buena práctica?}
+\begin{enumerate}[label=\alph*)]
+    \item Permitir SSH desde internet directamente a la base de datos.
+    \item Permitir HTTP desde internet a la base de datos.
+    \item Permitir acceso a base de datos solo desde la capa web.
+    \item Exponer la base de datos con una IP pública.
+\end{enumerate}
+
+\item \textbf{¿Qué consulta en CloudWatch Logs Insights ayuda a encontrar IPs con más tráfico bloqueado?}
+\begin{enumerate}[label=\alph*)]
+    \item Filtrar solo por \texttt{action = 'ACCEPT'}.
+    \item Usar \texttt{stats count(*) by srcAddr} filtrando \texttt{action = 'REJECT'}.
+    \item Ordenar por \texttt{@timestamp} ascendente.
+    \item Limitar siempre a 1 resultado.
+\end{enumerate}
+
+\item \textbf{El principio de mínimo privilegio aplicado a Security Groups implica:}
+\begin{enumerate}[label=\alph*)]
+    \item Abrir todos los puertos para evitar problemas de conectividad.
+    \item Abrir solo los puertos y orígenes estrictamente necesarios.
+    \item Usar siempre 0.0.0.0/0 en todas las reglas.
+    \item Nunca permitir tráfico saliente.
+\end{enumerate}
+
+\item \textbf{¿Qué tipo de tráfico es más probable que se considere anómalo?}
+\begin{enumerate}[label=\alph*)]
+    \item HTTP a puerto 80 desde clientes esperados.
+    \item Muchas conexiones fallidas a puertos no abiertos desde una misma IP.
+    \item Respuestas HTTP 200 OK a clientes conocidos.
+    \item Consultas de base de datos desde la capa web.
+\end{enumerate}
+
+\item \textbf{¿Qué ventaja ofrece enviar VPC Flow Logs a CloudWatch Logs en lugar de ignorarlos?}
+\begin{enumerate}[label=\alph*)]
+    \item Ninguna, solo consume espacio.
+    \item Permite analizar tráfico y detectar patrones sospechosos.
+    \item Desactiva automáticamente el tráfico malicioso.
+    \item Reemplaza la necesidad de Security Groups.
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Preguntas Verdadero/Falso}
+
+\begin{enumerate}[label=\textbf{VF\arabic*.}]
+
+\item \textbf{Los Security Groups en AWS son stateless y requieren reglas separadas para tráfico entrante y saliente.}
+
+\item \textbf{VPC Flow Logs permiten registrar tanto tráfico aceptado como traficorechazado según la configuración.}
+
+\item \textbf{CloudWatch Logs Insights solo puede ejecutarse sobre logs de VPC Flow Logs y no sobre ningún otro tipo de log.}
+
+\end{enumerate}
+
+\subsection{Escenarios Prácticos}
+
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+
+\item \textbf{Escenario 1: SSH expuesto}
+
+Tienes una instancia EC2 en la subred pública con un Security Group que permite:
+\begin{itemize}[leftmargin=*]
+    \item SSH (22) desde 0.0.0.0/0.
+    \item HTTP (80) desde 0.0.0.0/0.
+\end{itemize}
+En los VPC Flow Logs observas múltiples intentos de conexión SSH fallidos desde direcciones IP de diferentes países.
+
+\textbf{Pregunta:} ¿Qué cambios harías en el Security Group y en la arquitectura para reducir la superficie de ataque, aplicando defensa en profundidad?
+
+\item \textbf{Escenario 2: Detención de escaneo de puertos}
+
+Tu aplicación solo necesita HTTP/HTTPS. En VPC Flow Logs identificas que una IP externa intenta conectarse a muchos puertos (21, 23, 3389, 1433, etc.) hacia tu instancia web, todos con \texttt{action = 'REJECT'}.
+
+\textbf{Pregunta:} ¿Cómo usarías la información de VPC Flow Logs y qué medidas adicionales podrías implementar (por ejemplo, con NACLs o WAF) para mitigar este tipo de comportamiento?
+
+\end{enumerate}
+
+\newpage
+
+\subsection{Respuestas del Cuestionario}
+
+\subsubsection*{Selección Múltiple}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{c)} Implementar varias capas de controles de seguridad y monitoreo.
+    \item \textbf{b)} Firewalls a nivel de instancia, stateful.
+    \item \textbf{d)} Pueden usar como origen/destino otros Security Groups.
+    \item \textbf{b)} \texttt{action}.
+    \item \textbf{c)} CloudWatch Logs.
+    \item \textbf{c)} Permitir acceso a base de datos solo desde la capa web.
+    \item \textbf{b)} Usar \texttt{stats count(*) by srcAddr} filtrando \texttt{action = 'REJECT'}.
+    \item \textbf{b)} Abrir solo los puertos y orígenes estrictamente necesarios.
+    \item \textbf{b)} Muchas conexiones fallidas a puertos no abiertos desde una misma IP.
+    \item \textbf{b)} Permite analizar tráfico y detectar patrones sospechosos.
+\end{enumerate}
+
+\subsubsection*{Verdadero/Falso}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Falso.} Los Security Groups son \textbf{stateful}, no stateless.
+    \item \textbf{Verdadero.} Pueden configurarse para registrar \texttt{ACCEPT}, \texttt{REJECT} o ambos (\texttt{ALL}).
+    \item \textbf{Falso.} CloudWatch Logs Insights también puede analizar otros tipos de logs (aplicación, Lambda, etc.).
+\end{enumerate}
+
+\subsubsection*{Escenarios (Guía de Respuesta)}
+
+\textbf{Escenario 1:}
+\begin{itemize}[leftmargin=*]
+    \item Cerrar SSH desde 0.0.0.0/0.
+    \item Crear un \textbf{bastion host} con SG que permita SSH solo desde IPs de administración.
+    \item Configurar el SG de la instancia web para permitir SSH únicamente desde el SG del bastion.
+    \item Seguir monitoreando VPC Flow Logs para verificar disminución de intentos.
+\end{itemize}
+
+\textbf{Escenario 2:}
+\begin{itemize}[leftmargin=*]
+    \item Usar VPC Flow Logs para identificar la IP y el patrón de escaneo.
+    \item Considerar bloquear el rango de IP en un NACL (regla DENY explícita).
+    \item Mantener Security Groups con mínimo privilegio (solo HTTP/HTTPS).
+    \item Para tráfico a nivel de aplicación, integrar AWS WAF para detectar patrones maliciosos en HTTP.
+\end{itemize}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+En este laboratorio se ha profundizado en el diseño de \textbf{seguridad avanzada en redes sobre AWS}, pasando de configuraciones básicas a una arquitectura más madura basada en \textbf{defensa en profundidad} y \textbf{mínimo privilegio}. El estudiante ha experimentado la importancia de segmentar la red en capas (bastion, web, privada) y de utilizar \textbf{Security Groups multicapa} para controlar de forma granular quién puede comunicarse con quién y a través de qué puertos.
+
+La habilitación de \textbf{VPC Flow Logs} y su análisis mediante \textbf{CloudWatch Logs Insights} demuestran que la seguridad no solo se limita a bloquear o permitir tráfico, sino también a \textbf{observar, registrar y entender} los patrones de comunicación que se producen en la VPC. Esto permite detectar tráfico anómalo, posibles intentos de explotación y escaneos de puertos, proporcionando insumos para tomar decisiones informadas de endurecimiento (hardening).
+
+Finalmente, la combinación de estos mecanismos refuerza la idea de que la nube no es intrínsecamente insegura ni segura, sino que depende del diseño y de las prácticas aplicadas. El uso consistente del principio de mínimo privilegio, junto con controles de monitoreo y registro, prepara al estudiante para diseñar y operar arquitecturas de red en AWS que sean robustas, observables y alineadas con las mejores prácticas de seguridad en la industria.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Amazon VPC}
+    \begin{itemize}[leftmargin=*]
+        \item Amazon VPC Documentation \\
+        \url{https://docs.aws.amazon.com/vpc/}
+        \item VPC Flow Logs \\
+        \url{https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html}
+    \end{itemize}
+    
+    \item \textbf{Amazon EC2 Security Groups}
+    \begin{itemize}[leftmargin=*]
+        \item Amazon EC2 Security Groups for Linux Instances \\
+        \url{https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html}
+        \item Security Group Rules Reference \\
+        \url{https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html}
+    \end{itemize}
+    
+    \item \textbf{Network ACLs}
+    \begin{itemize}[leftmargin=*]
+        \item Network ACLs \\
+        \url{https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html}
+    \end{itemize}
+    
+    \item \textbf{Amazon CloudWatch Logs e Insights}
+    \begin{itemize}[leftmargin=*]
+        \item Amazon CloudWatch Logs \\
+        \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html}
+        \item Analyzing Log Data with CloudWatch Logs Insights \\
+        \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html}
+    \end{itemize}
+    
+    \item \textbf{AWS Security Best Practices}
+    \begin{itemize}[leftmargin=*]
+        \item AWS Security Best Practices Whitepaper \\
+        \url{https://docs.aws.amazon.com/whitepapers/latest/aws-security-best-practices/}
+        \item Security Pillar - AWS Well-Architected Framework \\
+        \url{https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Recursos de Aprendizaje y Arquitectura}
+
+\begin{enumerate}[leftmargin=*]
+    \item AWS Architecture Center \\
+    \url{https://aws.amazon.com/architecture/}
+    \item AWS Prescriptive Guidance - Security Patterns \\
+    \url{https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/}
+\end{enumerate}
+
+\subsection{Bibliografía General de Seguridad en Redes}
+
+\begin{enumerate}[leftmargin=*]
+    \item Stallings, W. (2014). \textit{Network Security Essentials: Applications and Standards}. Pearson.
+    \item Anderson, R. (2020). \textit{Security Engineering: A Guide to Building Dependable Distributed Systems}. Wiley.
+\end{enumerate}
+
+\vspace{1cm}
+
+\textbf{Nota:} Las URLs fueron verificadas al momento de elaboración de este laboratorio. Es posible que AWS actualice la ubicación de algunos documentos; en ese caso, se recomienda comenzar desde el portal principal de documentación: \url{https://docs.aws.amazon.com/}.
+
+\end{document}

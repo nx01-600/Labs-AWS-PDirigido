@@ -1,0 +1,1075 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#7}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 7 - Monitoreo de Redes con CloudWatch},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#7\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Monitoreo de Redes con Amazon CloudWatch\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 90 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito - Free Tier)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio aborda el \textbf{monitoreo de redes en AWS} utilizando Amazon CloudWatch como plataforma central para recopilar, visualizar y reaccionar ante métricas y logs relacionados con el tráfico de red. Se integra el uso de \textbf{métricas nativas}, \textbf{VPC Flow Logs}, \textbf{CloudWatch Logs Insights}, \textbf{alarmas} y \textbf{dashboards} para construir un entorno de observabilidad orientado a la capa de red.
+
+El estudiante aprenderá a habilitar y analizar \textbf{VPC Flow Logs} para observar el comportamiento de la red (tráfico permitido/denegado), crear \textbf{alarmas} (hasta 10 gratuitas dentro del Free Tier) sobre métricas clave, construir un \textbf{dashboard de monitoreo} de red y ejecutar \textbf{consultas en CloudWatch Logs Insights} para investigar patrones de tráfico y posibles anomalías. Además, se presentan \textbf{mejores prácticas} de monitoreo que son aplicables en entornos de producción, como la selección de métricas relevantes, el uso de umbrales adecuados y la correlación de eventos.
+
+El laboratorio está diseñado para ejecutarse dentro de los límites del \textbf{Free Tier} de AWS, aprovechando que CloudWatch proporciona de forma gratuita un subconjunto de métricas y hasta \textbf{10 alarmas} sin costo adicional, siempre que el uso de logs y consultas se mantenga en un nivel moderado.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} Amazon CloudWatch, Monitoreo de Redes, VPC Flow Logs, Alarmas, Dashboards, Logs Insights, Observabilidad, Free Tier.
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Diseñar e implementar un esquema básico de \textbf{monitoreo de red} en AWS apoyado en Amazon CloudWatch, utilizando métricas de red, VPC Flow Logs, alarmas y dashboards, aplicando mejores prácticas de observabilidad dentro del Free Tier.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Comprender el rol de Amazon CloudWatch como servicio central de monitoreo en AWS.
+    \item Habilitar y analizar \textbf{VPC Flow Logs} para observar tráfico aceptado y rechazado en una VPC.
+    \item Crear y configurar \textbf{alarmas de CloudWatch} basadas en métricas de red, respetando el límite de 10 alarmas gratuitas.
+    \item Construir un \textbf{dashboard de monitoreo} que incluya gráficos de métricas y paneles de estado relevantes para la red.
+    \item Utilizar \textbf{CloudWatch Logs Insights} para ejecutar consultas sobre VPC Flow Logs y extraer información útil.
+    \item Aplicar \textbf{mejores prácticas de monitoreo}, como la definición de umbrales, la selección de ventanas de tiempo y la priorización de señales.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Observabilidad en la nube:} Capacidad para instrumentar y supervisar recursos de red en AWS.
+    \item \textbf{Análisis de logs de red:} Interpretación de VPC Flow Logs para entender patrones de tráfico y posibles problemas de conectividad o seguridad.
+    \item \textbf{Diseño de tableros de monitoreo:} Creación de dashboards que resuman el estado de la red y faciliten la toma de decisiones.
+    \item \textbf{Gestión de alarmas:} Configuración de alarmas efectivas que notifiquen condiciones anómalas sin generar ruido excesivo.
+    \item \textbf{Buenas prácticas de operación:} Enfoque sistemático para monitorear, alertar y responder a eventos de red.
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{Introducción a Amazon CloudWatch}
+
+Amazon CloudWatch es el servicio de monitoreo y observabilidad nativo de AWS. Permite:
+\begin{itemize}[leftmargin=*]
+    \item Recopilar \textbf{métricas} (CPU, red, disco, etc.) de servicios como EC2, RDS, VPC, ELB, entre otros.
+    \item Recibir y almacenar \textbf{logs} de aplicaciones, sistemas operativos y servicios administrados.
+    \item Definir \textbf{alarmas} que se disparan cuando una métrica cruza un umbral.
+    \item Construir \textbf{dashboards} con visualizaciones en tiempo casi real.
+    \item Ejecutar \textbf{consultas} sobre logs mediante \textbf{CloudWatch Logs Insights}.
+\end{itemize}
+
+CloudWatch se organiza en diferentes componentes:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Métricas (Metrics):} Valores numéricos en el tiempo, organizados en \textit{namespaces}.
+    \item \textbf{Logs:} Flujos de eventos agrupados en \textit{log groups} y \textit{log streams}.
+    \item \textbf{Alarmas:} Condiciones evaluadas sobre métricas que generan un cambio de estado (OK, ALARM, INSUFFICIENT\_DATA).
+    \item \textbf{Dashboards:} Paneles personalizados con widgets de métricas, logs y texto.
+\end{itemize}
+
+\subsection{Métricas de Red en CloudWatch}
+
+Muchos servicios de AWS generan métricas relacionadas con la red, entre ellas:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{EC2:} NetworkIn, NetworkOut, NetworkPacketsIn, NetworkPacketsOut.
+    \item \textbf{Elastic Load Balancing:} RequestCount, HTTPCode\_ELB\_4XX, HTTPCode\_ELB\_5XX, etc.
+    \item \textbf{NAT Gateway, VPN, Transit Gateway:} métricas específicas de tráfico y errores.
+\end{itemize}
+
+Aunque las \textbf{VPC} como tal no exponen muchas métricas de L3 en CloudWatch, la combinación de:
+\begin{itemize}[leftmargin=*]
+    \item Métricas de instancias y balanceadores.
+    \item Logs de flujo de VPC (\textbf{VPC Flow Logs}).
+\end{itemize}
+permite construir una vista bastante completa del comportamiento de la red.
+
+\subsection{VPC Flow Logs}
+
+\subsubsection{Definición}
+
+\textbf{VPC Flow Logs} es una característica que permite capturar información sobre el tráfico IP que entra y sale de:
+\begin{itemize}[leftmargin=*]
+    \item Interfaces de red de instancias (ENI).
+    \item Subredes.
+    \item VPCs completas.
+\end{itemize}
+
+Los logs contienen información como:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{srcaddr, dstaddr}: IP de origen y destino.
+    \item \textbf{srcport, dstport}: puertos de origen y destino.
+    \item \textbf{protocol}: protocolo (TCP, UDP, ICMP).
+    \item \textbf{action}: \texttt{ACCEPT} o \texttt{REJECT}.
+    \item \textbf{bytes, packets}: volumen de datos y número de paquetes.
+\end{itemize}
+
+Estos logs pueden enviarse a:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{CloudWatch Logs}.
+    \item \textbf{Amazon S3}.
+\end{itemize}
+
+En este laboratorio utilizaremos \textbf{CloudWatch Logs} para:
+\begin{itemize}[leftmargin=*]
+    \item Visualizar los eventos.
+    \item Consultarlos con \textbf{Logs Insights}.
+\end{itemize}
+
+\subsubsection{Formato de un Registro de Flow Log (Versión Básica)}
+
+Un registro típico (simplificado) puede verse así:
+
+\begin{verbatim}
+version account-id interface-id srcaddr dstaddr srcport dstport protocol
+packets bytes start end action log-status
+2 123456789012 eni-0abc123def456 10.10.1.10 10.20.1.20 443 51532 6
+10 840 1699980000 1699980060 ACCEPT OK
+\end{verbatim}
+
+\subsection{CloudWatch Logs y Logs Insights}
+
+\subsubsection{CloudWatch Logs}
+
+CloudWatch Logs almacena flujos de logs en:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Log groups:} contenedores lógicos (por ejemplo, \texttt{/aws/vpc/flow-logs/lab7}).
+    \item \textbf{Log streams:} secuencias de eventos (por ejemplo, por ENI o por instancia).
+\end{itemize}
+
+Permite:
+\begin{itemize}[leftmargin=*]
+    \item Definir \textbf{retención} de logs (días).
+    \item Crear \textbf{métricas derivadas} (metric filters).
+\end{itemize}
+
+\subsubsection{CloudWatch Logs Insights}
+
+CloudWatch Logs Insights es un motor de consulta interactivo para logs. Permite:
+\begin{itemize}[leftmargin=*]
+    \item Escribir consultas tipo SQL simplificado.
+    \item Filtrar por campos, agrupar, contar, hacer sumas, etc.
+    \item Visualizar resultados en tablas y gráficos.
+\end{itemize}
+
+Ejemplo de consulta sobre VPC Flow Logs para contar conexiones rechazadas por IP de origen:
+
+\begin{lstlisting}[language={}, caption=Ejemplo de consulta en CloudWatch Logs Insights]
+fields srcaddr, dstaddr, action
+| filter action = 'REJECT'
+| stats count(*) as rechazos by srcaddr
+| sort rechazos desc
+| limit 20
+\end{lstlisting}
+
+\subsection{Alarmas de CloudWatch}
+
+Una \textbf{alarma de CloudWatch}:
+\begin{itemize}[leftmargin=*]
+    \item Se basa en una métrica (o métrica compuesta).
+    \item Evalúa una condición (por ejemplo, \textit{NetworkIn} mayor a cierto umbral durante N períodos).
+    \item Cambia de estado: \texttt{OK}, \texttt{ALARM} o \texttt{INSUFFICIENT\_DATA}.
+    \item Puede ejecutar acciones: enviar notificaciones (SNS), ejecutar acciones automáticas, etc.
+\end{itemize}
+
+En el contexto de este laboratorio:
+\begin{itemize}[leftmargin=*]
+    \item Aprovecharemos que el Free Tier ofrece hasta \textbf{10 alarmas} sin costo.
+    \item Crearemos alarmas \textbf{sencillas pero significativas} relacionadas con:
+    \begin{itemize}
+        \item Volumen de tráfico inusual.
+        \item Número de paquetes rechazados (vía métrica derivada de logs).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Dashboards de Monitoreo}
+
+Un \textbf{CloudWatch Dashboard} es una vista personalizable que puede incluir:
+\begin{itemize}[leftmargin=*]
+    \item Gráficos de métricas de red.
+    \item Widgets de texto explicativo.
+    \item Gráficos de resultados de consultas de Logs Insights (a través de métricas derivadas).
+\end{itemize}
+
+En este laboratorio crearemos un dashboard básico llamado \texttt{Lab7-Network-Monitoring} con:
+\begin{itemize}[leftmargin=*]
+    \item Panel de tráfico de red (NetworkIn/NetworkOut).
+    \item Panel de recuento de conexiones rechazadas.
+    \item Panel de estado de alarmas.
+\end{itemize}
+
+\subsection{Mejores Prácticas de Monitoreo de Redes}
+
+Algunas recomendaciones clave:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Medir antes de optimizar:} No se puede mejorar lo que no se mide.
+    \item \textbf{Elegir métricas representativas:} Volumen de tráfico, errores, latencia (cuando aplique), rechazos de firewall, etc.
+    \item \textbf{Evitar el ruido de alarmas:} Pocos umbrales bien pensados son mejores que decenas de alarmas que nadie mira.
+    \item \textbf{Correlacionar señales:} Un pico de tráfico \textit{y} un aumento de \texttt{REJECT} puede indicar un ataque o una mala configuración.
+    \item \textbf{Definir ventanas de tiempo adecuadas:} Evaluar promedios o sumas en intervalos de 5-15 minutos suele ser más estable que mirar cada minuto.
+    \item \textbf{Respetar el Free Tier:} Configurar solo las alarmas y logs necesarios, evitando ingestión masiva innecesaria.
+\end{itemize}
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Necesarios}
+
+\begin{itemize}[leftmargin=*]
+    \item Conceptos básicos de:
+    \begin{itemize}
+        \item VPC, subredes, tablas de ruteo.
+        \item Instancias EC2 y Security Groups.
+    \end{itemize}
+    \item Familiaridad con:
+    \begin{itemize}
+        \item Consola de AWS.
+        \item Conceptos de métrica, log y alerta.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Infraestructura Base}
+
+Idealmente, el estudiante debe disponer de:
+\begin{itemize}[leftmargin=*]
+    \item Al menos una VPC de laboratorios anteriores (por ejemplo, \texttt{VPC-A-Lab6}).
+    \item Una o dos instancias EC2 de prueba que generen algo de tráfico de red.
+\end{itemize}
+
+Si no existen, se pueden reutilizar los pasos de otros labs para lanzar una instancia simple de prueba.
+
+\subsection{Recursos Técnicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Cuenta AWS activa (Free Tier).
+    \item Usuario IAM con permisos sobre:
+    \begin{itemize}
+        \item CloudWatch (métricas, logs, alarmas, dashboards).
+        \item VPC (para crear VPC Flow Logs).
+        \item SNS (para notificaciones de alarmas).
+    \end{itemize}
+    \item Navegador web moderno.
+\end{itemize}
+
+\subsection{Costos Estimados}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Concepto} & \textbf{Costo Estimado} \\
+\hline
+Hasta 10 métricas personalizadas & \$0.00 (Free Tier) \\
+Hasta 10 alarmas CloudWatch & \$0.00 (Free Tier) \\
+VPC Flow Logs (bajo volumen de tráfico) & \$0.00 -- costo muy bajo (lab corto) \\
+CloudWatch Logs Insights (pocas consultas) & \$0.00 -- Free Tier / costo despreciable \\
+\hline
+\textbf{TOTAL} & \textbf{\$0.00} \\
+\hline
+\end{tabular}
+\caption{Costos del Laboratorio 7}
+\end{table}
+
+\textbf{Nota:} Aunque VPC Flow Logs y Logs Insights pueden generar costos en escenarios de alta carga, en este laboratorio se limita el uso a una ventana de tiempo acotada y a pocas consultas, manteniéndose en la práctica dentro del \textbf{Free Tier}.
+
+\subsection{Tiempo Estimado}
+
+\begin{itemize}[leftmargin=*]
+    \item Lectura del marco teórico: 20 minutos.
+    \item Habilitar VPC Flow Logs y CloudWatch Logs: 20 minutos.
+    \item Crear métricas y alarmas: 25 minutos.
+    \item Construir dashboard y ejecutar consultas en Logs Insights: 25 minutos.
+    \item \textbf{TOTAL ESTIMADO:} 90 minutos.
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+El siguiente procedimiento construye un sistema básico de monitoreo de red usando CloudWatch en torno a una VPC de laboratorio.
+
+\subsection{Paso 1: Identificar la VPC a Monitorear}
+
+\textbf{Objetivo:} Seleccionar la VPC sobre la cual habilitaremos VPC Flow Logs.
+
+\begin{enumerate}[leftmargin=*]
+    \item En la consola de AWS, ir a \textbf{VPC}.
+    \item En el panel izquierdo, hacer clic en \textbf{Your VPCs}.
+    \item Identificar la VPC que se usará para el laboratorio. Por ejemplo:
+    \begin{itemize}
+        \item \textbf{Name}: \texttt{VPC-A-Lab6}.
+        \item \textbf{CIDR}: \texttt{10.10.0.0/16}.
+    \end{itemize}
+    \item Anotar el \textbf{VPC ID}, por ejemplo \texttt{vpc-0abc123def456}.
+\end{enumerate}
+
+\subsection{Paso 2: Crear un Log Group para VPC Flow Logs}
+
+\textbf{Objetivo:} Definir el destino en CloudWatch Logs donde llegarán los VPC Flow Logs.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir al servicio \textbf{CloudWatch}.
+    \item En el panel izquierdo, seleccionar \textbf{Logs} $\rightarrow$ \textbf{Log groups}.
+    \item Hacer clic en \textbf{Create log group}.
+    \item Completar:
+    \begin{itemize}
+        \item \textbf{Log group name:} \texttt{/aws/vpc/flow-logs/lab7}.
+        \item \textbf{Retention:} por ejemplo, 7 días (para laboratorio).
+    \end{itemize}
+    \item Crear el log group.
+\end{enumerate}
+
+\subsection{Paso 3: Crear un Role IAM (si es necesario)}
+
+En muchas cuentas, el asistente de VPC Flow Logs crea el role automáticamente. Si no existe:
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir al servicio \textbf{IAM}.
+    \item Crear un \textbf{role} para el servicio \textbf{VPC Flow Logs} con permisos para escribir en CloudWatch Logs.
+    \item Nombre sugerido: \texttt{VPCFlowLogs-CloudWatchRole-Lab7}.
+\end{enumerate}
+
+(En caso de usar el wizard, AWS puede crear una política y role por defecto.)
+
+\subsection{Paso 4: Habilitar VPC Flow Logs para la VPC}
+
+\textbf{Objetivo:} Activar el registro de tráfico para la VPC seleccionada.
+
+\begin{enumerate}[leftmargin=*]
+    \item Volver al servicio \textbf{VPC}.
+    \item En \textbf{Your VPCs}, seleccionar la VPC (ej. \texttt{VPC-A-Lab6}).
+    \item En el panel inferior, ir a la pestaña \textbf{Flow Logs}.
+    \item Hacer clic en \textbf{Create flow log}.
+    \item Parámetros recomendados:
+    \begin{itemize}
+        \item \textbf{Filter:} \texttt{ALL} (captura ACCEPT y REJECT).
+        \item \textbf{Destination:} \texttt{Send to CloudWatch Logs}.
+        \item \textbf{Destination log group:} seleccionar \texttt{/aws/vpc/flow-logs/lab7}.
+        \item \textbf{IAM role:} seleccionar el role creado o sugerido.
+        \item \textbf{Maximum aggregation interval:} 1 minuto (para ver eventos más pronto).
+    \end{itemize}
+    \item Crear el Flow Log.
+\end{enumerate}
+
+\subsection{Paso 5: Generar Tráfico de Red de Prueba}
+
+\textbf{Objetivo:} Asegurar que el Flow Log capture tráfico útil.
+
+\begin{enumerate}[leftmargin=*]
+    \item Conectarse a una instancia EC2 dentro de la VPC mediante SSH.
+    \item Generar tráfico:
+    \begin{itemize}
+        \item \textbf{Tráfico permitido:}
+        \begin{itemize}
+            \item Hacer ping a otra instancia dentro de la VPC o a un servidor de prueba permitido.
+        \end{itemize}
+        \item \textbf{Tráfico rechazado:}
+        \begin{itemize}
+            \item Intentar conectarse a un puerto bloqueado o a un destino no permitido por el Security Group.
+        \end{itemize}
+    \end{itemize}
+    \item Esperar unos minutos para que los eventos aparezcan en CloudWatch Logs.
+\end{enumerate}
+
+\subsection{Paso 6: Visualizar VPC Flow Logs en CloudWatch Logs}
+
+\textbf{Objetivo:} Confirmar que los eventos están siendo registrados.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{CloudWatch} $\rightarrow$ \textbf{Logs} $\rightarrow$ \textbf{Log groups}.
+    \item Seleccionar \texttt{/aws/vpc/flow-logs/lab7}.
+    \item Abrir uno de los \textbf{log streams}.
+    \item Verificar que aparecen líneas con campos como \texttt{srcaddr}, \texttt{dstaddr}, \texttt{action}, \texttt{bytes}, etc.
+\end{enumerate}
+
+\subsection{Paso 7: Crear una Métrica Derivada (Metric Filter) para Tráfico REJECT}
+
+\textbf{Objetivo:} Contar conexiones rechazadas usando una métrica de CloudWatch.
+
+\begin{enumerate}[leftmargin=*]
+    \item Dentro del log group \texttt{/aws/vpc/flow-logs/lab7}, ir a la pestaña \textbf{Metric filters}.
+    \item Hacer clic en \textbf{Create metric filter}.
+    \item En \textbf{Filter pattern}, usar un patrón simple, por ejemplo:
+\end{enumerate}
+
+\begin{verbatim}
+REJECT
+\end{verbatim}
+
+\begin{enumerate}[leftmargin=*]
+    \setcounter{enumi}{3}
+    \item Hacer clic en \textbf{Next}.
+    \item Asignar:
+    \begin{itemize}
+        \item \textbf{Filter name:} \texttt{Lab7-Rejected-Connections}.
+        \item \textbf{Metric namespace:} \texttt{Lab7/Network}.
+        \item \textbf{Metric name:} \texttt{RejectedConnections}.
+        \item \textbf{Metric value:} \texttt{1}.
+        \item \textbf{Default value:} \texttt{0} (opcional).
+    \end{itemize}
+    \item Guardar el metric filter.
+\end{enumerate}
+
+Esta métrica incrementará en 1 por cada línea de log que contenga \texttt{REJECT}.
+
+\subsection{Paso 8: Crear una Alarma para Conexiones Rechazadas}
+
+\textbf{Objetivo:} Generar una alerta cuando haya un número inusual de rechazos (potencialmente indicando un problema de configuración o intento de ataque).
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{CloudWatch} $\rightarrow$ \textbf{Alarms} $\rightarrow$ \textbf{All alarms}.
+    \item Hacer clic en \textbf{Create alarm}.
+    \item Hacer clic en \textbf{Select metric}.
+    \item Navegar a:
+    \begin{itemize}
+        \item \textbf{Custom namespaces} $\rightarrow$ \texttt{Lab7/Network}.
+        \item Seleccionar \texttt{RejectedConnections}.
+    \end{itemize}
+    \item Hacer clic en \textbf{Select metric}.
+    \item Configurar la alarma:
+    \begin{itemize}
+        \item \textbf{Statistic:} Sum.
+        \item \textbf{Period:} 5 minutes.
+        \item \textbf{Condition:} \texttt{Greater than or equal to}.
+        \item \textbf{Threshold value:} por ejemplo, \texttt{10} (10 rechazos en 5 minutos).
+    \end{itemize}
+    \item Hacer clic en \textbf{Next}.
+    \item Configurar notificación:
+    \begin{itemize}
+        \item Crear o usar un \textbf{SNS topic} (por ejemplo, \texttt{Lab7-Alerts}).
+        \item Ingresar un correo electrónico para recibir notificaciones.
+    \end{itemize}
+    \item Asignar nombre a la alarma:
+    \begin{itemize}
+        \item \textbf{Alarm name:} \texttt{Lab7-HighRejectedConnections}.
+    \end{itemize}
+    \item Revisar y crear la alarma.
+\end{enumerate}
+
+\subsection{Paso 9: Crear un Dashboard de Monitoreo de Red}
+
+\textbf{Objetivo:} Visualizar en un solo lugar métricas relevantes del laboratorio.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{CloudWatch} $\rightarrow$ \textbf{Dashboards}.
+    \item Hacer clic en \textbf{Create dashboard}.
+    \item Nombre sugerido: \texttt{Lab7-Network-Monitoring}.
+    \item Seleccionar tipo de widget \textbf{Line} para gráficos de serie temporal.
+    \item Agregar:
+    \begin{itemize}
+        \item \textbf{Widget 1:} Tráfico de red de una instancia:
+        \begin{itemize}
+            \item Namespace: \texttt{AWS/EC2}.
+            \item Métricas: \texttt{NetworkIn} y \texttt{NetworkOut} de la instancia de prueba.
+            \item Título: \texttt{EC2 Network In/Out}.
+        \end{itemize}
+        \item \textbf{Widget 2:} Conexiones rechazadas:
+        \begin{itemize}
+            \item Namespace: \texttt{Lab7/Network}.
+            \item Métrica: \texttt{RejectedConnections}.
+            \item Título: \texttt{Conexiones REJECT por período}.
+        \end{itemize}
+        \item \textbf{Widget 3:} Estado de alarmas:
+        \begin{itemize}
+            \item Tipo de widget: \textbf{Alarm status}.
+            \item Seleccionar \texttt{Lab7-HighRejectedConnections}.
+        \end{itemize}
+    \end{itemize}
+    \item Ajustar el rango de tiempo del dashboard (por ejemplo, última 1 hora).
+\end{enumerate}
+
+\subsection{Paso 10: Consultas Básicas en CloudWatch Logs Insights}
+
+\textbf{Objetivo:} Usar Logs Insights para analizar los VPC Flow Logs.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{CloudWatch} $\rightarrow$ \textbf{Logs} $\rightarrow$ \textbf{Logs Insights}.
+    \item Seleccionar el log group \texttt{/aws/vpc/flow-logs/lab7}.
+    \item Establecer el rango de tiempo (últimos 30 minutos, por ejemplo).
+    \item Ejecutar las siguientes consultas como ejemplo:
+
+\end{enumerate}
+
+\subsubsection*{Consulta 1: Conteo de tráfico ACCEPT vs REJECT}
+
+\begin{lstlisting}[language={}, caption=ACCEPT vs REJECT]
+fields action
+| stats count(*) as total by action
+\end{lstlisting}
+
+\subsubsection*{Consulta 2: IPs con más tráfico rechazado}
+
+\begin{lstlisting}[language={}, caption=IPs con mayor número de REJECT]
+fields srcaddr, action
+| filter action = 'REJECT'
+| stats count(*) as rechazos by srcaddr
+| sort rechazos desc
+| limit 10
+\end{lstlisting}
+
+\subsubsection*{Consulta 3: Puertos de destino más usados}
+
+\begin{lstlisting}[language={}, caption=Puertos más frecuentes]
+fields dstport
+| stats count(*) as total by dstport
+| sort total desc
+| limit 10
+\end{lstlisting}
+
+\begin{enumerate}[leftmargin=*]
+    \setcounter{enumi}{4}
+    \item Observar los resultados y relacionarlos con el tráfico generado en el laboratorio.
+\end{enumerate}
+
+\newpage
+
+% ================== TABLAS DE CONFIGURACIÓN ==================
+\section{Tablas de Configuración}
+
+\subsection{Resumen de Recursos de Monitoreo}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Recurso} & \textbf{Nombre} & \textbf{Descripción} \\
+\hline
+Log Group & /aws/vpc/flow-logs/lab7 & Almacena VPC Flow Logs de la VPC del lab \\
+\hline
+Metric Filter & Lab7-Rejected-Connections & Cuenta líneas con ``REJECT'' en los flow logs \\
+\hline
+Namespace Métrica & Lab7/Network & Namespace personalizado para métricas del lab \\
+\hline
+Métrica & RejectedConnections & Número de conexiones rechazadas por período \\
+\hline
+Alarma & Lab7-HighRejectedConnections & Alerta si hay muchos REJECT en poco tiempo \\
+\hline
+Dashboard & Lab7-Network-Monitoring & Panel de monitoreo de red del lab \\
+\hline
+\end{tabular}
+\caption{Recursos principales de CloudWatch en el Laboratorio 7}
+\end{table}
+
+\subsection{Parámetros de Flow Logs}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parámetro} & \textbf{Valor} \\
+\hline
+Resource type & VPC \\
+\hline
+Filter & ALL \\
+\hline
+Destination & CloudWatch Logs \\
+\hline
+Log group & /aws/vpc/flow-logs/lab7 \\
+\hline
+Aggregation interval & 1 minute \\
+\hline
+\end{tabular}
+\caption{Parámetros recomendados para VPC Flow Logs}
+\end{table}
+
+\subsection{Configuración de la Alarma Principal}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Propiedad} & \textbf{Valor} \\
+\hline
+Namespace & Lab7/Network \\
+\hline
+Métrica & RejectedConnections \\
+\hline
+Statistic & Sum \\
+\hline
+Period & 300 s (5 minutos) \\
+\hline
+Condición & Greater or equal \\
+\hline
+Umbral & 10 \\
+\hline
+Acción & Enviar notificación a SNS (Lab7-Alerts) \\
+\hline
+\end{tabular}
+\caption{Configuración de la alarma Lab7-HighRejectedConnections}
+\end{table}
+
+\newpage
+
+% ================== VERIFICACIÓN ==================
+\section{Verificación}
+
+\subsection{Verificación de VPC Flow Logs}
+
+\begin{enumerate}[leftmargin=*]
+    \item Confirmar que en el panel \textbf{Flow Logs} de la VPC el estado del flow log aparece como \textbf{Active}.
+    \item Revisar algún log stream en \texttt{/aws/vpc/flow-logs/lab7} para verificar que se siguen generando eventos.
+\end{enumerate}
+
+\subsection{Verificación de la Métrica RejectedConnections}
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{CloudWatch} $\rightarrow$ \textbf{Metrics}.
+    \item Seleccionar el namespace \texttt{Lab7/Network}.
+    \item Localizar \texttt{RejectedConnections}.
+    \item Visualizar la gráfica en los últimos 15--30 minutos.
+    \item Generar de nuevo algunos intentos de conexión que resulten en \texttt{REJECT} y observar el incremento de la métrica.
+\end{enumerate}
+
+\subsection{Verificación de la Alarma}
+
+\begin{enumerate}[leftmargin=*]
+    \item Revisar la alarma \texttt{Lab7-HighRejectedConnections}.
+    \item Verificar que su estado es:
+    \begin{itemize}
+        \item \textbf{OK}, si no se ha superado el umbral.
+        \item \textbf{ALARM}, si se han generado suficientes rechazos.
+    \end{itemize}
+    \item Si se ha configurado SNS, revisar el correo para confirmar la recepción de la notificación cuando la alarma entra en estado \texttt{ALARM}.
+\end{enumerate}
+
+\subsection{Verificación del Dashboard}
+
+\begin{enumerate}[leftmargin=*]
+    \item Abrir el dashboard \texttt{Lab7-Network-Monitoring}.
+    \item Comprobar que:
+    \begin{itemize}
+        \item Se ven las métricas de red de la instancia (NetworkIn/NetworkOut).
+        \item Se ve la curva de \texttt{RejectedConnections}.
+        \item El widget de estado de alarmas refleja correctamente el estado de \texttt{Lab7-HighRejectedConnections}.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+% ================== LIMPIEZA DE RECURSOS ==================
+\section{Limpieza de Recursos}
+
+\textbf{Objetivo:} Evitar costos innecesarios y dejar el entorno ordenado después del laboratorio.
+
+\subsection{Pasos de Limpieza}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Instancias EC2 de prueba}
+    \begin{itemize}
+        \item Si se crearon instancias sólo para este laboratorio, detenerlas y terminarlas.
+    \end{itemize}
+
+    \item \textbf{Alarmas}
+    \begin{itemize}
+        \item Ir a \textbf{CloudWatch} $\rightarrow$ \textbf{Alarms}.
+        \item Seleccionar \texttt{Lab7-HighRejectedConnections} (y cualquier otra alarma creada).
+        \item Hacer clic en \textbf{Actions} $\rightarrow$ \textbf{Delete}.
+    \end{itemize}
+
+    \item \textbf{Metric filters y Log groups}
+    \begin{itemize}
+        \item En \textbf{CloudWatch} $\rightarrow$ \textbf{Logs}, seleccionar el log group \texttt{/aws/vpc/flow-logs/lab7}.
+        \item Eliminar metric filters asociados si el entorno no se va a reutilizar.
+        \item Si el laboratorio ha terminado y no se requiere retener logs, eliminar el log group.
+    \end{itemize}
+
+    \item \textbf{Flow Logs}
+    \begin{itemize}
+        \item Volver al servicio \textbf{VPC}.
+        \item En la VPC monitoreada, ir a la pestaña \textbf{Flow Logs}.
+        \item Seleccionar el flow log creado y eliminarlo para detener la captura de tráfico.
+    \end{itemize}
+
+    \item \textbf{SNS Topic (opcional)}
+    \begin{itemize}
+        \item En \textbf{SNS}, eliminar el topic \texttt{Lab7-Alerts} si fue creado solo para este laboratorio.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Comando CLI Opcional para Ver Alarmas}
+
+\begin{lstlisting}[language=bash, caption=Listar alarmas de CloudWatch]
+aws cloudwatch describe-alarms \
+  --query 'MetricAlarms[*].[AlarmName,StateValue,MetricName,Namespace]' \
+  --output table
+\end{lstlisting}
+
+\newpage
+
+% ================== CUESTIONARIO INTEGRADO ==================
+\section{Cuestionario de Evaluación}
+
+\textbf{Instrucciones:} Responde las siguientes preguntas. Las respuestas sugeridas se encuentran al final de la sección.
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Cuál es el propósito principal de Amazon CloudWatch?}
+\begin{enumerate}[label=\alph*)]
+    \item Almacenar objetos estáticos como imágenes y videos.
+    \item Ofrecer bases de datos relacionales escalables.
+    \item Proveer monitoreo, métricas y logs de recursos en AWS.
+    \item Gestionar identidades y accesos de usuarios.
+\end{enumerate}
+
+\item \textbf{¿Qué información típica proveen los VPC Flow Logs?}
+\begin{enumerate}[label=\alph*)]
+    \item Solo el uso de CPU en instancias EC2.
+    \item IP de origen y destino, puertos, protocolo, acción (ACCEPT/REJECT), bytes y paquetes.
+    \item Únicamente latencias de red entre regiones.
+    \item Número total de instancias activas en la VPC.
+\end{enumerate}
+
+\item \textbf{¿Hacia dónde se pueden enviar los VPC Flow Logs?}
+\begin{enumerate}[label=\alph*)]
+    \item Únicamente a Amazon S3.
+    \item Únicamente a CloudWatch Logs.
+    \item A CloudWatch Logs o a Amazon S3.
+    \item Solo a una base de datos RDS.
+\end{enumerate}
+
+\item \textbf{En el contexto de este laboratorio, la métrica personalizada \texttt{RejectedConnections} se obtiene a partir de:}
+\begin{enumerate}[label=\alph*)]
+    \item El número de conexiones exitosas aceptadas por la VPC.
+    \item Un metric filter que cuenta líneas con ``REJECT'' en los VPC Flow Logs.
+    \item El tráfico total (en bytes) de la VPC.
+    \item El promedio de latencia de red entre instancias.
+\end{enumerate}
+
+\item \textbf{¿Cuál de las siguientes afirmaciones sobre las alarmas de CloudWatch es correcta?}
+\begin{enumerate}[label=\alph*)]
+    \item No pueden enviar notificaciones, solo registrar el estado.
+    \item Solo pueden basarse en métricas de CPU y memoria.
+    \item Cambian de estado (OK/ALARM/INSUFFICIENT\_DATA) según la evaluación de una métrica.
+    \item Solo funcionan con servicios de red.
+\end{enumerate}
+
+\item \textbf{En el Free Tier de CloudWatch, típicamente se dispone de:}
+\begin{enumerate}[label=\alph*)]
+    \item Hasta 10 alarmas y 10 métricas personalizadas sin costo adicional.
+    \item Alarmas ilimitadas sin costo.
+    \item Cero métricas gratuitas, todo se cobra desde el inicio.
+    \item Sólo 1 alarma gratuita.
+\end{enumerate}
+
+\item \textbf{¿Qué componente de CloudWatch permite construir paneles visuales personalizados?}
+\begin{enumerate}[label=\alph*)]
+    \item CloudWatch Logs Insights.
+    \item CloudWatch Dashboards.
+    \item CloudWatch Metrics Engine.
+    \item VPC Flow Logs.
+\end{enumerate}
+
+\item \textbf{¿Qué permite hacer CloudWatch Logs Insights?}
+\begin{enumerate}[label=\alph*)]
+    \item Crear y administrar VPCs.
+    \item Ejecutar consultas sobre logs para analizarlos, filtrarlos y agregarlos.
+    \item Configurar usuarios IAM.
+    \item Crear buckets de S3 automáticamente.
+\end{enumerate}
+
+\item \textbf{Si se desea detectar un posible ataque mediante un gran número de conexiones rechazadas, una estrategia razonable es:}
+\begin{enumerate}[label=\alph*)]
+    \item Ignorar los VPC Flow Logs y monitorear solo CPU.
+    \item Crear una métrica derivada de logs que cuente las entradas REJECT y una alarma sobre esa métrica.
+    \item Deshabilitar todos los Security Groups.
+    \item Asignar IPs públicas a todas las instancias.
+\end{enumerate}
+
+\item \textbf{¿Cuál de las siguientes es una buena práctica de monitoreo?}
+\begin{enumerate}[label=\alph*)]
+    \item Crear cientos de alarmas con umbrales poco claros.
+    \item No monitorear nada mientras el sistema ``parezca'' funcionar.
+    \item Elegir un conjunto limitado de métricas clave y definir umbrales significativos.
+    \item Usar únicamente métricas de CPU para evaluar la salud de la red.
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Preguntas Verdadero/Falso}
+
+\begin{enumerate}[label=\textbf{VF\arabic*.}]
+
+\item \textbf{Los VPC Flow Logs permiten ver tanto tráfico aceptado como rechazado, dependiendo del filtro configurado.}
+
+\item \textbf{Las alarmas de CloudWatch pueden enviarse a un tópico de SNS para generar notificaciones por correo.}
+
+\item \textbf{CloudWatch Logs Insights solo funciona con logs de aplicaciones, pero no con VPC Flow Logs.}
+
+\end{enumerate}
+
+\subsection{Escenarios Prácticos}
+
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+
+\item \textbf{Escenario 1: Pico inusual de tráfico rechazado}
+
+Durante la noche, la alarma \texttt{Lab7-HighRejectedConnections} se dispara varias veces. En el dashboard se observa un pico en \texttt{RejectedConnections}, pero el tráfico \texttt{NetworkIn/Out} no ha aumentado de forma proporcional.
+
+\textbf{Pregunta:} ¿Qué pasos seguirías para investigar este comportamiento usando VPC Flow Logs y Logs Insights? Menciona al menos dos consultas o análisis que realizarías.
+
+\item \textbf{Escenario 2: Diseño de un dashboard de red para producción}
+
+Una empresa despliega aplicaciones críticas en múltiples instancias EC2 detrás de un Load Balancer. Desean un dashboard de red que les permita detectar rápidamente:
+\begin{itemize}[leftmargin=*]
+    \item Picos de tráfico.
+    \item Errores de red (4xx/5xx).
+    \item Aumentos en conexiones rechazadas.
+\end{itemize}
+
+\textbf{Pregunta:} ¿Qué métricas y widgets incluirías en el dashboard? ¿Qué alarmas clave definirías para complementar ese dashboard?
+
+\end{enumerate}
+
+\newpage
+
+\subsection{Respuestas del Cuestionario}
+
+\subsubsection*{Selección Múltiple}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{c)} Proveer monitoreo, métricas y logs de recursos en AWS.
+    \item \textbf{b)} IP de origen y destino, puertos, protocolo, acción (ACCEPT/REJECT), bytes y paquetes.
+    \item \textbf{c)} A CloudWatch Logs o a Amazon S3.
+    \item \textbf{b)} Un metric filter que cuenta líneas con ``REJECT'' en los VPC Flow Logs.
+    \item \textbf{c)} Cambian de estado (OK/ALARM/INSUFFICIENT\_DATA) según la evaluación de una métrica.
+    \item \textbf{a)} Hasta 10 alarmas y 10 métricas personalizadas sin costo adicional (según condiciones del Free Tier).
+    \item \textbf{b)} CloudWatch Dashboards.
+    \item \textbf{b)} Ejecutar consultas sobre logs para analizarlos, filtrarlos y agregarlos.
+    \item \textbf{b)} Crear una métrica derivada de logs que cuente las entradas REJECT y una alarma sobre esa métrica.
+    \item \textbf{c)} Elegir un conjunto limitado de métricas clave y definir umbrales significativos.
+\end{enumerate}
+
+\subsubsection*{Verdadero/Falso}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Verdadero.} El filtro \texttt{ALL} captura ACCEPT y REJECT; también existen filtros \texttt{ACCEPT} y \texttt{REJECT}.
+    \item \textbf{Verdadero.} SNS es una de las integraciones más comunes para notificaciones de alarmas.
+    \item \textbf{Falso.} Logs Insights puede trabajar con cualquier log group de CloudWatch, incluyendo VPC Flow Logs.
+\end{enumerate}
+
+\subsubsection*{Guía para Escenarios}
+
+\textbf{Escenario 1:}
+\begin{itemize}[leftmargin=*]
+    \item Revisar en Logs Insights cuáles IP de origen generan más \texttt{REJECT}:
+\begin{lstlisting}[language={}]
+fields srcaddr, action
+| filter action = 'REJECT'
+| stats count(*) as rechazos by srcaddr
+| sort rechazos desc
+| limit 20
+\end{lstlisting}
+    \item Analizar puertos de destino para ver si se trata de escaneo de puertos:
+\begin{lstlisting}[language={}]
+fields dstport, action
+| filter action = 'REJECT'
+| stats count(*) as rechazos by dstport
+| sort rechazos desc
+| limit 20
+\end{lstlisting}
+    \item Correlacionar el horario de los picos con cambios en Security Groups o despliegues recientes.
+\end{itemize}
+
+\textbf{Escenario 2:}
+\begin{itemize}[leftmargin=*]
+    \item Métricas en el dashboard:
+    \begin{itemize}
+        \item \texttt{NetworkIn/NetworkOut} de instancias y/o Load Balancer.
+        \item \texttt{RequestCount}, \texttt{HTTPCode\_ELB\_4XX}, \texttt{HTTPCode\_ELB\_5XX}.
+        \item Métrica derivada de \texttt{RejectedConnections} vía VPC Flow Logs.
+    \end{itemize}
+    \item Widgets:
+    \begin{itemize}
+        \item Gráficas de línea de tráfico total.
+        \item Gráficas de errores HTTP 4xx/5xx.
+        \item Gráfico de \texttt{RejectedConnections}.
+        \item Widget de estado de alarmas críticas.
+    \end{itemize}
+    \item Alarmas:
+    \begin{itemize}
+        \item Alarma por tasa alta de errores 5xx.
+        \item Alarma por pico de tráfico fuera de rango esperado.
+        \item Alarma por aumento significativo de \texttt{RejectedConnections}.
+    \end{itemize}
+\end{itemize}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+En este laboratorio, el estudiante ha construido un esquema básico pero completo de \textbf{monitoreo de redes} utilizando Amazon CloudWatch como plataforma central de observabilidad. A través de la combinación de \textbf{VPC Flow Logs}, \textbf{métricas derivadas}, \textbf{alarmas} y \textbf{dashboards}, se ha demostrado cómo pasar de una red ``opaca'' a una red \textbf{instrumentada} y \textbf{observable}.
+
+Los principales logros incluyen:
+\begin{itemize}[leftmargin=*]
+    \item Comprender el rol de CloudWatch en la arquitectura de AWS.
+    \item Habilitar y analizar VPC Flow Logs para entender el tráfico permitido y rechazado.
+    \item Derivar métricas significativas (como \texttt{RejectedConnections}) a partir de logs de bajo nivel.
+    \item Configurar alarmas efectivas que permiten reaccionar ante comportamientos de red anómalos, manteniéndose dentro de los límites del \textbf{Free Tier}.
+    \item Construir un dashboard que integra diferentes señales y facilita la detección visual de problemas.
+    \item Utilizar CloudWatch Logs Insights como herramienta de investigación para responder preguntas específicas sobre el comportamiento de la red.
+\end{itemize}
+
+Más allá de los detalles de implementación, el laboratorio enfatiza la importancia de:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Medir constantemente}: la red debe ser observable, no una caja negra.
+    \item \textbf{Filtrar el ruido}: las alarmas deben ser pocas pero relevantes.
+    \item \textbf{Correlacionar datos}: métricas y logs se complementan para contar la historia completa de lo que ocurre en la infraestructura.
+\end{itemize}
+
+Estas habilidades y buenas prácticas son fundamentales para operar entornos de producción en la nube de forma segura, eficiente y resiliente. El trabajo realizado en este laboratorio prepara el camino para arquitecturas más avanzadas donde el monitoreo se integra con automatización, respuesta a incidentes y prácticas de observabilidad de nivel empresarial.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+    \item Amazon CloudWatch Documentation \\
+    \url{https://docs.aws.amazon.com/cloudwatch/}
+    \item Using Amazon CloudWatch Metrics \\
+    \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/working_with_metrics.html}
+    \item VPC Flow Logs \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html}
+    \item CloudWatch Logs Insights \\
+    \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html}
+    \item Creating Amazon CloudWatch Alarms \\
+    \url{https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html}
+    \item CloudWatch Free Tier \\
+    \url{https://aws.amazon.com/cloudwatch/pricing/}
+\end{enumerate}
+
+\subsection{Recursos de Mejores Prácticas}
+
+\begin{enumerate}[leftmargin=*]
+    \item AWS Well-Architected Framework - Operational Excellence and Reliability Pillars \\
+    \url{https://aws.amazon.com/architecture/well-architected/}
+    \item AWS Architecture Center \\
+    \url{https://aws.amazon.com/architecture/}
+\end{enumerate}
+
+\subsection{Bibliografía General}
+
+\begin{enumerate}[leftmargin=*]
+    \item Jones, S. (2020). \textit{Monitoring and Observability in the Cloud}. Cloud Native Press.
+    \item Wittig, A., \& Wittig, M. (2018). \textit{Amazon Web Services in Action} (2nd ed.). Manning Publications.
+\end{enumerate}
+
+\vspace{1cm}
+
+\textbf{Nota:} Las URLs fueron verificadas al momento de elaboración de este laboratorio. Se recomienda revisar periódicamente la documentación oficial de AWS para cambios o nuevas funcionalidades relacionadas con CloudWatch y VPC Flow Logs.
+
+\end{document}

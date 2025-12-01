@@ -1,0 +1,1006 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#6}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 6 - VPC Peering},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#6\par}
+    \vspace{0.5cm}
+    {\Large\bfseries VPC Peering Teórico-Práctico en AWS\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 90 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito - Free Tier)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio introduce y profundiza en el concepto de \textbf{VPC Peering} en Amazon Web Services (AWS), combinando una parte teórica sólida con una práctica guiada detallada. El objetivo es que el estudiante comprenda cómo interconectar redes virtuales privadas (VPCs) de forma segura utilizando peering, conozca sus casos de uso reales, sus \textbf{limitaciones (especialmente la no transitividad)} y sea capaz de diseñar y configurar una arquitectura básica con peering entre dos VPCs sin necesidad de transferir grandes volúmenes de datos.
+
+Durante la práctica, se diseña una arquitectura con dos VPCs que poseen rangos de direcciones no superpuestos; se crea una conexión de peering entre ellas, se actualizan las tablas de ruteo y se ajustan reglas de seguridad para permitir comunicación controlada. Además, se analizan escenarios típicos donde el tráfico no funciona por limitaciones del modelo (como la falta de transitividad) y se discuten alternativas de diseño más escalables como \textbf{AWS Transit Gateway} (a nivel teórico).
+
+El laboratorio está diseñado para operar dentro del \textbf{Free Tier} de AWS: la creación del peering no tiene costo, y las pruebas sugeridas generan volúmenes mínimos de tráfico, por lo que el costo estimado del ejercicio es de \$0.00 siempre que se sigan las buenas prácticas de limpieza de recursos.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} VPC Peering, VPC, Routing, AWS Transit Gateway, Redes Privadas, No Transitividad, Arquitectura en la Nube.
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Comprender y aplicar el concepto de \textbf{VPC Peering} en AWS mediante el diseño, configuración y verificación de una arquitectura que conecta dos VPCs de forma segura, identificando sus casos de uso, limitaciones y alternativas de diseño.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Definir claramente qué es una conexión de VPC Peering y cómo se integra en la arquitectura de red de AWS.
+    \item Identificar \textbf{casos de uso comunes} de VPC Peering en entornos reales (multi-cuenta, multi-ambiente, compartición de servicios).
+    \item Reconocer las \textbf{limitaciones} de VPC Peering, especialmente la \textbf{no transitividad del ruteo} y las restricciones con direcciones IP superpuestas.
+    \item Diseñar una arquitectura básica con dos VPCs conectadas mediante VPC Peering, con rangos de direcciones no solapados.
+    \item Configurar paso a paso una conexión de VPC Peering, incluyendo la creación/aceptación de la conexión y la actualización de tablas de ruteo y reglas de seguridad.
+    \item Realizar pruebas de conectividad controladas que evidencien el funcionamiento correcto del peering sin generar grandes volúmenes de tráfico.
+    \item Discutir y comparar la alternativa de \textbf{AWS Transit Gateway} para escenarios de conectividad más complejos.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Diseño de Redes en la Nube:} Capacidad para diseñar topologías que interconectan múltiples VPCs de forma segura.
+    \item \textbf{Gestión de Ruteo:} Habilidad para configurar tablas de ruteo y entender el flujo de tráfico entre redes.
+    \item \textbf{Análisis de Limitaciones Arquitectónicas:} Comprender los límites del modelo de peering (no transitivo, no edge-to-edge) y su impacto en el diseño.
+    \item \textbf{Evaluación de Alternativas:} Comparar VPC Peering con Transit Gateway en términos de escalabilidad, simplicidad y costo.
+    \item \textbf{Buenas Prácticas de Seguridad:} Aplicar el principio de mínimo privilegio y la segmentación adecuada de redes.
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{Conceptos Fundamentales de VPC Peering}
+
+\subsubsection{Definición de VPC Peering}
+
+Un \textbf{VPC Peering} es una conexión de red entre dos Virtual Private Clouds (VPCs) que permite enrutar tráfico de forma privada utilizando direcciones IP internas, como si ambas VPCs formaran parte de una misma red lógica. Esta conexión:
+\begin{itemize}[leftmargin=*]
+    \item Es \textbf{uno a uno} entre dos VPCs.
+    \item Puede ser \textbf{intra-región} (dentro de la misma región) o \textbf{inter-región} (entre regiones diferentes, en las que el servicio esté soportado).
+    \item Puede ser \textbf{intra-cuenta} (misma cuenta AWS) o \textbf{cross-account} (distintas cuentas).
+    \item No requiere un gateway central ni dispositivos físicos; se basa en la infraestructura de red de AWS.
+\end{itemize}
+
+Una vez establecido el peering y actualizadas las tablas de ruteo, el tráfico entre las VPCs viaja por la red interna de AWS, sin salir a internet público.
+
+\subsubsection{Requisitos Clave}
+
+Para crear una conexión de VPC Peering válida se requiere:
+\begin{itemize}[leftmargin=*]
+    \item Que los rangos de direcciones IPv4 (y/o IPv6) \textbf{no se solapen} entre las VPCs.
+    \item Que las tablas de ruteo de cada VPC se actualicen para enviar tráfico hacia el rango de la otra a través del peering.
+    \item Que las reglas de seguridad (\textit{Security Groups} y, en su caso, NACLs) permitan el tráfico entre las VPCs.
+\end{itemize}
+
+\subsection{Características Importantes de VPC Peering}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{No es transitivo:} Si la VPC A está conectada con la VPC B, y B con C, el tráfico de A hacia C \textbf{no se enruta automáticamente} a través de B.
+    \item \textbf{Sin NAT ni VPN adicionales:} La comunicación se realiza con direcciones IP privadas, sin necesidad de IP públicas ni túneles.
+    \item \textbf{Alta disponibilidad:} La conexión de peering se construye sobre la infraestructura redundante de AWS.
+    \item \textbf{Facturación:} La \textbf{creación y mantenimiento} del peering no tiene costo. Sin embargo, la \textbf{transferencia de datos} entre VPCs puede facturarse según la región y el tipo de tráfico (especialmente en peering inter-región).
+\end{itemize}
+
+\subsection{Casos de Uso Reales}
+
+Algunos escenarios típicos donde se utiliza VPC Peering son:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Separación por ambiente:} Una VPC para desarrollo (\texttt{Dev-VPC}) y otra para producción (\texttt{Prod-VPC}), donde ciertos servicios (por ejemplo, herramientas compartidas) necesitan comunicarse.
+    \item \textbf{Arquitectura multi-cuenta:} Cada equipo o unidad de negocio tiene su propia cuenta AWS y VPC aislada; los servicios centrales (logging, monitoreo, directorio) viven en una VPC compartida a la que se hace peering.
+    \item \textbf{Compartición de servicios comunes:} Una VPC contiene servicios compartidos como \textit{bastion hosts}, servidores de actualización, repositorios de artefactos, y se hace peering con varias VPCs de aplicación.
+    \item \textbf{Migraciones progresivas:} Una VPC antigua y una nueva conviven mientras se migra la carga de trabajo; el peering actúa como puente temporal.
+\end{itemize}
+
+Estos casos ilustran cómo el peering permite \textbf{aislar} aplicaciones pero seguir facilitando la conectividad controlada.
+
+\subsection{Limitaciones de VPC Peering}
+
+\subsubsection{No Transitividad}
+
+La limitación más relevante es que \textbf{VPC Peering no es un mecanismo de ruteo transitivo}. Esto implica:
+
+\begin{itemize}[leftmargin=*]
+    \item Si tienes la VPC A en peering con B, y B en peering con C:
+    \begin{itemize}
+        \item A puede hablar con B.
+        \item B puede hablar con C.
+        \item A \textbf{no puede} hablar con C a través de B utilizando solo peering.
+    \end{itemize}
+    \item No es posible usar una VPC como ``hub'' de ruteo para otras VPCs únicamente con VPC Peering.
+\end{itemize}
+
+\subsubsection{Rangos IP no superpuestos}
+
+Las VPCs involucradas en un peering deben tener rangos CIDR que \textbf{no se solapen}. Si los rangos tienen intersección, la conexión de peering no se puede establecer.
+
+\subsubsection{Restricciones de Edge-to-Edge}
+
+AWS establece restricciones para evitar que VPC Peering se utilice como un túnel arbitrario entre endpoints:
+
+\begin{itemize}[leftmargin=*]
+    \item No se permite usar VPC Peering para enrutar tráfico desde o hacia:
+    \begin{itemize}
+        \item Internet Gateway (IGW) de forma transitiva.
+        \item VPNs o Direct Connect de otra VPC.
+        \item Endpoints de VPC en otra VPC (en general, no se permite saltar)
+    \end{itemize}
+\end{itemize}
+
+En otras palabras, un VPC Peering es para comunicación \textbf{directa} entre las dos VPCs, no para crear un backbone de ruteo global.
+
+\subsection{Diseño de Arquitectura con VPC Peering}
+
+\subsubsection{Ejemplo de Arquitectura Lógica}
+
+Consideremos el siguiente escenario:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{VPC-A (Aplicaciones)}: \texttt{10.10.0.0/16}, con subredes públicas y privadas, donde viven los servidores web.
+    \item \textbf{VPC-B (Servicios Compartidos)}: \texttt{10.20.0.0/16}, donde viven servicios de monitorización, logging o bases de datos compartidas.
+\end{itemize}
+
+Queremos que las instancias en la subred privada de VPC-A puedan comunicarse con un servidor de logging en VPC-B sin exponer nada a internet.
+
+\subsubsection{Diagrama Conceptual con TikZ}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    vpc/.style={rectangle, rounded corners, draw=blue!60, fill=blue!5, thick, minimum width=5cm, minimum height=3cm},
+    node distance=4cm
+]
+\node[vpc] (vpcA) {
+    \begin{minipage}{5cm}
+    \centering
+    \textbf{VPC-A}\\
+    CIDR: 10.10.0.0/16\\
+    \vspace{0.2cm}
+    \textit{App/Web}
+    \end{minipage}
+};
+
+\node[vpc, right=of vpcA] (vpcB) {
+    \begin{minipage}{5cm}
+    \centering
+    \textbf{VPC-B}\\
+    CIDR: 10.20.0.0/16\\
+    \vspace{0.2cm}
+    \textit{Servicios Compartidos}
+    \end{minipage}
+};
+
+\draw[<->, thick, dashed] (vpcA) -- node[above]{\textbf{VPC Peering}} (vpcB);
+
+\end{tikzpicture}
+\caption{Arquitectura lógica básica con VPC Peering entre dos VPCs}
+\end{figure}
+
+\subsection{Alternativa: AWS Transit Gateway (Teoría)}
+
+Cuando el número de VPCs empieza a crecer (por ejemplo, decenas o cientos de VPCs en múltiples cuentas y regiones), gestionar conexiones de VPC Peering \textbf{en malla completa} se vuelve complejo:
+\begin{itemize}[leftmargin=*]
+    \item Para $N$ VPCs, una malla completa requeriría $\frac{N(N-1)}{2}$ conexiones de peering.
+\end{itemize}
+
+\textbf{AWS Transit Gateway (TGW)} es un servicio que actúa como un \textbf{hub central} (router gestionado por AWS) al que se adjuntan VPCs, redes on-premise (VPN, Direct Connect) y, opcionalmente, otras Transit Gateways.
+
+Características principales:
+
+\begin{itemize}[leftmargin=*]
+    \item Proporciona \textbf{ruteo transitivo}: las VPCs conectadas al TGW pueden comunicarse entre sí siguiendo las tablas de ruteo del TGW.
+    \item Facilita arquitecturas \textbf{hub-and-spoke}: un núcleo central y múltiples VPCs conectadas como radios.
+    \item Es un servicio de pago: se cobra por hora de uso y por volumen de datos procesados.
+\end{itemize}
+
+En este laboratorio, Transit Gateway se aborda \textbf{solo a nivel conceptual} como alternativa escalable a VPC Peering en topologías grandes.
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Necesarios}
+
+\begin{itemize}[leftmargin=*]
+    \item Haber completado los laboratorios previos de VPC, subredes, routing e instancias EC2.
+    \item Conocer los conceptos básicos de:
+    \begin{itemize}
+        \item Direccionamiento IP y CIDR.
+        \item Tablas de ruteo (\textit{Route Tables}).
+        \item Security Groups.
+    \end{itemize}
+    \item Manejo básico de la consola de AWS.
+\end{itemize}
+
+\subsection{Recursos Requeridos}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cuenta AWS} activa y dentro de los límites del Free Tier.
+    \item \textbf{Usuario IAM} con permisos administrativos sobre VPC, EC2 y CloudWatch.
+    \item \textbf{Región AWS} seleccionada (por ejemplo, \texttt{us-east-1} o \texttt{sa-east-1}).
+    \item \textbf{Infraestructura base mínima:}
+    \begin{itemize}
+        \item VPC existente de laboratorios anteriores (\texttt{VPC-Principal}) o una nueva creada en este lab.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Costos Estimados}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Concepto} & \textbf{Costo Estimado} \\
+\hline
+Creación de VPC Peering & \$0.00 \\
+Tráfico entre VPCs (bajo volumen de pruebas) & \$0.00 (Free Tier / costo despreciable) \\
+Instancias EC2 t2.micro/t3.micro de prueba & Incluidas en Free Tier (si se respetan horas) \\
+\hline
+\textbf{TOTAL} & \textbf{\$0.00} \\
+\hline
+\end{tabular}
+\caption{Costos del Laboratorio 6}
+\end{table}
+
+\textbf{NOTA:} Crear la conexión de peering es gratuito. El tráfico de datos entre VPCs puede generar costo dependiendo de la región y del volumen, pero en este laboratorio se realizan solo pruebas mínimas y breves, por lo que el costo esperado es \$0.00.
+
+\subsection{Tiempo Estimado}
+
+\begin{itemize}[leftmargin=*]
+    \item Lectura del marco teórico: 20 minutos.
+    \item Creación de VPC secundaria y configuración básica: 20 minutos.
+    \item Creación y aceptación de VPC Peering: 15 minutos.
+    \item Actualización de tablas de ruteo y SGs: 20 minutos.
+    \item Verificación, pruebas y limpieza: 15 minutos.
+    \item \textbf{TOTAL ESTIMADO:} 90 minutos.
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+En este laboratorio crearemos dos VPCs simples y estableceremos una conexión de VPC Peering entre ellas. Luego, configuraremos ruteo y reglas de seguridad para permitir comunicación controlada.
+
+\subsection{Paso 1: Definir el Escenario y Rangos de Direcciones}
+
+\textbf{Objetivo:} Definir qué VPCs se van a interconectar y con qué rangos CIDR.
+
+\subsubsection*{Valores Recomendados}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{VPC-A (Aplicaciones):}
+    \begin{itemize}
+        \item Nombre: \texttt{VPC-A-Lab6}
+        \item CIDR: \texttt{10.10.0.0/16}
+        \item Subred pública: \texttt{10.10.1.0/24}
+    \end{itemize}
+    \item \textbf{VPC-B (Servicios):}
+    \begin{itemize}
+        \item Nombre: \texttt{VPC-B-Lab6}
+        \item CIDR: \texttt{10.20.0.0/16}
+        \item Subred pública: \texttt{10.20.1.0/24}
+    \end{itemize}
+\end{itemize}
+
+\textbf{Requisito crítico:} Los rangos \texttt{10.10.0.0/16} y \texttt{10.20.0.0/16} \textbf{no se solapan}.
+
+\subsection{Paso 2: Crear la VPC-A (si no existe)}
+
+Si ya tienes una VPC principal de laboratorios anteriores con un rango similar, puedes usarla. En caso contrario:
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la consola de AWS, ir a \textbf{VPC}.
+    \item Hacer clic en \textbf{Your VPCs}.
+    \item Hacer clic en \textbf{Create VPC}.
+    \item Seleccionar \textbf{VPC only}.
+    \item Completar:
+    \begin{itemize}
+        \item \textbf{Name tag:} \texttt{VPC-A-Lab6}
+        \item \textbf{IPv4 CIDR:} \texttt{10.10.0.0/16}
+        \item Dejar el resto por defecto.
+    \end{itemize}
+    \item Crear la VPC.
+    \item Crear una subred pública:
+    \begin{enumerate}[leftmargin=*]
+        \item Ir a \textbf{Subnets} $\rightarrow$ \textbf{Create subnet}.
+        \item Seleccionar \texttt{VPC-A-Lab6}.
+        \item \textbf{Name:} \texttt{Public-Subnet-A}.
+        \item \textbf{Availability Zone:} cualquiera.
+        \item \textbf{CIDR:} \texttt{10.10.1.0/24}.
+        \item Crear.
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Paso 3: Crear la VPC-B}
+
+\textbf{Objetivo:} Crear una segunda VPC independiente que se conectará mediante peering.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item En \textbf{Your VPCs}, hacer clic en \textbf{Create VPC}.
+    \item Seleccionar \textbf{VPC only}.
+    \item Completar:
+    \begin{itemize}
+        \item \textbf{Name tag:} \texttt{VPC-B-Lab6}
+        \item \textbf{IPv4 CIDR:} \texttt{10.20.0.0/16}
+    \end{itemize}
+    \item Crear la VPC.
+    \item Crear subred pública:
+    \begin{enumerate}[leftmargin=*]
+        \item Ir a \textbf{Subnets} $\rightarrow$ \textbf{Create subnet}.
+        \item VPC: \texttt{VPC-B-Lab6}.
+        \item \textbf{Name:} \texttt{Public-Subnet-B}.
+        \item \textbf{CIDR:} \texttt{10.20.1.0/24}.
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Paso 4: Lanzar Instancias EC2 de Prueba (Opcional pero Recomendado)}
+
+\textbf{Objetivo:} Tener una instancia de prueba en cada VPC para validar conectividad.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir al servicio \textbf{EC2}.
+    \item Lanzar una instancia en \texttt{VPC-A-Lab6}:
+    \begin{itemize}
+        \item Nombre: \texttt{Instance-A-Lab6}.
+        \item AMI: Amazon Linux 2 (Free Tier).
+        \item Tipo: \texttt{t2.micro} o \texttt{t3.micro} (Free Tier).
+        \item Red: \texttt{VPC-A-Lab6}.
+        \item Subred: \texttt{Public-Subnet-A}.
+        \item Auto-assign Public IP: habilitado (para conectarte desde tu equipo si quieres).
+        \item Security Group: crear uno llamado \texttt{SG-A-Lab6}, con:
+        \begin{itemize}
+            \item SSH (22) desde tu IP (\texttt{My IP}).
+            \item ICMP (All) desde \texttt{10.0.0.0/8} (para pruebas entre VPCs).
+        \end{itemize}
+    \end{itemize}
+    \item Repetir para \texttt{VPC-B-Lab6}:
+    \begin{itemize}
+        \item Nombre: \texttt{Instance-B-Lab6}.
+        \item Red: \texttt{VPC-B-Lab6}.
+        \item Subred: \texttt{Public-Subnet-B}.
+        \item Security Group: \texttt{SG-B-Lab6}, similar al anterior.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Nota:} Estas instancias se usarán solo para \textbf{pings y pruebas ligeras}, sin transferencia intensiva de datos.
+
+\subsection{Paso 5: Crear la Conexión de VPC Peering}
+
+\textbf{Objetivo:} Establecer el peering entre \texttt{VPC-A-Lab6} y \texttt{VPC-B-Lab6}.
+
+\subsubsection{Instrucciones}
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir al servicio \textbf{VPC}.
+    \item En el panel izquierdo, hacer clic en \textbf{Peering Connections}.
+    \item Hacer clic en \textbf{Create peering connection}.
+    \item Completar:
+    \begin{itemize}
+        \item \textbf{Name tag:} \texttt{Peering-A-B-Lab6}.
+        \item \textbf{VPC (requester):} seleccionar \texttt{VPC-A-Lab6}.
+        \item \textbf{Account:} \texttt{My account} (para este laboratorio).
+        \item \textbf{Region:} misma región.
+        \item \textbf{VPC (accepter):} seleccionar \texttt{VPC-B-Lab6}.
+    \end{itemize}
+    \item Hacer clic en \textbf{Create peering connection}.
+\end{enumerate}
+
+En este punto, la conexión queda en estado \texttt{Pending Acceptance}.
+
+\subsection{Paso 6: Aceptar la Conexión de Peering}
+
+\begin{enumerate}[leftmargin=*]
+    \item En \textbf{Peering Connections}, seleccionar \texttt{Peering-A-B-Lab6}.
+    \item En la parte superior, hacer clic en \textbf{Actions} $\rightarrow$ \textbf{Accept request}.
+    \item Confirmar la aceptación.
+    \item Verificar que el estado cambie a \texttt{Active}.
+\end{enumerate}
+
+\subsection{Paso 7: Actualizar las Tablas de Ruteo}
+
+\textbf{Objetivo:} Indicar explícitamente que el tráfico hacia la otra VPC debe salir por la conexión de peering.
+
+\subsubsection{Ruteo en VPC-A}
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{Route Tables}.
+    \item Filtrar por \texttt{VPC-A-Lab6}.
+    \item Seleccionar la tabla de ruteo asociada a \texttt{Public-Subnet-A}.
+    \item En la pestaña \textbf{Routes}, hacer clic en \textbf{Edit routes}.
+    \item Agregar una ruta:
+    \begin{itemize}
+        \item \textbf{Destination:} \texttt{10.20.0.0/16} (rango de \texttt{VPC-B-Lab6}).
+        \item \textbf{Target:} seleccionar la conexión de peering \texttt{Peering-A-B-Lab6}.
+    \end{itemize}
+    \item Guardar cambios.
+\end{enumerate}
+
+\subsubsection{Ruteo en VPC-B}
+
+\begin{enumerate}[leftmargin=*]
+    \item Repetir el proceso anterior, pero ahora:
+    \begin{itemize}
+        \item Filtrar por \texttt{VPC-B-Lab6}.
+        \item Seleccionar la tabla de ruteo de \texttt{Public-Subnet-B}.
+        \item Agregar ruta:
+        \begin{itemize}
+            \item \textbf{Destination:} \texttt{10.10.0.0/16}.
+            \item \textbf{Target:} \texttt{Peering-A-B-Lab6}.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 8: Ajustar Security Groups para Permitir Tráfico desde la VPC Remota}
+
+\textbf{Objetivo:} Permitir tráfico ICMP (ping) y, opcionalmente, SSH entre las instancias de ambas VPCs.
+
+\subsubsection{Security Group de Instance-A-Lab6}
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{EC2} $\rightarrow$ \textbf{Security Groups}.
+    \item Seleccionar \texttt{SG-A-Lab6}.
+    \item En \textbf{Inbound rules} $\rightarrow$ \textbf{Edit inbound rules}.
+    \item Asegurar que existe una regla:
+    \begin{itemize}
+        \item \textbf{Type:} All ICMP - IPv4.
+        \item \textbf{Source:} \texttt{10.20.0.0/16}.
+        \item \textbf{Description:} \texttt{Ping desde VPC-B-Lab6}.
+    \end{itemize}
+    \item Opcionalmente, permitir SSH desde \texttt{10.20.0.0/16} (solo para pruebas internas).
+\end{enumerate}
+
+\subsubsection{Security Group de Instance-B-Lab6}
+
+\begin{enumerate}[leftmargin=*]
+    \item Repetir el proceso para \texttt{SG-B-Lab6}, agregando:
+    \begin{itemize}
+        \item \textbf{Type:} All ICMP - IPv4.
+        \item \textbf{Source:} \texttt{10.10.0.0/16}.
+        \item \textbf{Description:} \texttt{Ping desde VPC-A-Lab6}.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 9: Pruebas de Conectividad (Controladas)}
+
+\textbf{Objetivo:} Validar que la conexión de peering, las rutas y los SGs están configurados correctamente, sin necesidad de transferir grandes volúmenes de datos.
+
+\begin{enumerate}[leftmargin=*]
+    \item Conectarse por SSH a \texttt{Instance-A-Lab6} desde tu máquina (usando su IP pública).
+    \item Dentro de \texttt{Instance-A-Lab6}, hacer ping a la IP privada de \texttt{Instance-B-Lab6}, por ejemplo:
+\end{enumerate}
+
+\begin{lstlisting}[language=bash, caption=Ping desde VPC-A hacia VPC-B]
+ping 10.20.1.10
+\end{lstlisting}
+
+\begin{enumerate}[leftmargin=*]
+    \setcounter{enumi}{2}
+    \item Deberías recibir respuestas ICMP exitosas (tiempos de respuesta bajos).
+    \item Repetir desde \texttt{Instance-B-Lab6} hacia la IP privada de \texttt{Instance-A-Lab6}.
+    \item Estas pruebas son de tráfico mínimo (ICMP), suficientes para validar la conectividad.
+\end{enumerate}
+
+\subsection{Paso 10: Explorar la No Transitividad (Ejercicio Conceptual)}
+
+\textbf{Opcional (Teórico/Práctico):} Si el tiempo lo permite, se puede crear una tercera VPC \texttt{VPC-C-Lab6} y establecer peering con \texttt{VPC-B-Lab6}, comprobando que:
+
+\begin{itemize}[leftmargin=*]
+    \item A puede hablar con B.
+    \item B puede hablar con C.
+    \item A \textbf{no} puede hablar con C a través de B usando solo peering.
+\end{itemize}
+
+El estudiante debe verificar que, aunque se intenten agregar rutas, AWS no permite usar peering como enlace transitivo.
+
+\newpage
+
+% ================== TABLAS DE CONFIGURACIÓN ==================
+\section{Tablas de Configuración}
+
+\subsection{Resumen de VPCs y Subredes}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Recurso} & \textbf{Nombre} & \textbf{CIDR} & \textbf{Descripción} \\
+\hline
+VPC & VPC-A-Lab6 & 10.10.0.0/16 & VPC de aplicaciones \\
+\hline
+Subred & Public-Subnet-A & 10.10.1.0/24 & Subred pública en VPC-A \\
+\hline
+VPC & VPC-B-Lab6 & 10.20.0.0/16 & VPC de servicios \\
+\hline
+Subred & Public-Subnet-B & 10.20.1.0/24 & Subred pública en VPC-B \\
+\hline
+\end{tabular}
+\caption{VPCs y subredes utilizadas en el laboratorio}
+\end{table}
+
+\subsection{Tablas de Ruteo}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tabla de Ruteo} & \textbf{Destino (CIDR)} & \textbf{Target} \\
+\hline
+RTB-A & 10.10.0.0/16 & Local \\
+\hline
+RTB-A & 10.20.0.0/16 & Peering-A-B-Lab6 \\
+\hline
+RTB-B & 10.20.0.0/16 & Local \\
+\hline
+RTB-B & 10.10.0.0/16 & Peering-A-B-Lab6 \\
+\hline
+\end{tabular}
+\caption{Rutas configuradas en las tablas de ruteo}
+\end{table}
+
+\subsection{Security Groups}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{SG} & \textbf{Tipo} & \textbf{Reglas Inbound Principales} \\
+\hline
+SG-A-Lab6 & Instancia A & SSH (22) desde My IP; ICMP desde 10.20.0.0/16 \\
+\hline
+SG-B-Lab6 & Instancia B & SSH (22) desde My IP; ICMP desde 10.10.0.0/16 \\
+\hline
+\end{tabular}
+\caption{Reglas de Security Groups para pruebas de peering}
+\end{table}
+
+\newpage
+
+% ================== VERIFICACIÓN ==================
+\section{Verificación del Funcionamiento}
+
+\subsection{Verificación del Estado de la Conexión de Peering}
+
+\begin{enumerate}[leftmargin=*]
+    \item En el servicio \textbf{VPC}, ir a \textbf{Peering Connections}.
+    \item Verificar que \texttt{Peering-A-B-Lab6} aparece con estado \texttt{Active}.
+    \item Confirmar que las VPCs asociadas son \texttt{VPC-A-Lab6} y \texttt{VPC-B-Lab6}.
+\end{enumerate}
+
+\subsection{Verificación de Rutas}
+
+\begin{enumerate}[leftmargin=*]
+    \item En \textbf{Route Tables}, seleccionar la tabla de ruteo de \texttt{Public-Subnet-A}.
+    \item Verificar que existe una ruta hacia \texttt{10.20.0.0/16} apuntando a \texttt{Peering-A-B-Lab6}.
+    \item Repetir para \texttt{Public-Subnet-B}, confirmando la ruta hacia \texttt{10.10.0.0/16}.
+\end{enumerate}
+
+\subsection{Pruebas de Conectividad entre Instancias}
+
+\begin{enumerate}[leftmargin=*]
+    \item Conectarse por SSH a \texttt{Instance-A-Lab6}.
+    \item Ejecutar:
+\end{enumerate}
+
+\begin{lstlisting}[language=bash, caption=Prueba de ping hacia la instancia en VPC-B]
+ping 10.20.1.X
+\end{lstlisting}
+
+\begin{enumerate}[leftmargin=*]
+    \setcounter{enumi}{2}
+    \item Verificar que se reciben respuestas (TTL y tiempo).
+    \item Hacer la prueba inversa desde \texttt{Instance-B-Lab6}.
+\end{enumerate}
+
+\subsection{Verificación de No Transitividad (Si se creó VPC-C)}
+
+Si se creó una tercera VPC \texttt{VPC-C-Lab6}, con peering solo hacia \texttt{VPC-B-Lab6}, el estudiante puede comprobar que:
+
+\begin{itemize}[leftmargin=*]
+    \item Aún agregando rutas, AWS no permite usar una conexión de peering como tránsito para otra VPC.
+    \item El tráfico de \texttt{VPC-A-Lab6} hacia \texttt{VPC-C-Lab6} no funcionará mediante peering doble.
+\end{itemize}
+
+\newpage
+
+% ================== LIMPIEZA DE RECURSOS ==================
+\section{Limpieza de Recursos}
+
+\textbf{Objetivo:} Evitar costos innecesarios y mantener el entorno ordenado.
+
+\subsection{Pasos de Limpieza}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Instancias EC2}
+    \begin{itemize}
+        \item Detener y terminar \texttt{Instance-A-Lab6} y \texttt{Instance-B-Lab6} si no se reutilizarán.
+    \end{itemize}
+    \item \textbf{Peering Connection}
+    \begin{itemize}
+        \item Ir a \textbf{Peering Connections}.
+        \item Seleccionar \texttt{Peering-A-B-Lab6}.
+        \item \textbf{Actions} $\rightarrow$ \textbf{Delete peering connection}.
+    \end{itemize}
+    \item \textbf{VPC-B-Lab6 (si solo se usa en este lab)}
+    \begin{itemize}
+        \item Eliminar recursos asociados (subredes, tablas de ruteo personalizadas, gateways).
+        \item Eliminar la VPC desde \textbf{Your VPCs}.
+    \end{itemize}
+    \item \textbf{VPC-A-Lab6}
+    \begin{itemize}
+        \item Si es una VPC creada solo para este lab y no se reutilizará, eliminar recursos y luego eliminar la VPC.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Comando CLI Opcional para Ver Instancias}
+
+\begin{lstlisting}[language=bash, caption=Listar instancias EC2 y sus estados]
+aws ec2 describe-instances \
+  --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PrivateIpAddress,Tags]' \
+  --output table
+\end{lstlisting}
+
+\newpage
+
+% ================== CUESTIONARIO INTEGRADO ==================
+\section{Cuestionario de Evaluación}
+
+\textbf{Instrucciones:} Contesta las siguientes preguntas. Las respuestas sugeridas se encuentran al final del cuestionario.
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Qué es una conexión de VPC Peering en AWS?}
+\begin{enumerate}[label=\alph*)]
+    \item Un túnel VPN entre una VPC y un data center on-premise.
+    \item Un enlace privado entre dos VPCs que permite tráfico usando direcciones IP privadas.
+    \item Un gateway público para exponer una VPC a internet.
+    \item Un servicio administrado para enrutar tráfico entre regiones y on-premise.
+\end{enumerate}
+
+\item \textbf{¿Cuál de las siguientes afirmaciones sobre VPC Peering es correcta?}
+\begin{enumerate}[label=\alph*)]
+    \item Es transitivo: si A se conecta con B y B con C, A puede contactar C.
+    \item Requiere que las VPCs tengan rangos de IP superpuestos.
+    \item No es transitivo y requiere rangos de IP no superpuestos.
+    \item Solo funciona entre VPCs en diferentes cuentas.
+\end{enumerate}
+
+\item \textbf{¿Cuándo tiene sentido usar VPC Peering?}
+\begin{enumerate}[label=\alph*)]
+    \item Para conectar dos VPCs que requieren comunicación privada directa.
+    \item Para conectar cientos de VPCs y actuar como router central.
+    \item Para exponer una VPC entera a internet.
+    \item Para reemplazar completamente el uso de Security Groups.
+\end{enumerate}
+
+\item \textbf{¿Qué se necesita para que dos instancias en VPCs conectadas por peering se comuniquen?}
+\begin{enumerate}[label=\alph*)]
+    \item Solo crear la conexión de peering; no se requiere nada más.
+    \item Crear la conexión de peering y actualizar tablas de ruteo y reglas de seguridad.
+    \item Deshabilitar todas las reglas de seguridad en ambas VPCs.
+    \item Asignar IPs públicas a todas las instancias.
+\end{enumerate}
+
+\item \textbf{En una conexión de VPC Peering, la creación de la conexión es:}
+\begin{enumerate}[label=\alph*)]
+    \item Siempre de pago, independiente del tráfico.
+    \item Gratuita; el costo se asocia principalmente al tráfico de datos.
+    \item Gratuita solo si las VPCs están en distintas regiones.
+    \item Gratuita solo si las VPCs están en distintas cuentas.
+\end{enumerate}
+
+\item \textbf{¿Cuál de las siguientes es una limitación de VPC Peering?}
+\begin{enumerate}[label=\alph*)]
+    \item No permite comunicación entre VPCs en la misma región.
+    \item Solo permite tráfico HTTP.
+    \item No soporta ruteo transitivo.
+    \item Solo permite tráfico unidireccional.
+\end{enumerate}
+
+\item \textbf{¿Qué alternativa ofrece AWS para escenarios con muchas VPCs que necesitan conectividad transitiva?}
+\begin{enumerate}[label=\alph*)]
+    \item Amazon S3.
+    \item AWS Transit Gateway.
+    \item Amazon CloudFront.
+    \item AWS Lambda.
+\end{enumerate}
+
+\item \textbf{¿Cuál es un caso de uso típico de VPC Peering?}
+\begin{enumerate}[label=\alph*)]
+    \item Conectar una VPC con internet público.
+    \item Conectar una VPC de producción con una VPC de servicios compartidos.
+    \item Conectar varias VPCs para formar un gran backbone global transitivo.
+    \item Reemplazar todas las VPN site-to-site.
+\end{enumerate}
+
+\item \textbf{En el contexto de seguridad, usar VPC Peering permite:}
+\begin{enumerate}[label=\alph*)]
+    \item Evitar el uso de Security Groups.
+    \item Seguir aplicando el principio de mínimo privilegio a nivel de SG y rutas entre VPCs.
+    \item Obligar a que todo tráfico pase por internet público.
+    \item Deshabilitar el uso de NACLs en ambas VPCs.
+\end{enumerate}
+
+\item \textbf{Si dos VPCs tienen rangos \texttt{10.0.0.0/16} y \texttt{10.0.1.0/24}, ¿pueden hacer peering?}
+\begin{enumerate}[label=\alph*)]
+    \item Sí, porque son rangos completamente distintos.
+    \item Sí, pero solo si están en diferentes regiones.
+    \item No, porque los rangos se superponen.
+    \item Solo si el tráfico es únicamente ICMP.
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Preguntas Verdadero/Falso}
+
+\begin{enumerate}[label=\textbf{VF\arabic*.}]
+
+\item \textbf{En una conexión de VPC Peering, el tráfico entre VPCs siempre viaja por internet público.}
+
+\item \textbf{VPC Peering puede ser utilizado entre VPCs en la misma cuenta o entre cuentas diferentes.}
+
+\item \textbf{Las tablas de ruteo de cada VPC deben actualizarse explícitamente para utilizar la conexión de peering.}
+
+\end{enumerate}
+
+\subsection{Escenarios Prácticos}
+
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+
+\item \textbf{Escenario 1: Entorno multi-ambiente}
+
+Tienes dos VPCs en la misma cuenta:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{VPC-Dev}: ambiente de desarrollo.
+    \item \texttt{VPC-Prod}: ambiente de producción.
+\end{itemize}
+El equipo de Dev necesita acceder a un servicio compartido (por ejemplo, un repositorio interno) que vive en \texttt{VPC-Prod}, pero no debe acceder libremente a todas las instancias de producción.
+
+\textbf{Pregunta:} ¿Cómo diseñarías el VPC Peering y las reglas de ruteo/seguridad para permitir solo el acceso necesario al servicio compartido, aplicando mínimo privilegio?
+
+\item \textbf{Escenario 2: Crecimiento de VPCs}
+
+Una organización empezó con una arquitectura pequeña y usó VPC Peering para conectar 3 VPCs. Ahora planea tener 20 VPCs en distintas cuentas y quiere conectividad flexible entre muchas de ellas.
+
+\textbf{Pregunta:} ¿Por qué VPC Peering puede empezar a ser problemático en este escenario? ¿Por qué AWS Transit Gateway podría ser una mejor opción a mediano y largo plazo?
+
+\end{enumerate}
+
+\newpage
+
+\subsection{Respuestas del Cuestionario}
+
+\subsubsection*{Selección Múltiple}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{b)} Un enlace privado entre dos VPCs que permite tráfico usando direcciones IP privadas.
+    \item \textbf{c)} No es transitivo y requiere rangos de IP no superpuestos.
+    \item \textbf{a)} Para conectar dos VPCs que requieren comunicación privada directa.
+    \item \textbf{b)} Crear la conexión de peering y actualizar tablas de ruteo y reglas de seguridad.
+    \item \textbf{b)} Gratuita; el costo se asocia principalmente al tráfico de datos.
+    \item \textbf{c)} No soporta ruteo transitivo.
+    \item \textbf{b)} AWS Transit Gateway.
+    \item \textbf{b)} Conectar una VPC de producción con una VPC de servicios compartidos.
+    \item \textbf{b)} Seguir aplicando el principio de mínimo privilegio a nivel de SG y rutas entre VPCs.
+    \item \textbf{c)} No, porque los rangos se superponen.
+\end{enumerate}
+
+\subsubsection*{Verdadero/Falso}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Falso.} El tráfico viaja por la red interna de AWS, no por internet público.
+    \item \textbf{Verdadero.} VPC Peering soporta escenarios intra-cuenta y cross-account.
+    \item \textbf{Verdadero.} Sin actualización de tablas de ruteo, el peering no se usa para enrutar tráfico.
+\end{enumerate}
+
+\subsubsection*{Guía para Escenarios}
+
+\textbf{Escenario 1:}
+\begin{itemize}[leftmargin=*]
+    \item Establecer peering entre \texttt{VPC-Dev} y \texttt{VPC-Prod}.
+    \item En \texttt{VPC-Prod}, aislar el servicio compartido en subred y SG específicos.
+    \item Configurar rutas que permitan tráfico solo hacia el rango del servicio compartido.
+    \item Ajustar Security Groups para permitir tráfico desde rangos/SGs de \texttt{VPC-Dev} únicamente hacia el puerto/servicio necesario.
+\end{itemize}
+
+\textbf{Escenario 2:}
+\begin{itemize}[leftmargin=*]
+    \item Con 20 VPCs, una malla completa de VPC Peering requiere muchas conexiones y mantenimiento complejo.
+    \item No se obtiene ruteo transitivo, lo que complica aún más los diseños.
+    \item Un Transit Gateway actúa como hub, permitiendo ruteo centralizado, simplificando la gestión y haciendo más escalable la topología.
+\end{itemize}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+En este laboratorio se ha explorado de forma teórico-práctica el uso de \textbf{VPC Peering} como mecanismo fundamental para interconectar redes privadas en AWS. A través de la construcción de un escenario con dos VPCs y la configuración detallada de peering, ruteo y seguridad, el estudiante ha podido observar cómo se habilita comunicación privada entre dominios de red aislados sin exponer recursos a internet.
+
+Se ha destacado la importancia de:
+\begin{itemize}[leftmargin=*]
+    \item Utilizar rangos de direcciones \textbf{no superpuestos}.
+    \item Actualizar adecuadamente las \textbf{tablas de ruteo} en ambos lados.
+    \item Ajustar \textbf{Security Groups} para permitir solo el tráfico estrictamente necesario, alineado con el \textbf{principio de mínimo privilegio}.
+\end{itemize}
+
+Asimismo, se han analizado las \textbf{limitaciones} del modelo, en particular la \textbf{no transitividad} y las restricciones de edge-to-edge. Esto es clave para evitar diseños incorrectos donde se pretendan usar VPCs como routers genéricos. Finalmente, se introdujo \textbf{AWS Transit Gateway} como solución más adecuada cuando el número de VPCs y la complejidad de la topología crecen, resaltando la necesidad de elegir la herramienta correcta según la escala del problema.
+
+Este laboratorio no solo fortalece conocimientos técnicos sobre VPC Peering, sino que también refuerza la capacidad de razonar sobre arquitectura de redes en la nube, sopesar alternativas y aplicar buenas prácticas de seguridad y diseño.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{VPC Peering}
+    \begin{itemize}[leftmargin=*]
+        \item VPC Peering Guide \\
+        \url{https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html}
+        \item VPC Peering Limitations \\
+        \url{https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html}
+    \end{itemize}
+    
+    \item \textbf{Amazon VPC}
+    \begin{itemize}[leftmargin=*]
+        \item Amazon VPC Documentation \\
+        \url{https://docs.aws.amazon.com/vpc/}
+        \item IP Addressing in Your VPC \\
+        \url{https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html}
+    \end{itemize}
+    
+    \item \textbf{AWS Transit Gateway}
+    \begin{itemize}[leftmargin=*]
+        \item AWS Transit Gateway Documentation \\
+        \url{https://docs.aws.amazon.com/transitgateway/}
+        \item Transit Gateway Peering and Routing \\
+        \url{https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html}
+    \end{itemize}
+    
+    \item \textbf{Security Groups y Routing}
+    \begin{itemize}[leftmargin=*]
+        \item Amazon EC2 Security Groups for Linux Instances \\
+        \url{https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html}
+        \item Route Tables \\
+        \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Recursos de Arquitectura y Mejores Prácticas}
+
+\begin{enumerate}[leftmargin=*]
+    \item AWS Architecture Center \\
+    \url{https://aws.amazon.com/architecture/}
+    \item AWS Well-Architected Framework - Security Pillar \\
+    \url{https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html}
+\end{enumerate}
+
+\subsection{Bibliografía General de Redes y Arquitectura}
+
+\begin{enumerate}[leftmargin=*]
+    \item Tanenbaum, A. S., \& Wetherall, D. (2011). \textit{Redes de Computadoras}. Pearson.
+    \item White, T. (2015). \textit{Networking for Systems Administrators}. No Starch Press.
+\end{enumerate}
+
+\vspace{1cm}
+
+\textbf{Nota:} Las URLs fueron verificadas al momento de elaboración de este laboratorio. Se recomienda consultar la documentación oficial de AWS para obtener actualizaciones y detalles adicionales.
+
+\end{document}

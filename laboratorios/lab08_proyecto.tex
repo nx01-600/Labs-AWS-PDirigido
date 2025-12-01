@@ -1,0 +1,1069 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#8}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 8 - Proyecto Integrador - Arquitectura Completa},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#8\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Proyecto Integrador - Arquitectura Completa en AWS\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 180 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito - Free Tier)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este laboratorio constituye el \textbf{proyecto integrador final} de la serie de laboratorios de redes en AWS. El objetivo es diseñar e implementar una \textbf{arquitectura corporativa completa} en la nube, integrando de forma coherente todos los conceptos trabajados en los laboratorios anteriores: creación de cuenta e IAM (Lab 1), diseño de VPC y subredes (Lab 2), conectividad a internet con Internet Gateway (Lab 3), instancias EC2 y seguridad de red (Lab 4), seguridad avanzada y defensa en profundidad (Lab 5), VPC Peering (Lab 6) y monitoreo con CloudWatch y VPC Flow Logs (Lab 7).
+
+El estudiante diseñará una red corporativa simplificada para una pequeña-mediana empresa, que incluya una VPC principal con subredes públicas y privadas distribuidas en múltiples zonas de disponibilidad, instancias EC2 para capa web y de administración, grupos de seguridad multicapa, NACLs, conectividad a internet mediante IGW, monitoreo con CloudWatch y VPC Flow Logs, y un esquema teórico de alta disponibilidad y escalabilidad. Se documentarán explícitamente las \textbf{decisiones arquitectónicas}, se realizará un \textbf{análisis de costos y optimización dentro del Free Tier} y se presentará la solución de forma profesional, como si se tratara de una propuesta para un cliente real.
+
+La implementación práctica se limitará a un subconjunto mínimo de recursos para mantener el costo en \$0.00 (Free Tier), mientras que la arquitectura completa se describirá a nivel de diseño lógico y buenas prácticas.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} AWS, Arquitectura de Red, VPC, EC2, Security Groups, VPC Peering, CloudWatch, VPC Flow Logs, Alta Disponibilidad, Free Tier.
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Diseñar y documentar una \textbf{arquitectura corporativa completa en AWS}, integrando todos los componentes de red trabajados en los laboratorios 1–7, junto con una implementación básica que se mantenga dentro del Free Tier y refleje buenas prácticas de seguridad, escalabilidad y monitoreo.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Integrar VPC, subredes públicas y privadas, Internet Gateway, EC2, Security Groups, VPC Peering y CloudWatch en una arquitectura coherente.
+    \item Documentar de forma explícita las \textbf{decisiones arquitectónicas} tomadas (rangos de direcciones, distribución por AZ, separación por capas, patrones de seguridad, etc.).
+    \item Diseñar un \textbf{escenario de alta disponibilidad y escalabilidad} (a nivel teórico) basado en el uso de múltiples zonas de disponibilidad y balanceo de carga.
+    \item Realizar un \textbf{análisis de costos} de la arquitectura propuesta, identificando qué se mantiene en Free Tier y qué componentes tendrían costo en producción.
+    \item Implementar de forma práctica una versión mínima de la arquitectura (al menos una VPC, subred pública y privada, 1–2 instancias EC2 y seguridad básica) y verificar su funcionamiento.
+    \item Aplicar mecanismos de \textbf{monitoreo y registro} (VPC Flow Logs, métricas y alarmas de CloudWatch) sobre la arquitectura básica implementada.
+    \item Presentar la solución final con un nivel de detalle y formalidad similar al de un \textbf{diseño profesional} de red corporativa en la nube.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Diseño arquitectónico en la nube:} Capacidad para diseñar topologías de red completas en AWS considerando seguridad, disponibilidad y monitoreo.
+    \item \textbf{Toma de decisiones técnicas:} Selección y justificación de componentes de AWS adecuados a los requisitos funcionales y no funcionales.
+    \item \textbf{Análisis de costo-beneficio:} Evaluación de alternativas técnicas a la luz de su impacto económico (Free Tier vs producción).
+    \item \textbf{Documentación profesional:} Elaboración de documentos de diseño claros, estructurados y orientados a clientes o equipos técnicos.
+    \item \textbf{Operación y monitoreo:} Configuración de registros, métricas y alarmas para tener visibilidad del comportamiento de la red y los servicios.
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{Arquitectura de Red Corporativa en AWS}
+
+Una \textbf{red corporativa en AWS} suele estructurarse siguiendo patrones de arquitectura bien conocidos:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Separación por capas (n-tier):}
+    \begin{itemize}
+        \item Capa de presentación (web).
+        \item Capa de lógica de negocio (aplicación).
+        \item Capa de datos (bases de datos).
+    \end{itemize}
+    \item \textbf{Separación por dominios de seguridad:}
+    \begin{itemize}
+        \item Subredes públicas: recursos expuestos a internet (por ejemplo, balanceadores y bastions).
+        \item Subredes privadas: recursos internos (aplicaciones, bases de datos).
+    \end{itemize}
+    \item \textbf{Distribución en múltiples zonas de disponibilidad (AZs):}
+    \begin{itemize}
+        \item Subredes replicadas en al menos 2 AZs para alta disponibilidad.
+    \end{itemize}
+\end{itemize}
+
+La arquitectura integradora de este laboratorio se basará en una \textbf{VPC principal corporativa} con:
+\begin{itemize}[leftmargin=*]
+    \item CIDR base \texttt{10.0.0.0/16}.
+    \item Subredes públicas y privadas en al menos dos AZs.
+    \item Instancias EC2 en capa de presentación y administración.
+    \item Reglas de seguridad multicapa (Security Groups + NACLs).
+    \item Integración con CloudWatch para monitoreo.
+\end{itemize}
+
+\subsection{Resumen Integrado de Conceptos Anteriores}
+
+\subsubsection{Cuenta, IAM y MFA (Lab 1)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cuenta AWS:} es el contenedor administrativo de todos los recursos.
+    \item \textbf{IAM (Identity and Access Management):} controla quién puede hacer qué.
+    \item \textbf{MFA:} protege la cuenta root y usuarios privilegiados.
+    \item \textbf{Alertas de facturación:} sirven para evitar costos inesperados.
+\end{itemize}
+
+En el proyecto integrador, se asume:
+\begin{itemize}[leftmargin=*]
+    \item Usuario IAM administrativo con MFA habilitado.
+    \item Alertas de facturación activas para mantener el costo en Free Tier.
+\end{itemize}
+
+\subsubsection{VPC, Subredes y Rutas (Lab 2 y Lab 3)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{VPC:} red virtual aislada con un rango CIDR.
+    \item \textbf{Subredes:} divisiones lógicas del rango CIDR principal.
+    \item \textbf{Internet Gateway (IGW):} proporciona acceso a internet desde y hacia la VPC.
+    \item \textbf{Tablas de ruteo:} definen por dónde debe ir el tráfico.
+\end{itemize}
+
+La arquitectura integradora usará:
+\begin{itemize}[leftmargin=*]
+    \item Una VPC principal con cidr \texttt{10.0.0.0/16}.
+    \item Subredes públicas (por ejemplo, \texttt{10.0.1.0/24} y \texttt{10.0.2.0/24}).
+    \item Subredes privadas (por ejemplo, \texttt{10.0.11.0/24} y \texttt{10.0.12.0/24}).
+    \item IGW para salida a internet desde subredes públicas.
+\end{itemize}
+
+\subsubsection{Instancias EC2 y Seguridad de Red (Lab 4 y Lab 5)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{EC2:} máquinas virtuales en la nube.
+    \item \textbf{Security Groups (SG):} firewalls \textit{stateful} a nivel de instancia.
+    \item \textbf{Network ACLs (NACLs):} listas de control de acceso \textit{stateless} a nivel de subred.
+    \item \textbf{Defense in depth:} múltiples capas de seguridad (SG + NACL + IAM + monitoreo).
+    \item \textbf{Principio de mínimo privilegio:} solo permitir el tráfico estricto necesario.
+\end{itemize}
+
+En el proyecto integrador se diseñarán:
+\begin{itemize}[leftmargin=*]
+    \item Un SG para servidores web.
+    \item Un SG para instancias privadas (aplicación / base de datos).
+    \item Un SG para bastion host (administración).
+    \item NACLs que refuercen las políticas de tráfico por subred.
+\end{itemize}
+
+\subsubsection{VPC Peering (Lab 6)}
+
+\begin{itemize}[leftmargin=*]
+    \item Permite conectar dos VPCs de forma privada usando la red de AWS.
+    \item \textbf{No es transitivo:} si VPC A está conectada con B, y B con C, A no ve a C por defecto.
+    \item Se usa para escenarios multi-VPC (por ejemplo, entorno \textit{producción} y \textit{gestión}).
+\end{itemize}
+
+En este laboratorio, el \textbf{peering se considerará a nivel de diseño} para un escenario donde la empresa tenga:
+\begin{itemize}[leftmargin=*]
+    \item Una VPC principal de producción.
+    \item Una VPC de herramientas o administración conectada por peering (teórico).
+\end{itemize}
+
+\subsubsection{Monitoreo y VPC Flow Logs (Lab 7)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{CloudWatch:} métrica, logs, alarmas y dashboards.
+    \item \textbf{VPC Flow Logs:} registro de tráfico ACCEPT/REJECT.
+    \item \textbf{CloudWatch Logs Insights:} consultas sobre logs.
+    \item \textbf{Alarmas:} condiciones que generan notificaciones.
+\end{itemize}
+
+En la arquitectura integradora:
+\begin{itemize}[leftmargin=*]
+    \item Se habilitarán Flow Logs sobre la VPC o subredes principales.
+    \item Se configurarán métricas derivadas (por ejemplo, conexiones REJECT).
+    \item Se integrarán alarmas clave en un dashboard de monitoreo de red.
+\end{itemize}
+
+\subsection{Diseño de Alta Disponibilidad y Escalabilidad (Teórico)}
+
+Aunque la implementación práctica se limitará a pocos recursos por Free Tier, el diseño considerará:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Alta disponibilidad (HA):}
+    \begin{itemize}
+        \item Subredes replicadas en al menos dos AZs.
+        \item Posible uso de balanceadores de carga (teórico) para distribuir tráfico.
+    \end{itemize}
+    \item \textbf{Escalabilidad:}
+    \begin{itemize}
+        \item Escalado horizontal (más instancias EC2 detrás de un Load Balancer).
+        \item Auto Scaling Groups (ASG) a nivel teórico.
+    \end{itemize}
+    \item \textbf{Resiliencia:}
+    \begin{itemize}
+        \item Diseñar para que la falla de una AZ no implique caída total.
+        \item Uso de servicios gestionados (por ejemplo, RDS Multi-AZ en un escenario real).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Análisis de Costos y Optimización en Free Tier}
+
+Un elemento clave en la arquitectura es diferenciar entre:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Recursos efectivamente usados en el laboratorio:}
+    \begin{itemize}
+        \item 1–2 instancias EC2 t2.micro/t3.micro (bajo límite de horas).
+        \item VPC, subredes, IGW, NACLs, SGs (sin costo).
+        \item VPC Flow Logs y CloudWatch con uso moderado.
+    \end{itemize}
+    \item \textbf{Recursos que quedarían solo a nivel de diseño teórico:}
+    \begin{itemize}
+        \item Balanceador de carga (ALB).
+        \item Auto Scaling Groups.
+        \item NAT Gateway (tiene costo, se deja solo como teoría).
+        \item Transit Gateway para multi-VPC complejas.
+    \end{itemize}
+\end{itemize}
+
+El diseño debe \textbf{separar claramente} lo que se implementa en la práctica sin costo y lo que sería parte de una versión ``full'' en producción con presupuesto asignado.
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Necesarios}
+
+\begin{itemize}[leftmargin=*]
+    \item Haber completado (o entendido) los laboratorios 1–7.
+    \item Comprender:
+    \begin{itemize}
+        \item Conceptos de VPC, subredes, tablas de ruteo, IGW.
+        \item Configuración básica de EC2 y acceso SSH.
+        \item Conceptos de Security Groups y NACLs.
+        \item Fundamentos de VPC Peering.
+        \item Uso básico de CloudWatch, VPC Flow Logs y Logs Insights.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Recursos Técnicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Cuenta AWS activa con Free Tier.
+    \item Usuario IAM con permisos administrativos (o al menos sobre VPC, EC2, CloudWatch, logs, IAM de lectura).
+    \item Navegador web moderno.
+    \item Cliente SSH para conectarse a las instancias (PuTTY, OpenSSH, etc.).
+\end{itemize}
+
+\subsection{Costos Estimados}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Concepto} & \textbf{Costo Estimado} \\
+\hline
+1--2 instancias EC2 t2.micro/t3.micro & \$0.00 (dentro de 750 horas/mes Free Tier) \\
+\hline
+VPC, subredes, IGW, tablas de ruteo & \$0.00 \\
+\hline
+Security Groups y NACLs & \$0.00 \\
+\hline
+VPC Peering (sin tráfico de datos) & \$0.00 \\
+\hline
+CloudWatch métricas básicas y hasta 10 alarmas & \$0.00 (Free Tier) \\
+\hline
+VPC Flow Logs (bajo volumen, uso limitado) & \$0.00 -- costo muy bajo controlado \\
+\hline
+\textbf{TOTAL (Laboratorio)} & \textbf{\$0.00} \\
+\hline
+\end{tabular}
+\caption{Costos del Laboratorio 8 en modo práctico}
+\end{table}
+
+\subsection{Tiempo Estimado}
+
+\begin{itemize}[leftmargin=*]
+    \item Diseño conceptual de la arquitectura: 45 minutos.
+    \item Implementación básica (VPC, subredes, IGW, EC2, SGs): 60–70 minutos.
+    \item Configuración de Flow Logs, métricas y dashboard: 40–45 minutos.
+    \item Verificación, limpieza y documentación final: 25–30 minutos.
+    \item \textbf{TOTAL ESTIMADO:} 180 minutos.
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+\subsection{Visión General del Proyecto}
+
+Antes de iniciar, se define el \textbf{escenario corporativo}:
+
+\begin{itemize}[leftmargin=*]
+    \item Empresa ficticia: \textbf{AcmeCorp S.A.S.}
+    \item Necesidades:
+    \begin{itemize}
+        \item Exponer un sitio web corporativo.
+        \item Tener una capa de aplicación y datos protegida en subredes privadas.
+        \item Administrar los servidores de forma segura mediante un bastion host.
+        \item Monitorear el tráfico de red y detectar anomalías.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection*{Arquitectura Lógica (Descripción)}
+
+\begin{itemize}[leftmargin=*]
+    \item VPC principal \texttt{AcmeCorp-VPC} (\texttt{10.0.0.0/16}).
+    \item Subredes públicas en dos AZs:
+    \begin{itemize}
+        \item \texttt{10.0.1.0/24} (Public-AZ1).
+        \item \texttt{10.0.2.0/24} (Public-AZ2).
+    \end{itemize}
+    \item Subredes privadas en dos AZs:
+    \begin{itemize}
+        \item \texttt{10.0.11.0/24} (Private-AZ1).
+        \item \texttt{10.0.12.0/24} (Private-AZ2).
+    \end{itemize}
+    \item IGW para salida/entrada a internet desde subredes públicas.
+    \item 1 servidor web en subred pública (implementación práctica).
+    \item 1 bastion host en subred pública para administración SSH.
+    \item 1 servidor de aplicación (o datos) en subred privada.
+    \item Security Groups específicos para cada rol.
+    \item VPC Flow Logs habilitados para la VPC.
+    \item Métricas y alarmas en CloudWatch.
+\end{itemize}
+
+\subsection{Paso 1: Diseño de Direccionamiento y Subredes}
+
+\textbf{Objetivo:} Definir el plan de direccionamiento IP interno.
+
+\begin{enumerate}[leftmargin=*]
+    \item Elegir región (por ejemplo, \texttt{us-east-1} o \texttt{sa-east-1}).
+    \item Definir CIDR de la VPC: \texttt{10.0.0.0/16}.
+    \item Plan de subredes:
+    \begin{itemize}
+        \item Subred pública AZ1: \texttt{10.0.1.0/24}.
+        \item Subred pública AZ2: \texttt{10.0.2.0/24}.
+        \item Subred privada AZ1: \texttt{10.0.11.0/24}.
+        \item Subred privada AZ2: \texttt{10.0.12.0/24}.
+    \end{itemize}
+    \item Reservar espacio extra para posibles subredes futuras (por ejemplo, \texttt{10.0.21.0/24} para administración).
+\end{enumerate}
+
+\subsection{Paso 2: Creación de la VPC y Subredes}
+
+\textbf{Objetivo:} Implementar el diseño de VPC y subredes.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{VPC} $\rightarrow$ \textbf{Your VPCs} $\rightarrow$ \textbf{Create VPC}.
+    \item Parámetros sugeridos:
+    \begin{itemize}
+        \item \textbf{Name}: \texttt{AcmeCorp-VPC}.
+        \item \textbf{IPv4 CIDR}: \texttt{10.0.0.0/16}.
+        \item Opciones adicionales: por defecto.
+    \end{itemize}
+    \item Crear subredes:
+    \begin{itemize}
+        \item \textbf{Subnet 1 (publica-AZ1)}:
+        \begin{itemize}
+            \item Name: \texttt{AcmeCorp-Public-AZ1}.
+            \item VPC: \texttt{AcmeCorp-VPC}.
+            \item AZ: seleccionar una (ej. \texttt{us-east-1a}).
+            \item CIDR: \texttt{10.0.1.0/24}.
+        \end{itemize}
+        \item \textbf{Subnet 2 (publica-AZ2)}:
+        \begin{itemize}
+            \item Name: \texttt{AcmeCorp-Public-AZ2}.
+            \item AZ diferente (ej. \texttt{us-east-1b}).
+            \item CIDR: \texttt{10.0.2.0/24}.
+        \end{itemize}
+        \item \textbf{Subnet 3 (privada-AZ1)}:
+        \begin{itemize}
+            \item Name: \texttt{AcmeCorp-Private-AZ1}.
+            \item CIDR: \texttt{10.0.11.0/24}.
+        \end{itemize}
+        \item \textbf{Subnet 4 (privada-AZ2)}:
+        \begin{itemize}
+            \item Name: \texttt{AcmeCorp-Private-AZ2}.
+            \item CIDR: \texttt{10.0.12.0/24}.
+        \end{itemize}
+    \end{itemize}
+    \item Marcar las subredes públicas para asignación automática de IPs públicas (opcional).
+\end{enumerate}
+
+\subsection{Paso 3: Internet Gateway y Tablas de Ruteo}
+
+\textbf{Objetivo:} Proveer conectividad a internet a las subredes públicas.
+
+\begin{enumerate}[leftmargin=*]
+    \item Crear un Internet Gateway:
+    \begin{itemize}
+        \item En \textbf{VPC} $\rightarrow$ \textbf{Internet Gateways} $\rightarrow$ \textbf{Create internet gateway}.
+        \item Name: \texttt{AcmeCorp-IGW}.
+        \item Crear y luego \textbf{Attach to VPC} $\rightarrow$ seleccionar \texttt{AcmeCorp-VPC}.
+    \end{itemize}
+    \item Crear tabla de ruteo pública:
+    \begin{itemize}
+        \item \textbf{Route Tables} $\rightarrow$ \textbf{Create route table}.
+        \item Name: \texttt{AcmeCorp-Public-RT}.
+        \item VPC: \texttt{AcmeCorp-VPC}.
+    \end{itemize}
+    \item Agregar ruta por defecto a internet:
+    \begin{itemize}
+        \item Editar rutas.
+        \item Destino: \texttt{0.0.0.0/0}.
+        \item Target: \texttt{AcmeCorp-IGW}.
+    \end{itemize}
+    \item Asociar subredes públicas a esta tabla:
+    \begin{itemize}
+        \item Subredes: \texttt{AcmeCorp-Public-AZ1} y \texttt{AcmeCorp-Public-AZ2}.
+    \end{itemize}
+    \item Dejar la tabla de ruteo por defecto para subredes privadas (sin ruta a internet).
+\end{enumerate}
+
+\subsection{Paso 4: Security Groups y NACLs (Defensa en Profundidad)}
+
+\textbf{Objetivo:} Definir políticas de seguridad multicapa.
+
+\subsubsection*{Security Groups}
+
+\begin{enumerate}[leftmargin=*]
+    \item SG para servidor web:
+    \begin{itemize}
+        \item Name: \texttt{SG-Web}.
+        \item Inbound:
+        \begin{itemize}
+            \item HTTP (80) desde \texttt{0.0.0.0/0} (para pruebas).
+            \item SSH (22) \textbf{solo} desde IP pública del bastion (luego de creado) o desde la IP pública del administrador.
+        \end{itemize}
+        \item Outbound: \texttt{0.0.0.0/0} (por simplicidad en el lab).
+    \end{itemize}
+    \item SG para bastion host:
+    \begin{itemize}
+        \item Name: \texttt{SG-Bastion}.
+        \item Inbound:
+        \begin{itemize}
+            \item SSH (22) solo desde la IP pública del estudiante/administrador.
+        \end{itemize}
+        \item Outbound:
+        \begin{itemize}
+            \item SSH (22) hacia subredes privadas (instancias internas).
+        \end{itemize}
+    \end{itemize}
+    \item SG para servidor interno (aplicación/datos):
+    \begin{itemize}
+        \item Name: \texttt{SG-App}.
+        \item Inbound:
+        \begin{itemize}
+            \item SSH (22) solo desde \texttt{SG-Bastion}.
+            \item Puerto de aplicación (ej. 8080) solo desde \texttt{SG-Web} (teórico).
+        \end{itemize}
+        \item Outbound: \texttt{0.0.0.0/0} o restringido según necesidad.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection*{NACLs (Opcional para refuerzo)}
+
+\begin{enumerate}[leftmargin=*]
+    \item NACL pública:
+    \begin{itemize}
+        \item Allow inbound HTTP(80)/SSH(22) desde internet (según sea necesario).
+        \item Allow outbound respuestas establecidas.
+    \end{itemize}
+    \item NACL privada:
+    \begin{itemize}
+        \item Restringir el tráfico entrante a puertos específicos desde subredes públicas.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 5: Lanzar Instancias EC2 (Implementación Básica)}
+
+\textbf{Objetivo:} Desplegar recursos mínimos de cómputo para probar la arquitectura.
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Servidor web:}
+    \begin{itemize}
+        \item Tipo: \texttt{t2.micro} o \texttt{t3.micro} (Free Tier).
+        \item AMI: Amazon Linux 2 u otra Free Tier.
+        \item Subred: \texttt{AcmeCorp-Public-AZ1}.
+        \item Auto-assign Public IP: habilitado.
+        \item SG: \texttt{SG-Web}.
+        \item User data opcional: instalar un servidor web simple (ejemplo con \texttt{httpd}).
+    \end{itemize}
+    \item \textbf{Bastion host:}
+    \begin{itemize}
+        \item Tipo: \texttt{t2.micro}/\texttt{t3.micro}.
+        \item Subred: \texttt{AcmeCorp-Public-AZ1} (o AZ2).
+        \item IP pública asignada.
+        \item SG: \texttt{SG-Bastion}.
+    \end{itemize}
+    \item \textbf{Servidor interno:}
+    \begin{itemize}
+        \item Tipo: \texttt{t2.micro}/\texttt{t3.micro}.
+        \item Subred: \texttt{AcmeCorp-Private-AZ1}.
+        \item Sin IP pública.
+        \item SG: \texttt{SG-App}.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 6: Pruebas de Conectividad y Seguridad}
+
+\begin{enumerate}[leftmargin=*]
+    \item Desde el navegador del estudiante, acceder a la IP pública del servidor web vía HTTP.
+    \item Conectarse por SSH al bastion host usando la clave privada.
+    \item Desde el bastion host, hacer SSH al servidor interno (private IP).
+    \item Verificar que no se pueda acceder directamente al servidor interno desde internet.
+\end{enumerate}
+
+\subsection{Paso 7: Habilitar VPC Flow Logs y Monitoreo}
+
+\textbf{Objetivo:} Integrar monitoreo en la arquitectura.
+
+\begin{enumerate}[leftmargin=*]
+    \item Crear log group en CloudWatch: \texttt{/aws/vpc/flow-logs/acmecorp}.
+    \item En VPC $\rightarrow$ \textbf{Your VPCs} $\rightarrow$ \texttt{AcmeCorp-VPC} $\rightarrow$ pestaña \textbf{Flow Logs}.
+    \item Crear flow log con:
+    \begin{itemize}
+        \item Filter: \texttt{ALL}.
+        \item Destination: CloudWatch Logs.
+        \item Log group: \texttt{/aws/vpc/flow-logs/acmecorp}.
+        \item Interval: 1 minuto.
+    \end{itemize}
+    \item Generar tráfico de prueba (HTTP permitido, puertos bloqueados).
+    \item Verificar logs en CloudWatch.
+\end{enumerate}
+
+\subsection{Paso 8: Métricas Derivadas y Alarmas}
+
+\begin{enumerate}[leftmargin=*]
+    \item Crear un metric filter para \texttt{REJECT} similar al Lab 7:
+    \begin{itemize}
+        \item Log group: \texttt{/aws/vpc/flow-logs/acmecorp}.
+        \item Filter pattern: \texttt{REJECT}.
+        \item Namespace: \texttt{AcmeCorp/Network}.
+        \item Metric name: \texttt{RejectedConnections}.
+    \end{itemize}
+    \item Crear una alarma \texttt{AcmeCorp-HighRejectedConnections} sobre esta métrica.
+    \item Opcional: crear alarma sobre \texttt{NetworkIn} del servidor web para detectar picos de tráfico.
+\end{enumerate}
+
+\subsection{Paso 9: Dashboard de Arquitectura y Monitoreo}
+
+\begin{enumerate}[leftmargin=*]
+    \item Crear dashboard \texttt{AcmeCorp-Network-Dashboard}.
+    \item Agregar widgets:
+    \begin{itemize}
+        \item Gráfico de \texttt{NetworkIn/Out} del servidor web.
+        \item Gráfico de \texttt{RejectedConnections}.
+        \item Widget de estado de alarmas.
+        \item Opcional: un widget de texto con un diagrama ASCII simplificado de la arquitectura.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 10: Diseño Teórico de Escalabilidad y Alta Disponibilidad}
+
+Este paso es \textbf{solo teórico} (no implementar por costo):
+
+\begin{itemize}[leftmargin=*]
+    \item Proponer el uso de:
+    \begin{itemize}
+        \item Application Load Balancer (ALB) frente a una flota de servidores web.
+        \item Auto Scaling Group con mínimo 2 instancias en 2 AZs.
+        \item NAT Gateway (o NAT instance) para permitir salida a internet desde subredes privadas (teniendo en cuenta el costo).
+        \item Posible segunda VPC (administración) conectada por VPC Peering.
+    \end{itemize}
+    \item Documentar cómo cambiaría la arquitectura básica para llegar a una solución de alta disponibilidad en producción.
+\end{itemize}
+
+\newpage
+
+% ================== TABLAS DE CONFIGURACIÓN ==================
+\section{Tablas de Configuración}
+
+\subsection{Plan de Direccionamiento}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Recurso} & \textbf{Nombre} & \textbf{CIDR} \\
+\hline
+VPC & AcmeCorp-VPC & 10.0.0.0/16 \\
+\hline
+Subred pública AZ1 & AcmeCorp-Public-AZ1 & 10.0.1.0/24 \\
+\hline
+Subred pública AZ2 & AcmeCorp-Public-AZ2 & 10.0.2.0/24 \\
+\hline
+Subred privada AZ1 & AcmeCorp-Private-AZ1 & 10.0.11.0/24 \\
+\hline
+Subred privada AZ2 & AcmeCorp-Private-AZ2 & 10.0.12.0/24 \\
+\hline
+\end{tabular}
+\caption{Plan de direccionamiento de la arquitectura integradora}
+\end{table}
+
+\subsection{Resumen de Componentes Clave}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Componente} & \textbf{Nombre} & \textbf{Descripción} \\
+\hline
+VPC & AcmeCorp-VPC & Red corporativa principal \\
+\hline
+IGW & AcmeCorp-IGW & Conectividad a internet \\
+\hline
+RT Pública & AcmeCorp-Public-RT & Tabla de rutas para subredes públicas \\
+\hline
+SG & SG-Web & Seguridad para servidor web \\
+\hline
+SG & SG-Bastion & Seguridad para bastion host \\
+\hline
+SG & SG-App & Seguridad para servidor interno \\
+\hline
+Flow Logs & AcmeCorp-VPC Flow Log & Registros de tráfico de la VPC \\
+\hline
+Log Group & /aws/vpc/flow-logs/acmecorp & Almacenamiento de VPC Flow Logs \\
+\hline
+Namespace & AcmeCorp/Network & Métricas personalizadas de red \\
+\hline
+Métrica & RejectedConnections & Conteo de conexiones REJECT \\
+\hline
+Alarma & AcmeCorp-HighRejectedConnections & Alerta por tráfico rechazado elevado \\
+\hline
+Dashboard & AcmeCorp-Network-Dashboard & Panel de monitoreo integrado \\
+\hline
+\end{tabular}
+\caption{Componentes principales del proyecto integrador}
+\end{table}
+
+\newpage
+
+% ================== VERIFICACIÓN ==================
+\section{Verificación}
+
+\subsection{Pruebas de Conectividad}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Prueba 1: Acceso web}
+    \begin{itemize}
+        \item Desde el navegador local, acceder a \texttt{http://IP-publica-servidor-web}.
+        \item Verificar que responde la página por defecto o el contenido configurado.
+    \end{itemize}
+    \item \textbf{Prueba 2: Acceso SSH seguro}
+    \begin{itemize}
+        \item Conectarse por SSH al bastion host usando clave privada.
+        \item Desde el bastion, conectarse por SSH a la IP privada del servidor interno.
+    \end{itemize}
+    \item \textbf{Prueba 3: Aislamiento del servidor interno}
+    \begin{itemize}
+        \item Intentar conectarse directamente desde internet al servidor interno (debe fallar).
+        \item Confirmar que solo es accesible a través del bastion.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Verificación de Flow Logs y Métricas}
+
+\begin{enumerate}[leftmargin=*]
+    \item Verificar que el Flow Log de la VPC está en estado \textbf{Active}.
+    \item Revisar el log group \texttt{/aws/vpc/flow-logs/acmecorp} para ver registros recientes.
+    \item Confirmar que la métrica \texttt{RejectedConnections} se está actualizando en \texttt{AcmeCorp/Network}.
+\end{enumerate}
+
+\subsection{Verificación de Alarmas y Dashboard}
+
+\begin{enumerate}[leftmargin=*]
+    \item Verificar en \textbf{CloudWatch Alarms} el estado de \texttt{AcmeCorp-HighRejectedConnections}.
+    \item Forzar algunos intentos de conexión bloqueados (por ejemplo, puertos cerrados) y observar si la métrica aumenta.
+    \item Revisar el dashboard \texttt{AcmeCorp-Network-Dashboard} y comprobar que:
+    \begin{itemize}
+        \item Se muestra el tráfico de red del servidor web.
+        \item Se visualiza la curva de \texttt{RejectedConnections}.
+        \item Se ve el widget con el estado de alarmas.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+% ================== LIMPIEZA DE RECURSOS ==================
+\section{Limpieza de Recursos}
+
+\textbf{Objetivo:} Dejar la cuenta libre de recursos que puedan generar costos más allá del laboratorio.
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Instancias EC2:}
+    \begin{itemize}
+        \item Detener y terminar el servidor web, bastion host y servidor interno si no se van a seguir usando.
+    \end{itemize}
+    \item \textbf{Flow Logs:}
+    \begin{itemize}
+        \item En la VPC, eliminar el Flow Log configurado para detener la generación de logs.
+    \end{itemize}
+    \item \textbf{CloudWatch Logs:}
+    \begin{itemize}
+        \item Eliminar el log group \texttt{/aws/vpc/flow-logs/acmecorp} si ya no es necesario.
+    \end{itemize}
+    \item \textbf{Alarmas y métricas:}
+    \begin{itemize}
+        \item Eliminar la alarma \texttt{AcmeCorp-HighRejectedConnections}.
+        \item (Opcional) Eliminar el metric filter asociado.
+    \end{itemize}
+    \item \textbf{Dashboard:}
+    \begin{itemize}
+        \item Eliminar el dashboard \texttt{AcmeCorp-Network-Dashboard} si no se usará más.
+    \end{itemize}
+    \item \textbf{VPC y redes:}
+    \begin{itemize}
+        \item Eliminar subredes, tablas de ruteo personalizadas, IGW y finalmente la VPC \texttt{AcmeCorp-VPC} si fue creada exclusivamente para el laboratorio.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+% ================== CUESTIONARIO INTEGRADO ==================
+\section{Cuestionario de Evaluación}
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Cuál es el principal objetivo del proyecto integrador del Lab 8?}
+\begin{enumerate}[label=\alph*)]
+    \item Probar únicamente el rendimiento de instancias EC2.
+    \item Diseñar una arquitectura corporativa completa integrando los conceptos de los labs 1–7.
+    \item Configurar NAT Gateway en producción.
+    \item Migrar una base de datos on-premise a AWS RDS.
+\end{enumerate}
+
+\item \textbf{En la arquitectura propuesta, las subredes privadas se utilizan principalmente para:}
+\begin{enumerate}[label=\alph*)]
+    \item Alojar recursos expuestos directamente a internet.
+    \item Almacenar objetos S3 con acceso público.
+    \item Instancias internas de aplicación y bases de datos sin IP pública.
+    \item Consolas de administración web públicas.
+\end{enumerate}
+
+\item \textbf{¿Cuál de los siguientes componentes NO genera costo directo en el Free Tier (uso razonable)?}
+\begin{enumerate}[label=\alph*)]
+    \item 1–2 instancias EC2 t2.micro/t3.micro dentro de las 750 horas/mes.
+    \item VPC, subredes, tablas de ruteo e IGW.
+    \item NAT Gateway con tráfico de salida a internet.
+    \item Security Groups y NACLs.
+\end{enumerate}
+
+\item \textbf{En el diseño de defensa en profundidad, los Security Groups:}
+\begin{enumerate}[label=\alph*)]
+    \item Son \textit{stateless} y se aplican a nivel de subred.
+    \item Son \textit{stateful} y se aplican a nivel de instancia.
+    \item Solo controlan tráfico saliente, no entrante.
+    \item Reemplazan completamente la necesidad de NACLs.
+\end{enumerate}
+
+\item \textbf{Un bastion host se utiliza principalmente para:}
+\begin{enumerate}[label=\alph*)]
+    \item Servir contenido web público a los clientes.
+    \item Proporcionar un punto de acceso SSH seguro a instancias en subredes privadas.
+    \item Actuar como NAT Gateway gestionado.
+    \item Funcionar como base de datos central.
+\end{enumerate}
+
+\item \textbf{¿Cuál es la ventaja de distribuir subredes en múltiples zonas de disponibilidad (AZs)?}
+\begin{enumerate}[label=\alph*)]
+    \item Reducir el costo de instancias EC2.
+    \item Incrementar la capacidad de almacenamiento de S3.
+    \item Mejorar la alta disponibilidad y tolerancia a fallos.
+    \item Eliminar la necesidad de balanceadores de carga.
+\end{enumerate}
+
+\item \textbf{VPC Peering en el contexto del proyecto integrador se utiliza (a nivel teórico) para:}
+\begin{enumerate}[label=\alph*)]
+    \item Conectar dos VPCs de forma privada usando la red de AWS.
+    \item Conectar directamente una VPC con internet.
+    \item Reemplazar un NAT Gateway.
+    \item Crear una base de datos replicada entre regiones.
+\end{enumerate}
+
+\item \textbf{¿Cuál de las siguientes afirmaciones sobre VPC Flow Logs es correcta?}
+\begin{enumerate}[label=\alph*)]
+    \item Solo registran tráfico aceptado (ACCEPT).
+    \item Pueden enviar logs a CloudWatch Logs o a S3.
+    \item Solo funcionan en subredes públicas.
+    \item Solo registran tráfico de salida a internet.
+\end{enumerate}
+
+\item \textbf{En el análisis de costos, es importante:}
+\begin{enumerate}[label=\alph*)]
+    \item Ignorar el Free Tier y asumir siempre el peor escenario.
+    \item Conocer qué servicios tienen ofertas gratuitas y cuáles generan cargos desde el inicio.
+    \item Usar todos los servicios posibles sin importar el costo.
+    \item Evitar el uso de CloudWatch para reducir costos.
+\end{enumerate}
+
+\item \textbf{Un CloudWatch Dashboard bien diseñado para esta arquitectura debe incluir, como mínimo:}
+\begin{enumerate}[label=\alph*)]
+    \item Solo gráficos de CPU de instancias internas.
+    \item Gráficos de tráfico de red, métricas de conexiones rechazadas y estado de alarmas relevantes.
+    \item Únicamente un gráfico con el costo mensual estimado.
+    \item Un listado de usuarios IAM sin métricas.
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Preguntas Verdadero/Falso}
+
+\begin{enumerate}[label=\textbf{VF\arabic*.}]
+
+\item \textbf{En el proyecto integrador, se puede lograr una implementación básica completamente dentro del Free Tier si se controla el número de instancias y la duración de uso.}
+
+\item \textbf{El diseño teórico de alta disponibilidad con balanceadores, Auto Scaling y NAT Gateway no debe implementarse en este laboratorio para evitar costos, pero sí debe documentarse.}
+
+\item \textbf{Una buena práctica es permitir acceso SSH a todas las instancias directamente desde internet para simplificar la administración.}
+
+\end{enumerate}
+
+\subsection{Escenarios Prácticos}
+
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+
+\item \textbf{Escenario 1: Cambio de requisitos de seguridad}
+
+AcmeCorp decide que el servidor web no debe permitir acceso SSH desde ninguna IP pública, y que toda administración debe hacerse únicamente desde el bastion host.
+
+\textbf{Pregunta:} ¿Qué cambios realizarías en los Security Groups y flujos de acceso para cumplir este requisito sin romper la arquitectura?
+
+\item \textbf{Escenario 2: Crecimiento de la empresa}
+
+La empresa crece y ahora requiere que la aplicación web soporte el doble de usuarios, manteniendo alta disponibilidad. El presupuesto de producción permite agregar algunos servicios de pago.
+
+\textbf{Pregunta:} ¿Qué modificaciones propondrías a la arquitectura actual (componentes adicionales y cambios) para soportar esta nueva carga, manteniendo buenas prácticas de seguridad y monitoreo?
+
+\end{enumerate}
+
+\newpage
+
+\subsection{Respuestas del Cuestionario}
+
+\subsubsection*{Selección Múltiple}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{b)} Diseñar una arquitectura corporativa completa integrando los conceptos de los labs 1–7.
+    \item \textbf{c)} Instancias internas de aplicación y bases de datos sin IP pública.
+    \item \textbf{c)} NAT Gateway con tráfico de salida a internet (tiene costo).
+    \item \textbf{b)} Son \textit{stateful} y se aplican a nivel de instancia.
+    \item \textbf{b)} Proporcionar un punto de acceso SSH seguro a instancias en subredes privadas.
+    \item \textbf{c)} Mejorar la alta disponibilidad y tolerancia a fallos.
+    \item \textbf{a)} Conectar dos VPCs de forma privada usando la red de AWS.
+    \item \textbf{b)} Pueden enviar logs a CloudWatch Logs o a S3.
+    \item \textbf{b)} Conocer qué servicios tienen ofertas gratuitas y cuáles generan cargos desde el inicio.
+    \item \textbf{b)} Gráficos de tráfico de red, métricas de conexiones rechazadas y estado de alarmas relevantes.
+\end{enumerate}
+
+\subsubsection*{Verdadero/Falso}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Verdadero.} Controlando el número de instancias y el tiempo de ejecución, es posible mantenerse en el Free Tier.
+    \item \textbf{Verdadero.} Se recomienda documentar el diseño completo pero no implementarlo para evitar cargos.
+    \item \textbf{Falso.} La buena práctica es limitar el acceso SSH mediante bastion host y rangos de IP confiables.
+\end{enumerate}
+
+\subsubsection*{Guía para Escenarios}
+
+\textbf{Escenario 1:}
+\begin{itemize}[leftmargin=*]
+    \item Modificar \texttt{SG-Web} para:
+    \begin{itemize}
+        \item Eliminar cualquier regla de inbound SSH (22) desde internet.
+        \item Permitir únicamente HTTP/HTTPS desde \texttt{0.0.0.0/0}.
+    \end{itemize}
+    \item Asegurar que \texttt{SG-Bastion} pueda acceder por SSH al servidor web:
+    \begin{itemize}
+        \item Agregar en \texttt{SG-Web} una regla SSH con origen = \texttt{SG-Bastion}.
+    \end{itemize}
+    \item Flujo de acceso:
+    \begin{itemize}
+        \item Administrador $\rightarrow$ bastion (SSH).
+        \item Bastion $\rightarrow$ servidor web (SSH) y servidor interno.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Escenario 2:}
+\begin{itemize}[leftmargin=*]
+    \item Propuestas:
+    \begin{itemize}
+        \item Agregar un Application Load Balancer frente a la capa web.
+        \item Crear un Auto Scaling Group con mínimo 2 instancias web en subredes públicas (AZ1 y AZ2).
+        \item Usar NAT Gateway para permitir salida segura a internet desde subredes privadas (actualizaciones, dependencias).
+        \item Considerar RDS Multi-AZ para la capa de datos.
+        \item Extender el monitoreo:
+        \begin{itemize}
+            \item Métricas de ALB (RequestCount, errores 4xx/5xx).
+            \item Alarmas sobre tiempos de respuesta y tasa de errores.
+            \item Dashboards adicionales para la capa de aplicación y base de datos.
+        \end{itemize}
+    \end{itemize}
+    \item Mantener buenas prácticas:
+    \begin{itemize}
+        \item SGs y NACLs bien definidos.
+        \item IAM con mínimo privilegio.
+        \item MFA en cuentas administrativas.
+    \end{itemize}
+\end{itemize}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+El Laboratorio 8 representa la culminación de la serie de prácticas de redes en AWS, integrando todos los conceptos abordados en los laboratorios previos en una \textbf{arquitectura corporativa coherente, segura y monitoreada}. A través del diseño y la implementación básica de la VPC \texttt{AcmeCorp-VPC}, subredes públicas y privadas, instancias EC2, Security Groups multicapa, VPC Flow Logs y CloudWatch, el estudiante ha experimentado el ciclo completo de construcción de una red en la nube, desde la planificación hasta la observabilidad.
+
+Los principales aprendizajes incluyen:
+
+\begin{itemize}[leftmargin=*]
+    \item La importancia de un \textbf{buen diseño de direccionamiento IP} y separación lógica en subredes públicas y privadas.
+    \item La aplicación práctica del \textbf{principio de mínimo privilegio} y la \textbf{defensa en profundidad}, combinando Security Groups, NACLs e IAM.
+    \item La relevancia de contar con \textbf{mecanismos de administración seguros}, como el uso de un bastion host para acceder a recursos privados.
+    \item La necesidad de \textbf{monitorear el tráfico de red} mediante VPC Flow Logs, métricas derivadas y alarmas para detectar comportamientos anómalos.
+    \item La capacidad de diferenciar entre \textbf{implementaciones sin costo (Free Tier)} y \textbf{diseños de producción} que incluyen componentes adicionales como ALB, NAT Gateway, Auto Scaling y RDS.
+\end{itemize}
+
+Este proyecto integrador ha demostrado que es posible construir, con recursos mínimos, una arquitectura que ya refleja las buenas prácticas de la industria en términos de seguridad, disponibilidad, escalabilidad y observabilidad. En un entorno real de producción, esta base podría evolucionar hacia una solución aún más robusta incorporando servicios gestionados, automatización y despliegues continuos, sin perder los principios fundamentales aprendidos.
+
+En síntesis, el estudiante no solo ha aprendido a \textbf{usar servicios individuales de AWS}, sino a \textbf{pensar en arquitecturas completas}, evaluando decisiones técnicas, costos, riesgos y mecanismos de operación, capacidades esenciales para cualquier profesional que diseñe redes y sistemas en la nube.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+    \item AWS Documentation - Página principal \\
+    \url{https://docs.aws.amazon.com/}
+    \item Amazon VPC User Guide \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/}
+    \item Amazon EC2 User Guide \\
+    \url{https://docs.aws.amazon.com/ec2/}
+    \item Amazon CloudWatch Documentation \\
+    \url{https://docs.aws.amazon.com/cloudwatch/}
+    \item VPC Flow Logs \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html}
+    \item AWS Identity and Access Management (IAM) \\
+    \url{https://docs.aws.amazon.com/IAM/latest/UserGuide/}
+    \item AWS Free Tier \\
+    \url{https://aws.amazon.com/free/}
+\end{enumerate}
+
+\subsection{AWS Well-Architected Framework}
+
+\begin{enumerate}[leftmargin=*]
+    \item AWS Well-Architected Framework \\
+    \url{https://aws.amazon.com/architecture/well-architected/}
+    \item Security Pillar - AWS Well-Architected Framework \\
+    \url{https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html}
+    \item Reliability Pillar - AWS Well-Architected Framework \\
+    \url{https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html}
+\end{enumerate}
+
+\subsection{Bibliografía Recomendada}
+
+\begin{enumerate}[leftmargin=*]
+    \item Wittig, A., \& Wittig, M. (2018). \textit{Amazon Web Services in Action} (2nd ed.). Manning Publications.
+    \item Erl, T., Mahmood, Z., \& Puttini, R. (2013). \textit{Cloud Computing: Concepts, Technology \& Architecture}. Prentice Hall.
+    \item NIST Special Publication 800-145. (2011). \textit{The NIST Definition of Cloud Computing}. \\
+    \url{https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf}
+\end{enumerate}
+
+\vspace{1cm}
+
+\textbf{Nota:} Las URLs de la documentación oficial de AWS fueron verificadas al momento de la elaboración de este laboratorio. Dado que AWS actualiza constantemente sus servicios y guías, se recomienda consultar siempre la versión más reciente en el sitio oficial.
+
+\end{document}

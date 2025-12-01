@@ -1,0 +1,917 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Configuración de página
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm
+}
+
+% Configuración de encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Laboratorios Virtuales de Redes en AWS}
+\fancyhead[R]{Lab \#4}
+\fancyfoot[C]{\thepage}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Laboratorio 4 - Amazon EC2 y Seguridad de Red},
+    pdfauthor={Nicolás Carreño Tascón, Juan Manuel Canchala Jiménez},
+}
+
+% Configuración de código
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=2
+}
+
+% Configuración de títulos
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!70!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== PORTADA ==================
+\begin{titlepage}
+    \centering
+    \vspace{2cm}
+    {\huge\bfseries Laboratorio \#4\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Amazon EC2 y Seguridad de Red\par}
+    \vspace{2cm}
+    
+    {\large\textbf{Proyecto:}\par}
+    {\large Laboratorios Virtuales de Redes en AWS para el\par}
+    {\large Fortalecimiento de Competencias en Redes de Nueva Generación\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Estudiantes:}\par}
+    {\large Nicolás Carreño Tascón\par}
+    {\large Juan Manuel Canchala Jiménez\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Director:}\par}
+    {\large Carlos Olarte\par}
+    \vspace{1.5cm}
+    
+    {\large\textbf{Asignatura:}\par}
+    {\large Redes de Nueva Generación\par}
+    \vspace{1cm}
+    
+    {\large\textbf{Duración Estimada:} 120 minutos\par}
+    {\large\textbf{Costo:} \$0.00 (100\% Gratuito - Free Tier)\par}
+    \vspace{1cm}
+    
+    {\large Diciembre 2025\par}
+\end{titlepage}
+
+% ================== TABLA DE CONTENIDOS ==================
+\tableofcontents
+\newpage
+
+% ================== RESUMEN ==================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+En este laboratorio se introducen de forma práctica los conceptos fundamentales de \textbf{Amazon EC2 (Elastic Compute Cloud)} y su integración con los mecanismos de \textbf{seguridad de red} de AWS. El objetivo es que el estudiante sea capaz de lanzar una instancia EC2 \texttt{t2.micro} o \texttt{t3.micro} dentro del Free Tier, configurar correctamente los \textbf{Security Groups} (grupos de seguridad) y las \textbf{Network ACLs} (Listas de Control de Acceso a la Red), comprender la diferencia entre mecanismos \textit{stateful} y \textit{stateless}, aplicar mejores prácticas de seguridad y conectarse de forma segura vía SSH.
+
+El laboratorio se desarrolla sobre la VPC creada en laboratorios anteriores, utilizando subredes públicas para exponer un servidor y aplicando controles de seguridad en varias capas. Se enfatiza el uso responsable del Free Tier, las 750 horas/mes disponibles para instancias de tipo \texttt{t2.micro/t3.micro}, y la importancia de diseñar reglas de acceso mínimas y específicas. Al finalizar, el estudiante habrá implementado una arquitectura básica pero realista de cómputo en la nube, protegida mediante políticas de red adecuadas.
+
+\vspace{0.5cm}
+\noindent\textbf{Palabras clave:} Amazon EC2, Security Groups, Network ACLs, Stateful, Stateless, SSH, Free Tier, Seguridad en la Nube.
+
+\newpage
+
+% ================== OBJETIVOS ==================
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Proporcionar al estudiante una comprensión práctica y detallada de Amazon EC2 y de los mecanismos de seguridad de red asociados (Security Groups y Network ACLs), permitiéndole lanzar instancias de cómputo en la nube de forma segura, controlada y alineada con las mejores prácticas de la industria.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*]
+    \item Lanzar una instancia EC2 \texttt{t2.micro} o \texttt{t3.micro} aprovechando el Free Tier de AWS.
+    \item Configurar \textbf{Security Groups} para controlar tráfico inbound y outbound hacia la instancia.
+    \item Comprender las diferencias entre \textbf{Security Groups} y \textbf{Network ACLs} y cuándo usar cada uno.
+    \item Explicar y ejemplificar la diferencia entre \textbf{mecanismos stateful y stateless} en la seguridad de red.
+    \item Aplicar \textbf{mejores prácticas de seguridad}: principio de mínimo privilegio, bastion hosts, restricciones por IP, cierre de puertos innecesarios.
+    \item Conectarse a la instancia EC2 vía \textbf{SSH} desde un equipo local siguiendo un flujo seguro.
+    \item Verificar el correcto funcionamiento de las configuraciones de red y seguridad mediante pruebas de conectividad.
+\end{itemize}
+
+\subsection{Competencias a Desarrollar}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Administración de Cómputo en la Nube:} Capacidad para desplegar y gestionar instancias EC2.
+    \item \textbf{Diseño de Políticas de Seguridad de Red:} Definición y aplicación de reglas de acceso con Security Groups y NACLs.
+    \item \textbf{Diagnóstico de Conectividad:} Habilidad para identificar y resolver problemas de acceso causados por reglas de red.
+    \item \textbf{Seguridad Operacional:} Uso de claves SSH, restricciones por IP y prácticas seguras para administración remota.
+\end{itemize}
+
+\newpage
+
+% ================== MARCO TEÓRICO ==================
+\section{Marco Teórico}
+
+\subsection{Introducción a Amazon EC2}
+
+Amazon EC2 (\textit{Elastic Compute Cloud}) es el servicio de cómputo bajo demanda de AWS que permite lanzar instancias (máquinas virtuales) con diferentes capacidades de CPU, memoria, almacenamiento y red. EC2 es un componente central en la mayoría de arquitecturas en la nube, ya que ofrece flexibilidad, escalabilidad y un modelo de pago por uso.
+
+\subsubsection{Componentes Clave de EC2}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Instancias:} máquinas virtuales que ejecutan un sistema operativo (Linux, Windows, etc.).
+    \item \textbf{Amazon Machine Image (AMI):} plantilla que contiene el sistema operativo y, opcionalmente, software preinstalado.
+    \item \textbf{Tipos de instancia:} combinaciones de CPU, memoria y red (por ejemplo: \texttt{t2.micro}, \texttt{t3.micro}, \texttt{m5.large}, etc.).
+    \item \textbf{Almacenamiento:} típicamente volúmenes EBS (Elastic Block Store) asociados a las instancias.
+    \item \textbf{Key pairs:} par de claves (pública/privada) utilizados para autenticación vía SSH en instancias Linux.
+    \item \textbf{Regiones y Zonas de Disponibilidad (AZs):} ubicación física de los recursos.
+\end{itemize}
+
+\subsubsection{Tipos de Instancia y Free Tier}
+
+Las instancias \texttt{t2.micro} o \texttt{t3.micro} son tipos de instancia de uso general que pueden ser elegibles para el nivel gratuito de AWS (Free Tier). El Free Tier incluye típicamente:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{750 horas/mes} de uso combinado de instancias \texttt{t2.micro} o \texttt{t3.micro}.
+    \item Si se usan varias instancias, la suma de sus horas no debe superar las 750 horas mensuales para mantener el costo en \$0.00.
+\end{itemize}
+
+\subsection{Security Groups}
+
+Los \textbf{Security Groups (SG)} son firewalls virtuales \textit{stateful} que operan a nivel de instancia. Cada instancia EC2 asociada a un SG solo permite el tráfico que concuerda con las reglas del grupo de seguridad.
+
+\subsubsection{Características de los Security Groups}
+
+\begin{itemize}[leftmargin=*]
+    \item Operan a nivel de \textbf{instancia}, no de subred.
+    \item Son \textbf{stateful}: si se permite tráfico entrante, las respuestas se permiten automáticamente, aunque no haya reglas explícitas para el tráfico saliente y viceversa.
+    \item Las reglas se definen en términos de:
+    \begin{itemize}
+        \item Protocolo (TCP, UDP, ICMP).
+        \item Puerto o rango de puertos.
+        \item Origen/Destino (CIDR, otra SG, etc.).
+    \end{itemize}
+    \item Las reglas son por defecto \textbf{permisivas}: se definen \textit{permitir} (Allow), no existe un \textit{deny} explícito. Todo lo que no está permitido se bloquea implícitamente.
+\end{itemize}
+
+\subsubsection{Ejemplos Comunes de Reglas en SG}
+
+\begin{itemize}[leftmargin=*]
+    \item Permitir SSH (puerto 22) únicamente desde la IP pública del administrador.
+    \item Permitir HTTP (80) y HTTPS (443) desde \texttt{0.0.0.0/0} para servidores web públicos (solo en entornos de prueba y con cuidado).
+    \item Permitir acceso a base de datos (por ejemplo, puerto 3306) solo desde un SG de aplicación, nunca desde internet.
+\end{itemize}
+
+\subsection{Network ACLs (NACLs)}
+
+Las \textbf{Network ACLs} son listas de control de acceso que operan a nivel de subred dentro de una VPC. Proporcionan una capa adicional de seguridad y pueden permitir o denegar tráfico explícitamente.
+
+\subsubsection{Características de las NACLs}
+
+\begin{itemize}[leftmargin=*]
+    \item Operan a nivel de \textbf{subred}.
+    \item Son \textbf{stateless}: las reglas de entrada y salida son independientes; se deben configurar explícitamente ambas direcciones.
+    \item Las reglas se evalúan en orden según un número (rule number) y se detiene en la primera coincidencia.
+    \item Permiten reglas \textbf{Allow} y \textbf{Deny}.
+    \item Cada subred debe estar asociada a una única NACL.
+\end{itemize}
+
+\subsection{Stateful vs Stateless}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stateful (Security Groups):}
+    \begin{itemize}
+        \item El sistema \textbf{recuerda} el estado de la conexión.
+        \item Si un paquete entrante está permitido, la respuesta saliente se permite automáticamente.
+        \item Simplifica la configuración de reglas de retorno.
+    \end{itemize}
+    \item \textbf{Stateless (NACLs):}
+    \begin{itemize}
+        \item El sistema \textbf{no recuerda} el estado.
+        \item Se deben definir reglas para tráfico entrante y saliente de forma separada.
+        \item Requiere mayor cuidado para no bloquear respuestas legítimas.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Mejores Prácticas de Seguridad para EC2}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Principio de mínimo privilegio:} abrir solo los puertos estrictamente necesarios, hacia las direcciones mínimas posibles.
+    \item \textbf{SSH restringido:} no permitir SSH desde \texttt{0.0.0.0/0}. Limitar por dirección IP pública o utilizar un bastion host.
+    \item \textbf{Uso de claves SSH:} evitar contraseñas débiles; preferir autenticación por clave pública/privada.
+    \item \textbf{Separación de capas:} colocar servidores públicos en subredes públicas y servidores internos (aplicaciones, bases de datos) en subredes privadas.
+    \item \textbf{Monitoreo:} habilitar logs y métricas para detectar intentos de acceso no autorizados.
+    \item \textbf{Parcheo y actualización:} mantener el sistema operativo y servicios actualizados.
+\end{itemize}
+
+\newpage
+
+% ================== REQUISITOS PREVIOS ==================
+\section{Requisitos Previos}
+
+\subsection{Conocimientos Necesarios}
+
+\begin{itemize}[leftmargin=*]
+    \item Haber completado los laboratorios 1–3 (cuenta, IAM, VPC, subredes, IGW).
+    \item Conocimientos básicos de:
+    \begin{itemize}
+        \item Sistemas operativos Linux.
+        \item Uso de terminal y comandos básicos.
+        \item Conceptos de red (IP, puertos, protocolos).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Recursos Técnicos Requeridos}
+
+\begin{itemize}[leftmargin=*]
+    \item Cuenta AWS activa con Free Tier.
+    \item Usuario IAM con permisos suficientes sobre EC2 y VPC.
+    \item Navegador web moderno (Chrome, Firefox, etc.).
+    \item Cliente SSH:
+    \begin{itemize}
+        \item Linux/macOS: OpenSSH.
+        \item Windows: PuTTY o cliente SSH integrado de Windows 10+.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Costos Estimados}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Concepto} & \textbf{Costo Estimado} \\
+\hline
+Instancia EC2 t2.micro/t3.micro (<= 120 min) & \$0.00 (dentro de 750 horas/mes) \\
+\hline
+VPC, Subredes, IGW, Tablas de Rutas & \$0.00 \\
+\hline
+Security Groups y NACLs & \$0.00 \\
+\hline
+Almacenamiento EBS (8 GB estándar) & \$0.00 (dentro del Free Tier) \\
+\hline
+\textbf{TOTAL (Laboratorio)} & \textbf{\$0.00} \\
+\hline
+\end{tabular}
+\caption{Costos del Laboratorio 4 en modo práctico}
+\end{table}
+
+\subsection{Tiempo Estimado}
+
+\begin{itemize}[leftmargin=*]
+    \item Revisión de marco teórico: 20–25 minutos.
+    \item Lanzar y configurar instancia EC2: 40–45 minutos.
+    \item Configurar Security Groups y NACLs: 25–30 minutos.
+    \item Pruebas de conectividad y limpieza: 20–25 minutos.
+    \item \textbf{TOTAL ESTIMADO:} 120 minutos.
+\end{itemize}
+
+\newpage
+
+% ================== PROCEDIMIENTO PASO A PASO ==================
+\section{Procedimiento Paso a Paso}
+
+\subsection{Paso 1: Seleccionar Región y Preparar Entorno}
+
+\textbf{Objetivo:} Asegurar que los recursos se creen en la región adecuada y sobre la VPC existente de laboratorios previos.
+
+\begin{enumerate}[leftmargin=*]
+    \item Iniciar sesión en la consola de AWS con un usuario IAM administrativo.
+    \item Verificar la región seleccionada en la esquina superior derecha (por ejemplo, \texttt{us-east-1} o \texttt{sa-east-1}).
+    \item Verificar que la VPC creada en el Lab 2 está disponible y que existe al menos una subred pública con acceso a internet mediante IGW (Lab 3).
+\end{enumerate}
+
+\subsection{Paso 2: Crear o Verificar un Key Pair}
+
+\textbf{Objetivo:} Disponer de un par de claves para acceso SSH a la instancia EC2.
+
+\begin{enumerate}[leftmargin=*]
+    \item En la consola AWS, ir a \textbf{EC2} $\rightarrow$ \textbf{Key pairs}.
+    \item Si ya existe un key pair adecuado para esta región y laboratorio, tomar nota de su nombre y ubicación del archivo \texttt{.pem} (o \texttt{.ppk} en PuTTY).
+    \item Si no existe:
+    \begin{enumerate}[label*=\arabic*.]
+        \item Hacer clic en \textbf{Create key pair}.
+        \item Name: \texttt{lab4-ec2-key}.
+        \item Key pair type: \texttt{RSA}.
+        \item Private key file format:
+        \begin{itemize}
+            \item \texttt{.pem} si se usará OpenSSH.
+            \item \texttt{.ppk} si se usará PuTTY (o convertir posteriormente).
+        \end{itemize}
+        \item Hacer clic en \textbf{Create key pair}.
+        \item Guardar el archivo de clave privada en un lugar seguro en el equipo local.
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Paso 3: Lanzar una Instancia EC2 (Free Tier)}
+
+\textbf{Objetivo:} Lanzar una instancia \texttt{t2.micro} o \texttt{t3.micro} en una subred pública.
+
+\begin{enumerate}[leftmargin=*]
+    \item En el servicio \textbf{EC2}, hacer clic en \textbf{Instances} $\rightarrow$ \textbf{Launch instances}.
+    \item \textbf{Nombre de la instancia:} \texttt{lab4-web-server}.
+    \item \textbf{AMI (Amazon Machine Image):}
+    \begin{itemize}
+        \item Seleccionar \texttt{Amazon Linux 2} (Free Tier eligible).
+    \end{itemize}
+    \item \textbf{Tipo de instancia:}
+    \begin{itemize}
+        \item Seleccionar \texttt{t2.micro} o \texttt{t3.micro} (indicadas como Free Tier eligible).
+    \end{itemize}
+    \item \textbf{Key pair:}
+    \begin{itemize}
+        \item En \textbf{Key pair (login)}, seleccionar \texttt{lab4-ec2-key} (u otro par existente).
+    \end{itemize}
+    \item \textbf{Configuración de red:}
+    \begin{itemize}
+        \item VPC: seleccionar la VPC creada en el Lab 2 (por ejemplo, \texttt{MiVPC-Lab2}).
+        \item Subnet: elegir una \textbf{subred pública} (por ejemplo, \texttt{Public-Subnet-AZ1}).
+        \item Auto-assign public IP: \textbf{Enable} (necesario para acceso SSH desde internet).
+    \end{itemize}
+    \item \textbf{Firewall (Security Group):}
+    \begin{itemize}
+        \item Seleccionar \textbf{Create security group}.
+        \item Security group name: \texttt{SG-Lab4-Web}.
+        \item Description: \texttt{SG para servidor web del Lab 4}.
+        \item Inbound rules (inicialmente):
+        \begin{itemize}
+            \item Tipo: \texttt{SSH}, Puerto: 22, Origen: \texttt{My IP} (IP pública del estudiante).
+            \item Opcional: Tipo: \texttt{HTTP}, Puerto: 80, Origen: \texttt{0.0.0.0/0} (solo si se desea probar un servidor web SIMPLE).
+        \end{itemize}
+        \item Outbound rules:
+        \begin{itemize}
+            \item Dejar el valor por defecto (\texttt{All traffic} hacia \texttt{0.0.0.0/0}) para facilitar el laboratorio.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Almacenamiento:}
+    \begin{itemize}
+        \item Volume type: \texttt{gp2} o \texttt{gp3}, tamaño 8 GB (dentro del Free Tier).
+    \end{itemize}
+    \item Revisar la configuración y hacer clic en \textbf{Launch instance}.
+    \item Esperar a que el estado de la instancia cambie a \textbf{running} y los \textit{status checks} estén en \textbf{2/2 checks passed}.
+\end{enumerate}
+
+\subsection{Paso 4: Configuración de Security Groups (Inbound/Outbound)}
+
+\textbf{Objetivo:} Ajustar las reglas del Security Group según mejores prácticas.
+
+\begin{enumerate}[leftmargin=*]
+    \item En EC2, hacer clic en \textbf{Instances}, seleccionar \texttt{lab4-web-server}.
+    \item En la pestaña \textbf{Security}, identificar el \texttt{SG-Lab4-Web} y hacer clic en su ID.
+    \item \textbf{Inbound rules:}
+    \begin{itemize}
+        \item Mantener:
+        \begin{itemize}
+            \item SSH (22) con origen \texttt{My IP} (no \texttt{0.0.0.0/0}).
+        \end{itemize}
+        \item Opcional: HTTP (80) desde \texttt{0.0.0.0/0} solo para pruebas temporales de un servidor web, dejando claro que en producción se debe restringir según sea necesario.
+    \end{itemize}
+    \item \textbf{Outbound rules:}
+    \begin{itemize}
+        \item Permitir \texttt{All traffic} hacia \texttt{0.0.0.0/0} para que la instancia pueda actualizar paquetes, descargar software, etc.
+        \item En entornos más estrictos, estas reglas podrían limitarse a puertos específicos (por ejemplo, 80/443).
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 5: Configuración de Network ACLs}
+
+\textbf{Objetivo:} Revisar y, opcionalmente, ajustar las NACLs asociadas a la subred pública.
+
+\begin{enumerate}[leftmargin=*]
+    \item Ir a \textbf{VPC} $\rightarrow$ \textbf{Subnets}, seleccionar la subred pública donde se lanzó la instancia.
+    \item Revisar la \textbf{Network ACL} asociada:
+    \begin{itemize}
+        \item Por defecto, la NACL \texttt{default} suele permitir todo el tráfico inbound y outbound.
+    \end{itemize}
+    \item Opcionalmente, crear una NACL más restrictiva:
+    \begin{enumerate}[label*=\arabic*.]
+        \item \textbf{Network ACLs} $\rightarrow$ \textbf{Create network ACL}.
+        \item Name: \texttt{NACL-Public-Lab4}.
+        \item VPC: VPC del laboratorio.
+        \item Crear la NACL.
+    \end{enumerate}
+    \item Definir reglas de ejemplo:
+    \begin{itemize}
+        \item Inbound:
+        \begin{itemize}
+            \item Permitir SSH (22) desde la IP del estudiante.
+            \item Permitir HTTP (80) desde \texttt{0.0.0.0/0} (si se usa).
+            \item Permitir puertos efímeros de retorno (por ejemplo, 1024–65535) desde \texttt{0.0.0.0/0}.
+        \end{itemize}
+        \item Outbound:
+        \begin{itemize}
+            \item Permitir todo el tráfico hacia \texttt{0.0.0.0/0} (para el laboratorio).
+        \end{itemize}
+    \end{itemize}
+    \item Asociar la NACL a la subred pública utilizada por la instancia.
+\end{enumerate}
+
+\subsection{Paso 6: Conexión a la Instancia vía SSH}
+
+\textbf{Objetivo:} Verificar que la instancia es accesible de forma segura mediante SSH.
+
+\subsubsection*{Desde Linux/macOS (OpenSSH)}
+
+\begin{enumerate}[leftmargin=*]
+    \item En la consola de EC2, copiar la \textbf{IPv4 Public IP} de \texttt{lab4-web-server}.
+    \item En el equipo local:
+    \begin{enumerate}[label*=\arabic*.]
+        \item Abrir una terminal.
+        \item Ubicarse en el directorio donde está el archivo de clave privada \texttt{lab4-ec2-key.pem}.
+        \item Asegurar permisos correctos del archivo:
+\begin{lstlisting}[language=bash, caption=Comando para asegurar permisos de la clave privada]
+chmod 400 lab4-ec2-key.pem
+\end{lstlisting}
+        \item Conectarse vía SSH:
+\begin{lstlisting}[language=bash, caption=Conexión SSH desde Linux/macOS]
+ssh -i lab4-ec2-key.pem ec2-user@IP_PUBLICA
+\end{lstlisting}
+        \item Aceptar la huella (fingerprint) del servidor cuando se pregunte.
+    \end{enumerate}
+\end{enumerate}
+
+\subsubsection*{Desde Windows con cliente SSH integrado (Windows 10+)}
+
+\begin{enumerate}[leftmargin=*]
+    \item Abrir \textbf{PowerShell} o \textbf{CMD}.
+    \item Navegar al directorio donde está \texttt{lab4-ec2-key.pem}.
+    \item Ejecutar:
+\begin{lstlisting}[language=bash, caption=Conexión SSH desde Windows 10+]
+ssh -i .\lab4-ec2-key.pem ec2-user@IP_PUBLICA
+\end{lstlisting}
+    \item Aceptar la huella del servidor.
+\end{enumerate}
+
+\subsubsection*{Prueba de conectividad dentro de la instancia}
+
+Una vez conectado:
+
+\begin{enumerate}[leftmargin=*]
+    \item Verificar la conectividad a internet:
+\begin{lstlisting}[language=bash, caption=Prueba de conectividad desde la instancia]
+ping -c 3 www.google.com
+\end{lstlisting}
+    \item Actualizar paquetes (ejemplo en Amazon Linux 2):
+\begin{lstlisting}[language=bash, caption=Actualizar paquetes del sistema]
+sudo yum update -y
+\end{lstlisting}
+\end{enumerate}
+
+\subsection{Paso 7: Pruebas de Seguridad (Stateful vs Stateless)}
+
+\textbf{Objetivo:} Observar efectos de reglas en SG y NACLs.
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Prueba con SG:}
+    \begin{itemize}
+        \item Eliminar temporalmente la regla SSH en \texttt{SG-Lab4-Web}.
+        \item Intentar conectar nuevamente por SSH desde el equipo local (debe fallar).
+        \item Volver a agregar la regla SSH y verificar que la conexión vuelve a funcionar.
+    \end{itemize}
+    \item \textbf{Prueba con NACL:}
+    \begin{itemize}
+        \item En la NACL asociada a la subred, añadir una regla \textbf{Deny} para tráfico entrante en puerto 22 desde cualquier origen.
+        \item Intentar conectarse por SSH (fallará aunque el SG lo permita, demostrando que las NACLs también influyen).
+        \item Eliminar la regla Deny para restaurar el acceso.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Paso 8: Reflexión sobre Mejores Prácticas}
+
+\begin{itemize}[leftmargin=*]
+    \item Identificar qué puertos quedaron abiertos y justificar su necesidad.
+    \item Evaluar si se usó la IP pública correcta para restringir SSH.
+    \item Considerar la introducción de un bastion host en un diseño más avanzado (acceso indirecto a instancias privadas).
+\end{itemize}
+
+\newpage
+
+% ================== TABLAS DE CONFIGURACIÓN ==================
+\section{Tablas de Configuración}
+
+\subsection{Configuración de la Instancia EC2}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parámetro} & \textbf{Valor} \\
+\hline
+Nombre & lab4-web-server \\
+\hline
+AMI & Amazon Linux 2 (Free Tier eligible) \\
+\hline
+Tipo de instancia & t2.micro o t3.micro \\
+\hline
+VPC & VPC del laboratorio (Lab 2) \\
+\hline
+Subred & Subred pública (Lab 3) \\
+\hline
+IP pública & Asignada automáticamente \\
+\hline
+Key pair & lab4-ec2-key \\
+\hline
+Security Group & SG-Lab4-Web \\
+\hline
+Almacenamiento & 8 GB gp2/gp3 \\
+\hline
+\end{tabular}
+\caption{Configuración de la instancia EC2 del Laboratorio 4}
+\end{table}
+
+\subsection{Reglas del Security Group SG-Lab4-Web}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Dirección} & \textbf{Protocolo} & \textbf{Puerto} & \textbf{Origen/Destino} \\
+\hline
+Inbound & TCP & 22 (SSH) & IP pública del estudiante \\
+\hline
+Inbound (opcional) & TCP & 80 (HTTP) & 0.0.0.0/0 \\
+\hline
+Outbound & All & All & 0.0.0.0/0 \\
+\hline
+\end{tabular}
+\caption{Reglas de ejemplo para el Security Group SG-Lab4-Web}
+\end{table}
+
+\subsection{Ejemplo de Reglas en NACL Pública}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{\# Regla} & \textbf{Dirección} & \textbf{Protocolo} & \textbf{Puerto} & \textbf{Acción / Origen/Destino} \\
+\hline
+100 & Inbound & TCP & 22 & Allow desde IP del estudiante \\
+\hline
+110 & Inbound & TCP & 80 & Allow desde 0.0.0.0/0 \\
+\hline
+120 & Inbound & TCP & 1024-65535 & Allow desde 0.0.0.0/0 \\
+\hline
+100 & Outbound & All & All & Allow hacia 0.0.0.0/0 \\
+\hline
+\end{tabular}
+\caption{Ejemplo de reglas en NACL para la subred pública}
+\end{table}
+
+\newpage
+
+% ================== VERIFICACIÓN ==================
+\section{Verificación}
+
+\subsection{Verificación de la Instancia EC2}
+
+\begin{enumerate}[leftmargin=*]
+    \item En \textbf{EC2 $\rightarrow$ Instances} verificar que \texttt{lab4-web-server} está en estado \textbf{running}.
+    \item Asegurarse de que los \textit{status checks} están en \textbf{2/2 checks passed}.
+\end{enumerate}
+
+\subsection{Verificación de Conectividad SSH}
+
+\begin{enumerate}[leftmargin=*]
+    \item Conectarse vía SSH usando el comando correspondiente (Linux/macOS/Windows).
+    \item Confirmar que el prompt muestra \texttt{ec2-user@ip-...}.
+    \item Ejecutar comandos básicos:
+\begin{lstlisting}[language=bash, caption=Comandos básicos de verificación]
+whoami
+hostname
+ip addr
+\end{lstlisting}
+\end{enumerate}
+
+\subsection{Verificación de Reglas de Seguridad}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Acceso permitido:}
+    \begin{itemize}
+        \item Desde la IP configurada en SG y NACL, la conexión SSH funciona.
+    \end{itemize}
+    \item \textbf{Acceso denegado:}
+    \begin{itemize}
+        \item Cambiar temporalmente de red o IP y verificar que el acceso se bloquea.
+        \item Introducir una regla \textbf{Deny} en NACL y observar su efecto.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+% ================== LIMPIEZA DE RECURSOS ==================
+\section{Limpieza de Recursos}
+
+\textbf{Objetivo:} Evitar costos innecesarios después del laboratorio.
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Instancia EC2:}
+    \begin{itemize}
+        \item En \textbf{EC2 $\rightarrow$ Instances}, seleccionar \texttt{lab4-web-server}.
+        \item Hacer clic en \textbf{Instance state $\rightarrow$ Terminate instance}.
+        \item Confirmar la terminación.
+    \end{itemize}
+    \item \textbf{Volúmenes EBS:}
+    \begin{itemize}
+        \item Verificar en \textbf{EC2 $\rightarrow$ Volumes} que el volumen asociado a la instancia se eliminó (según la política por defecto).
+    \end{itemize}
+    \item \textbf{Security Groups y NACLs:}
+    \begin{itemize}
+        \item Si se crearon exclusivamente para el laboratorio y no se utilizarán más, eliminarlos una vez que no estén asociados a recursos.
+    \end{itemize}
+    \item \textbf{Key pair:}
+    \begin{itemize}
+        \item Mantener el key pair si se usará en laboratorios posteriores.
+        \item En caso de no necesitarlo, puede eliminarse desde \textbf{EC2 $\rightarrow$ Key pairs}.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+% ================== CUESTIONARIO INTEGRADO ==================
+\section{Cuestionario de Evaluación}
+
+\subsection{Preguntas de Selección Múltiple}
+
+\begin{enumerate}
+
+\item \textbf{¿Cuál es la función principal de Amazon EC2?}
+\begin{enumerate}[label=\alph*)]
+    \item Proveer almacenamiento de objetos.
+    \item Proveer máquinas virtuales bajo demanda para ejecutar aplicaciones.
+    \item Administrar bases de datos relacionales.
+    \item Gestionar usuarios e identidades en AWS.
+\end{enumerate}
+
+\item \textbf{¿Qué tipo de instancia es elegible para el Free Tier en este laboratorio?}
+\begin{enumerate}[label=\alph*)]
+    \item \texttt{m5.large}
+    \item \texttt{r5.xlarge}
+    \item \texttt{t2.micro} o \texttt{t3.micro}
+    \item \texttt{p3.2xlarge}
+\end{enumerate}
+
+\item \textbf{¿Cuántas horas al mes de uso de instancias \texttt{t2.micro/t3.micro} típicamente permite el Free Tier?}
+\begin{enumerate}[label=\alph*)]
+    \item 100 horas/mes
+    \item 750 horas/mes
+    \item 1000 horas/mes
+    \item 24 horas/mes
+\end{enumerate}
+
+\item \textbf{Los Security Groups en AWS son:}
+\begin{enumerate}[label=\alph*)]
+    \item Firewalls \textit{stateless} aplicados a nivel de subred.
+    \item Firewalls \textit{stateful} aplicados a nivel de instancia.
+    \item Listas de control de acceso para S3.
+    \item Herramientas para cifrar volúmenes EBS.
+\end{enumerate}
+
+\item \textbf{Las Network ACLs (NACLs) se caracterizan por:}
+\begin{enumerate}[label=\alph*)]
+    \item Ser \textit{stateful} y aplicarse a instancias.
+    \item Ser \textit{stateless} y aplicarse a subredes.
+    \item Solo permitir reglas de tipo Allow.
+    \item No afectar el tráfico dentro de una VPC.
+\end{enumerate}
+
+\item \textbf{En un mecanismo de seguridad \textit{stateful}:}
+\begin{enumerate}[label=\alph*)]
+    \item Se deben configurar reglas de respuesta explícitas para cada conexión.
+    \item El sistema recuerda el estado de la conexión y permite las respuestas automáticamente.
+    \item No se permite el tráfico de retorno.
+    \item Solo se evalúan las reglas outbound.
+\end{enumerate}
+
+\item \textbf{¿Cuál es la mejor práctica para permitir acceso SSH a una instancia EC2?}
+\begin{enumerate}[label=\alph*)]
+    \item Permitir SSH (22) desde \texttt{0.0.0.0/0}.
+    \item Permitir SSH solo desde la IP pública del administrador o desde un bastion host.
+    \item Deshabilitar SSH completamente.
+    \item Permitir SSH desde cualquier red privada.
+\end{enumerate}
+
+\item \textbf{Si un Security Group permite tráfico SSH desde la IP del estudiante, pero la NACL asociada a la subred deniega puerto 22, el resultado será:}
+\begin{enumerate}[label=\alph*)]
+    \item El tráfico se permite porque el Security Group tiene prioridad.
+    \item El tráfico se deniega porque la NACL bloquea el puerto 22.
+    \item El tráfico se permite solo la primera vez.
+    \item El tráfico no se ve afectado por la NACL.
+\end{enumerate}
+
+\item \textbf{¿Qué componente es necesario para que una instancia en subred pública tenga acceso a internet?}
+\begin{enumerate}[label=\alph*)]
+    \item NAT Gateway
+    \item Internet Gateway (IGW) asociado a la VPC y ruta por defecto
+    \item VPC Peering
+    \item Transit Gateway
+\end{enumerate}
+
+\item \textbf{La clave privada de un key pair de EC2 debe:}
+\begin{enumerate}[label=\alph*)]
+    \item Compartirse con todos los miembros del equipo para facilitar acceso.
+    \item Subirse como archivo público a un repositorio git.
+    \item Mantenerse segura en el equipo local y no compartirse.
+    \item Guardarse dentro de la instancia EC2 para facilitar el login.
+\end{enumerate}
+
+\end{enumerate}
+
+\subsection{Preguntas Verdadero/Falso}
+
+\begin{enumerate}[label=\textbf{VF\arabic*.}]
+
+\item \textbf{Un Security Group puede contener tanto reglas inbound como outbound, y todo tráfico no permitido explícitamente es bloqueado por defecto.}
+
+\item \textbf{Las Network ACLs solo se aplican al tráfico que va hacia internet, no al tráfico dentro de la VPC.}
+
+\item \textbf{En el Free Tier, si se lanzan dos instancias \texttt{t2.micro} de forma simultánea durante todo el mes, se corre el riesgo de superar las 750 horas gratuitas.}
+
+\end{enumerate}
+
+\subsection{Escenarios Prácticos}
+
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+
+\item \textbf{Escenario 1: Conexión SSH bloqueada}
+
+Has lanzado una instancia EC2 y configurado un Security Group permitiendo SSH (22) desde tu IP. Sin embargo, no puedes conectarte via SSH. Lista al menos tres posibles causas relacionadas con Security Groups, NACLs o configuración de red, y cómo las verificarías/corregirías.
+
+\item \textbf{Escenario 2: Servidor web accesible desde cualquier lugar}
+
+Has configurado un servidor web en la instancia EC2 con HTTP (80) abierto a \texttt{0.0.0.0/0} en el Security Group. La empresa ahora exige restringir el acceso solo a un conjunto de direcciones IP corporativas. Describe los cambios que realizarías en el Security Group y cómo probarías que la restricción funciona correctamente.
+
+\end{enumerate}
+
+\newpage
+
+\subsection{Respuestas del Cuestionario}
+
+\subsubsection*{Selección Múltiple}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{b)} Proveer máquinas virtuales bajo demanda para ejecutar aplicaciones.
+    \item \textbf{c)} \texttt{t2.micro} o \texttt{t3.micro}.
+    \item \textbf{b)} 750 horas/mes.
+    \item \textbf{b)} Firewalls \textit{stateful} aplicados a nivel de instancia.
+    \item \textbf{b)} Ser \textit{stateless} y aplicarse a subredes.
+    \item \textbf{b)} El sistema recuerda el estado de la conexión y permite las respuestas automáticamente.
+    \item \textbf{b)} Permitir SSH solo desde la IP pública del administrador o desde un bastion host.
+    \item \textbf{b)} El tráfico se deniega porque la NACL bloquea el puerto 22.
+    \item \textbf{b)} Internet Gateway (IGW) asociado a la VPC y ruta por defecto.
+    \item \textbf{c)} Mantenerse segura en el equipo local y no compartirse.
+\end{enumerate}
+
+\subsubsection*{Verdadero/Falso}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Verdadero.} Los Security Groups permiten solo el tráfico definido; no hay reglas de Deny explícitas, pero todo lo no permitido se bloquea.
+    \item \textbf{Falso.} Las NACLs se aplican al tráfico que entra y sale de las subredes, incluyendo tráfico interno dentro de la VPC.
+    \item \textbf{Verdadero.} Dos instancias ejecutadas simultáneamente 24/7 sumarían 2 x 720 horas aprox., superando las 750 horas/mes.
+\end{enumerate}
+
+\subsubsection*{Guía para Escenarios}
+
+\textbf{Escenario 1: Conexión SSH bloqueada}
+
+Posibles causas y soluciones:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Security Group sin regla SSH correcta:}
+    \begin{itemize}
+        \item Verificar que el SG asociado a la instancia tiene una regla inbound:
+        \begin{itemize}
+            \item Protocolo: TCP, Puerto: 22.
+            \item Origen: IP pública actual del estudiante.
+        \end{itemize}
+        \item Corregir la regla si el origen es incorrecto (por ejemplo, estaba \texttt{My IP} anterior).
+    \end{itemize}
+    \item \textbf{NACL denegando puerto 22:}
+    \begin{itemize}
+        \item Revisar la NACL asociada a la subred.
+        \item Verificar si existe alguna regla \textbf{Deny} para puerto 22 inbound o outbound.
+        \item Ajustar las reglas para permitir el tráfico SSH.
+    \end{itemize}
+    \item \textbf{IP o DNS incorrectos:}
+    \begin{itemize}
+        \item Confirmar que se está usando la IP pública actual de la instancia (no una anterior).
+        \item Verificar que la instancia tiene estado \textbf{running} y \textbf{status checks} en 2/2.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Escenario 2: Servidor web accesible desde cualquier lugar}
+
+Pasos para restringir:
+
+\begin{itemize}[leftmargin=*]
+    \item Identificar el rango de IPs corporativas (por ejemplo, \texttt{200.10.20.0/24} y \texttt{201.30.40.0/24}).
+    \item Editar las reglas inbound del SG que controla el servidor web:
+    \begin{itemize}
+        \item Eliminar la regla HTTP (80) con origen \texttt{0.0.0.0/0}.
+        \item Agregar reglas HTTP (80) con origen:
+        \begin{itemize}
+            \item \texttt{200.10.20.0/24}.
+            \item \texttt{201.30.40.0/24}.
+        \end{itemize}
+    \end{itemize}
+    \item Pruebas:
+    \begin{itemize}
+        \item Desde una IP corporativa, verificar que la aplicación web sigue siendo accesible.
+        \item Desde otra red (por ejemplo, datos móviles personales), verificar que el acceso HTTP es bloqueado.
+    \end{itemize}
+\end{itemize}
+
+\newpage
+
+% ================== CONCLUSIONES ==================
+\section{Conclusiones}
+
+En este laboratorio, el estudiante ha dado un paso clave en la transición desde el diseño puramente lógico de redes en AWS hacia la operación práctica de \textbf{cómputo en la nube} con Amazon EC2. La experiencia de lanzar una instancia, protegerla con \textbf{Security Groups}, reforzar la seguridad con \textbf{Network ACLs} y conectarse vía SSH, permite cerrar el ciclo de conceptos trabajados en los laboratorios anteriores de VPC e Internet Gateway.
+
+Entre los principales logros se destacan:
+
+\begin{itemize}[leftmargin=*]
+    \item La comprensión del rol de EC2 como servicio de máquinas virtuales bajo demanda y su relación con la VPC y las subredes.
+    \item La diferenciación clara entre \textbf{Security Groups (stateful)} y \textbf{NACLs (stateless)}, entendiendo cómo se complementan en una estrategia de defensa en profundidad.
+    \item La aplicación de \textbf{mejores prácticas de seguridad}, restringiendo el acceso SSH a direcciones IP específicas y evitando aperturas indiscriminadas de puertos.
+    \item La construcción de habilidades prácticas para diagnosticar problemas de conectividad y aislar si el bloqueo ocurre a nivel de SG, NACL o configuración de red.
+\end{itemize}
+
+Finalmente, el laboratorio refuerza la idea de que el uso correcto de EC2 va mucho más allá de ``encender una máquina virtual'': implica \textbf{diseñar cuidadosamente la superficie de exposición de red}, controlar quién puede conectarse y desde dónde, y mantener una disciplina de cierre y limpieza de recursos para respetar límites de Free Tier y evitar costos inesperados. Estas competencias serán esenciales para los laboratorios posteriores, donde EC2 se integrará con otros servicios en arquitecturas cada vez más complejas y cercanas a escenarios de producción.
+
+\newpage
+
+% ================== REFERENCIAS ==================
+\section{Referencias}
+
+\subsection{Documentación Oficial de AWS}
+
+\begin{enumerate}[leftmargin=*]
+    \item Amazon EC2 User Guide for Linux Instances \\
+    \url{https://docs.aws.amazon.com/ec2/}
+    \item Amazon VPC User Guide \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/}
+    \item Security Groups for Your VPC \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html}
+    \item Network ACLs \\
+    \url{https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html}
+    \item AWS Free Tier \\
+    \url{https://aws.amazon.com/free/}
+    \item Best practices for securing Amazon EC2 instances \\
+    \url{https://docs.aws.amazon.com/whitepapers/latest/aws-overview/security-and-compliance.html}
+\end{enumerate}
+
+\subsection{Recursos de Aprendizaje}
+
+\begin{enumerate}[leftmargin=*]
+    \item AWS Training and Certification - Introducción a EC2 \\
+    \url{https://www.aws.training/}
+    \item AWS Skill Builder - Cursos introductorios de EC2 y VPC \\
+    \url{https://skillbuilder.aws/}
+\end{enumerate}
+
+\vspace{0.5cm}
+
+\textbf{Nota:} Las URLs anteriores fueron verificadas al momento de elaboración de este laboratorio. La documentación de AWS se actualiza frecuentemente, por lo que se recomienda consultar siempre la versión más reciente desde el portal oficial.
+
+\end{document}
