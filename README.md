@@ -1,10 +1,10 @@
 # Laboratorios Virtuales de Redes en AWS
 
-## 📋 Descripción del Proyecto
+## Descripción del Proyecto
 
 Proyecto dirigido para la asignatura "Redes de Nueva Generación" que consiste en el diseño e implementación de 8 laboratorios prácticos en AWS para fortalecer competencias en redes mediante servicios de nube.
 
-## 👥 Autores
+## Autores
 
 - **Nicolás Carreño Tascón**
 - **Juan Manuel Canchala Jiménez**
@@ -13,11 +13,11 @@ Proyecto dirigido para la asignatura "Redes de Nueva Generación" que consiste e
 **Universidad Javeriana Cali**  
 **Diciembre 2025**
 
-## 🎯 Objetivos
+## Objetivos
 
 Diseñar e implementar un entorno práctico de redes utilizando Amazon Web Services (AWS) que permita a los estudiantes fortalecer sus conocimientos mediante laboratorios virtuales alineados con el contenido del curso AWS Cloud Practitioner.
 
-## 📚 Contenido del Proyecto
+## Contenido del Proyecto
 
 ### Laboratorios Incluidos
 
@@ -38,18 +38,16 @@ Diseñar e implementar un entorno práctico de redes utilizando Amazon Web Servi
 - **Documentación técnica detallada** con procedimientos paso a paso
 - **Cuestionarios integrados** en cada laboratorio
 
-## 📁 Estructura del Repositorio
+## Estructura del Repositorio
 
 ```
 Labs-AWS-PDirigido/
 │
 ├── proyecto.txt                    # Información del proyecto
 ├── PLAN_PROYECTO_NUEVO.txt        # Plan de ejecución
-├── CHECKLIST_ENTREGA.txt          # Estado de entregables
 ├── README.md                      # Este archivo
 │
 ├── laboratorios/
-│   ├── plantilla_lab.tex          # Plantilla base LaTeX
 │   ├── CONTENIDO_LABORATORIOS.txt # Descripción de cada lab
 │   ├── lab01_introduccion_aws.tex
 │   ├── lab02_vpc_redes_virtuales.tex
@@ -60,15 +58,11 @@ Labs-AWS-PDirigido/
 │   ├── lab07_monitoreo_cloudwatch.tex
 │   └── lab08_proyecto.tex
 │
-├── cuestionarios/
-│   └── banco_cuestionarios.tex    # 120+ preguntas
 │
-├── PDFs/                          # PDFs compilados
-├── recursos/                      # Recursos adicionales
-└── documentacion/                 # Documentación complementaria
+├── PDFs/ # Archivos de latex compilados a PDF
 ```
 
-## 🛠️ Tecnologías y Servicios AWS
+## Tecnologías y Servicios AWS
 
 ### Servicios Core
 - Amazon VPC (Virtual Private Cloud)
@@ -92,13 +86,13 @@ Labs-AWS-PDirigido/
 - VPC Flow Logs
 - AWS WAF (conceptual)
 
-## 💰 Consideraciones de Costos
+## Consideraciones de Costos
 
 - **Diseñado para AWS Free Tier:** Todos los laboratorios utilizan servicios gratuitos
 - **Costo estimado:** $0.00 siguiendo las instrucciones correctamente
 - **Recomendación:** Eliminar recursos después de cada práctica
 
-## 📖 Cómo Usar Este Proyecto
+## Cómo Usar Este Proyecto
 
 ### Para Estudiantes
 
@@ -116,7 +110,7 @@ Labs-AWS-PDirigido/
 4. Implementar rúbricas de evaluación incluidas
 5. Considerar el proyecto integrador (Lab 8) como evaluación final
 
-## 🔧 Requisitos Previos
+## Requisitos Previos
 
 ### Conocimientos Necesarios
 - Conceptos básicos de redes (TCP/IP, subnetting)
@@ -128,28 +122,7 @@ Labs-AWS-PDirigido/
 - Navegador web moderno
 - Conexión a internet estable
 
-## 📝 Compilación de Documentos LaTeX
-
-### Requisitos
-```bash
-# Instalar distribución LaTeX
-# Windows: MiKTeX o TeX Live
-# macOS: MacTeX
-# Linux: texlive-full
-```
-
-### Compilar un laboratorio
-```bash
-pdflatex lab01_introduccion_aws.tex
-pdflatex lab01_introduccion_aws.tex  # Segunda vez para referencias
-```
-
-### Usando Overleaf (recomendado)
-1. Subir archivo .tex a Overleaf
-2. Compilar automáticamente
-3. Descargar PDF
-
-## 🎓 Metodología Pedagógica
+## Metodología Pedagógica
 
 El proyecto sigue una metodología progresiva:
 
@@ -169,7 +142,7 @@ El proyecto sigue una metodología progresiva:
    - Arquitectura completa 3-tier
    - Todos los conceptos integrados
 
-## 📊 Evaluación
+## Evaluación
 
 ### Componentes de Evaluación
 - **Laboratorios prácticos:** Implementación de servicios AWS
@@ -182,15 +155,15 @@ El proyecto sigue una metodología progresiva:
 - Documentación de proceso
 - Respuestas a preguntas de reflexión
 
-## 🤝 Sobre el Proyecto
+## Sobre el Proyecto
 
 Este proyecto académico forma parte del curso "Redes de Nueva Generación" y fue desarrollado bajo la dirección del profesor Carlos Olarte en la Universidad Javeriana Cali durante el semestre académico 2025.
 
-## 📄 Licencia
+## Licencia
 
 Material desarrollado con fines educativos.
 
-## 🙏 Agradecimientos
+## Agradecimientos
 
 - AWS por la documentación oficial
 - Comunidad de AWS en español
