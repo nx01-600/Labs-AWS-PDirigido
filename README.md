@@ -9,6 +9,10 @@ Proyecto dirigido para la asignatura "Redes de Nueva Generación" que consiste e
 - **Nicolás Carreño Tascón**
 - **Juan Manuel Canchala Jiménez**
 
+**Director:** Carlos Olarte  
+**Universidad Javeriana Cali**  
+**Diciembre 2025**
+
 ## 🎯 Objetivos
 
 Diseñar e implementar un entorno práctico de redes utilizando Amazon Web Services (AWS) que permita a los estudiantes fortalecer sus conocimientos mediante laboratorios virtuales alineados con el contenido del curso AWS Cloud Practitioner.
@@ -28,43 +32,40 @@ Diseñar e implementar un entorno práctico de redes utilizando Amazon Web Servi
 
 ### Componentes del Proyecto
 
-- ✅ **8 Laboratorios completos en LaTeX/PDF**
-- ✅ **120+ preguntas de evaluación** (cuestionarios tipo Kahoot/Quiz)
-- ✅ **Diagramas de arquitectura** para cada laboratorio
-- ✅ **Documentación textual detallada** (sin capturas, excepto Lab 8)
-- ✅ **Manual para instructores**
-- ✅ **Guía de implementación**
+- **8 Laboratorios completos en LaTeX** con documentación profesional
+- **120+ preguntas de evaluación** en banco de cuestionarios unificado
+- **Diagramas de arquitectura** con TikZ para cada laboratorio
+- **Documentación técnica detallada** con procedimientos paso a paso
+- **Cuestionarios integrados** en cada laboratorio
 
 ## 📁 Estructura del Repositorio
 
 ```
-proyectodirigidi/
+Labs-AWS-PDirigido/
 │
-├── proyecto.txt                    # Datos del proyecto
-├── PLAN_PROYECTO.txt              # Plan completo de ejecución
-├── CHECKLIST_ENTREGA.txt          # Checklist de entregables
+├── proyecto.txt                    # Información del proyecto
+├── PLAN_PROYECTO_NUEVO.txt        # Plan de ejecución
+├── CHECKLIST_ENTREGA.txt          # Estado de entregables
 ├── README.md                      # Este archivo
 │
 ├── laboratorios/
 │   ├── plantilla_lab.tex          # Plantilla base LaTeX
-│   ├── CONTENIDO_LABORATORIOS.txt # Detalle de cada lab
+│   ├── CONTENIDO_LABORATORIOS.txt # Descripción de cada lab
 │   ├── lab01_introduccion_aws.tex
 │   ├── lab02_vpc_redes_virtuales.tex
 │   ├── lab03_internet_gateway.tex
-│   └── ... (hasta lab08)
+│   ├── lab04_EC2_seguridadRed.tex
+│   ├── lab05_seguridad_redes.tex
+│   ├── lab06_VPC_peering.tex
+│   ├── lab07_monitoreo_cloudwatch.tex
+│   └── lab08_proyecto.tex
 │
 ├── cuestionarios/
 │   └── banco_cuestionarios.tex    # 120+ preguntas
 │
-├── recursos/
-│   ├── diagramas/                 # Diagramas de arquitectura
-│   ├── scripts/                   # Scripts de automatización
-│   └── guias/                     # Guías complementarias
-│
-└── documentacion/
-    ├── manual_instructor.pdf
-    ├── memoria_proyecto.pdf
-    └── guia_implementacion.pdf
+├── PDFs/                          # PDFs compilados
+├── recursos/                      # Recursos adicionales
+└── documentacion/                 # Documentación complementaria
 ```
 
 ## 🛠️ Tecnologías y Servicios AWS
@@ -93,10 +94,9 @@ proyectodirigidi/
 
 ## 💰 Consideraciones de Costos
 
-- **Objetivo:** Todos los laboratorios diseñados para AWS Free Tier
+- **Diseñado para AWS Free Tier:** Todos los laboratorios utilizan servicios gratuitos
+- **Costo estimado:** $0.00 siguiendo las instrucciones correctamente
 - **Recomendación:** Eliminar recursos después de cada práctica
-- **Costos estimados:** $0.00 siguiendo las instrucciones correctamente
-- **Sin Free Tier:** ~$5-10 por completar todos los labs
 
 ## 📖 Cómo Usar Este Proyecto
 
@@ -127,7 +127,6 @@ proyectodirigidi/
 - Cuenta de AWS (Free Tier recomendado)
 - Navegador web moderno
 - Conexión a internet estable
-- (Opcional) AWS CLI instalado
 
 ## 📝 Compilación de Documentos LaTeX
 
@@ -173,9 +172,9 @@ El proyecto sigue una metodología progresiva:
 ## 📊 Evaluación
 
 ### Componentes de Evaluación
-- **Laboratorios prácticos:** 50%
-- **Cuestionarios:** 20%
-- **Proyecto final (Lab 8):** 30%
+- **Laboratorios prácticos:** Implementación de servicios AWS
+- **Cuestionarios:** 15 preguntas por laboratorio
+- **Proyecto final (Lab 8):** Arquitectura completa 3-tier
 
 ### Criterios de Calificación
 - Completitud de implementación
@@ -183,55 +182,21 @@ El proyecto sigue una metodología progresiva:
 - Documentación de proceso
 - Respuestas a preguntas de reflexión
 
-## 🤝 Contribuciones
+## 🤝 Sobre el Proyecto
 
-Este es un proyecto académico. Para sugerencias o mejoras:
-1. Documentar el problema o mejora propuesta
-2. Incluir capturas o ejemplos
-3. Referenciar el laboratorio específico
+Este proyecto académico forma parte del curso "Redes de Nueva Generación" y fue desarrollado bajo la dirección del profesor Carlos Olarte en la Universidad Javeriana Cali durante el semestre académico 2025.
 
 ## 📄 Licencia
 
-Este material es desarrollado con fines educativos para la asignatura "Redes de Nueva Generación".
+Material desarrollado con fines educativos.
 
 ## 🙏 Agradecimientos
 
 - AWS por la documentación oficial
 - Comunidad de AWS en español
-- AWS Free Tier por hacer posible el aprendizaje práctico sin costos
-
-## 🚀 Estado del Proyecto
-
-**Estado Actual:** En Desarrollo
-
-### Completado ✅
-- [x] Planificación general
-- [x] Estructura de carpetas
-- [x] Plantilla LaTeX
-- [x] Definición de contenidos
-- [x] Banco de cuestionarios (estructura)
-
-### En Progreso 🔄
-- [x] Desarrollo Labs 1-3
-- [ ] Desarrollo Labs 4-8
-- [ ] Creación de diagramas
-- [ ] Manual del instructor
-
-### Pendiente 📋
-- [ ] Completar Labs 4-8
-- [ ] Banco completo de cuestionarios
-- [ ] Memoria del proyecto
-- [ ] Revisión final y presentación
-
-## 📅 Cronograma
-
-**Duración:** 10 semanas de desarrollo activo  
-**Inicio:** 2 de septiembre de 2025  
-**Entrega final:** 20 de diciembre de 2025
-
-Ver `PLAN_PROYECTO_NUEVO.txt` para el cronograma detallado.
+- AWS Free Tier por hacer posible el aprendizaje práctico
 
 ---
 
-**Última actualización:** 28 de noviembre de 2025  
+**Última actualización:** 1 de diciembre de 2025  
 **Versión:** 1.0

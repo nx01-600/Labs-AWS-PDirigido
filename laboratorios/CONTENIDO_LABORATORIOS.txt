@@ -1,12 +1,15 @@
-LISTA DE LABORATORIOS - PROYECTO DIRIGIDO AWS
-=============================================
+LABORATORIOS DE REDES EN AWS - CONTENIDO DETALLADO
+==================================================
+Proyecto Dirigido - Redes de Nueva Generación
+Universidad Javeriana Cali - Diciembre 2025
+
 Total: 8 Laboratorios | Progresión: Básico → Intermedio → Avanzado
-Todos 100% Free Tier ($0.00) | Sin screenshots (documentación textual completa)
+Todos 100% Free Tier ($0.00)
 
 
-LAB 1: INTRODUCCIÓN A AWS Y CONFIGURACIÓN INICIAL ✓ COMPLETADO
----------------------------------------------------------------
-Duración: 60-90 minutos | Dificultad: Básica | Páginas: ~20
+LAB 1: INTRODUCCIÓN A AWS Y CONFIGURACIÓN INICIAL
+-------------------------------------------------
+Duración: 60-90 minutos | Dificultad: Básica
 
 Objetivos:
 - Crear cuenta AWS con alertas de facturación
@@ -26,9 +29,9 @@ Servicios: IAM, Billing Dashboard, CloudWatch, SNS
 Costo: $0.00
 
 
-LAB 2: AMAZON VPC - REDES VIRTUALES ✓ COMPLETADO
--------------------------------------------------
-Duración: 75-90 minutos | Dificultad: Básica-Intermedia | Páginas: ~22
+LAB 2: AMAZON VPC - REDES VIRTUALES
+------------------------------------
+Duración: 75-90 minutos | Dificultad: Básica-Intermedia
 
 Objetivos:
 - Crear VPC personalizada con arquitectura multi-AZ
@@ -51,9 +54,9 @@ Servicios: VPC, Subnets, Route Tables, Availability Zones
 Costo: $0.00
 
 
-LAB 3: INTERNET GATEWAY - CONECTIVIDAD A INTERNET ✓ COMPLETADO
----------------------------------------------------------------
-Duración: 45-60 minutos | Dificultad: Intermedia | Páginas: ~25
+LAB 3: INTERNET GATEWAY - CONECTIVIDAD A INTERNET
+--------------------------------------------------
+Duración: 45-60 minutos | Dificultad: Intermedia
 
 Objetivos:
 - Implementar conectividad bidireccional a internet
@@ -76,36 +79,29 @@ Costo: $0.00 (IGW gratuito, primeros 100GB transferencia/mes gratis)
 
 LAB 4: AMAZON EC2 Y SECURITY GROUPS
 ------------------------------------
-Duración: 90-120 minutos | Dificultad: Intermedia | Páginas estimadas: ~25
+Duración: 90-120 minutos | Dificultad: Intermedia
 
 Objetivos:
 - Lanzar instancias EC2 en subredes públicas y privadas
 - Configurar Security Groups (firewall stateful)
 - Implementar bastion host para acceso seguro
-- Probar conectividad real a través de IGW
+- Probar conectividad a través de IGW
 
-Contenido a desarrollar:
+Contenido implementado:
 - Marco teórico: EC2 conceptos, tipos de instancia (t2.micro Free Tier)
 - Security Groups: stateful firewall, reglas inbound/outbound
 - Key pairs para SSH, mejores prácticas de seguridad
-- Procedimiento:
-  1. Crear Key Pair para SSH
-  2. Lanzar EC2 t2.micro en Public-Subnet-1A (bastion/jump host)
-  3. Lanzar EC2 t2.micro en Private-Subnet-1A (servidor backend)
-  4. Configurar Security Groups:
-     - Bastion-SG: permitir SSH desde tu IP
-     - Private-SG: permitir SSH solo desde Bastion-SG
-  5. Conectar a bastion, luego saltar a instancia privada
-  6. Verificar conectividad internet desde pública, no desde privada
+- Arquitectura bastion host con Security Groups
+- Procedimiento detallado de lanzamiento y conexión SSH
 - 15 preguntas sobre EC2, Security Groups, arquitectura bastion
 
-Servicios: EC2 (t2.micro Free Tier 750hrs/mes), Security Groups, Key Pairs
-Costo: $0.00 (Free Tier)
+Servicios: EC2, Security Groups, Key Pairs
+Costo: $0.00 (Free Tier: 750hrs/mes)
 
 
 LAB 5: SEGURIDAD AVANZADA - NETWORK ACLs Y VPC FLOW LOGS
 ---------------------------------------------------------
-Duración: 90 minutos | Dificultad: Intermedia-Avanzada | Páginas estimadas: ~23
+Duración: 90 minutos | Dificultad: Intermedia-Avanzada
 
 Objetivos:
 - Configurar Network ACLs (firewall stateless)
@@ -113,17 +109,12 @@ Objetivos:
 - Analizar logs en CloudWatch
 - Comprender defensa en profundidad
 
-Contenido a desarrollar:
+Contenido implementado:
 - Marco teórico: NACLs vs Security Groups (stateless vs stateful)
-- Reglas de entrada/salida, numeración, evaluación secuencial
 - VPC Flow Logs: capture, formato, casos de uso
-- Procedimiento:
-  1. Configurar NACL personalizada para subnet pública
-  2. Agregar reglas explícitas (allow HTTP 80, HTTPS 443, SSH 22, ephemeral ports)
-  3. Habilitar VPC Flow Logs (CloudWatch Logs)
-  4. Generar tráfico desde EC2
-  5. Analizar logs en CloudWatch: ACCEPT/REJECT records
-  6. Crear filtros y métricas
+- Configuración de NACLs con reglas explícitas
+- Análisis de tráfico de red con CloudWatch
+- Filtros y métricas personalizadas
 - 15 preguntas sobre NACLs, Flow Logs, análisis de tráfico
 
 Servicios: Network ACLs, VPC Flow Logs, CloudWatch Logs
@@ -132,35 +123,29 @@ Costo: $0.00 (Free Tier: 5GB logs/mes)
 
 LAB 6: VPC PEERING - CONECTIVIDAD ENTRE VPCs
 ---------------------------------------------
-Duración: 75 minutos | Dificultad: Intermedia | Páginas estimadas: ~20
+Duración: 75 minutos | Dificultad: Intermedia
 
 Objetivos:
 - Conectar dos VPCs mediante VPC Peering
 - Configurar routing entre VPCs
 - Comprender limitaciones (no transitivo, no overlapping CIDR)
-- Casos de uso: Dev/Prod separation
+- Casos de uso empresariales
 
-Contenido a desarrollar:
+Contenido implementado:
 - Marco teórico: VPC Peering concepts, topologías, limitaciones
-- Peering no es transitivo: A-B y B-C no implica A-C
-- CIDR ranges no deben solaparse
-- Procedimiento:
-  1. Crear segunda VPC: VPC-B 172.16.0.0/16 con 2 subnets
-  2. Lanzar EC2 en VPC-B
-  3. Crear VPC Peering Connection (requestor VPC-A, acceptor VPC-B)
-  4. Aceptar peering request
-  5. Agregar rutas en ambas VPCs: A → B CIDR via pcx-xxx, B → A CIDR via pcx-xxx
-  6. Actualizar Security Groups para permitir tráfico
-  7. Probar conectividad ping entre instancias de ambas VPCs
+- Peering no transitivo y restricciones de CIDR
+- Procedimiento de creación y configuración de peering
+- Configuración de rutas bidireccionales
+- Actualización de Security Groups para permitir tráfico
 - 15 preguntas sobre peering, routing, casos de uso
 
 Servicios: VPC Peering, Multiple VPCs, Route Tables
-Costo: $0.00 (VPC peering gratuito, solo transferencia datos intrarregión)
+Costo: $0.00
 
 
 LAB 7: MONITOREO Y CLOUDWATCH
 ------------------------------
-Duración: 75 minutos | Dificultad: Intermedia | Páginas estimadas: ~20
+Duración: 75 minutos | Dificultad: Intermedia
 
 Objetivos:
 - Configurar CloudWatch metrics para EC2 y VPC
@@ -168,92 +153,50 @@ Objetivos:
 - Implementar SNS para notificaciones
 - Dashboards personalizados
 
-Contenido a desarrollar:
-- Marco teórico: CloudWatch conceptos, métricas estándar vs detalladas
-- Alarmas: thresholds, estados (OK, ALARM, INSUFFICIENT_DATA)
-- SNS topics para notificaciones email/SMS
-- Procedimiento:
-  1. Habilitar detailed monitoring en EC2 (opcional, tiene costo)
-  2. Revisar métricas básicas: CPUUtilization, NetworkIn/Out
-  3. Crear alarma: CPU > 80% durante 5min
-  4. Configurar SNS topic con email subscription
-  5. Crear dashboard: métricas de EC2, VPC Flow Logs rejected packets
-  6. Analizar VPC Flow Logs históricos
-  7. Crear filtros métricos personalizados
+Contenido implementado:
+- Marco teórico: CloudWatch conceptos, métricas estándar
+- Alarmas: thresholds, estados
+- SNS topics para notificaciones
+- Dashboard con métricas de EC2 y VPC Flow Logs
+- Análisis de logs históricos
 - 15 preguntas sobre CloudWatch, alarmas, SNS, monitoreo
 
 Servicios: CloudWatch Metrics, CloudWatch Alarms, SNS, Dashboards
-Costo: $0.00 (Free Tier: 10 alarmas, 1M API requests, 5GB logs)
+Costo: $0.00 (Free Tier: 10 alarmas, 1M API requests)
 
 
 LAB 8: PROYECTO INTEGRADOR - ARQUITECTURA COMPLETA 3-TIER
 ----------------------------------------------------------
-Duración: 120-150 minutos | Dificultad: Avanzada | Páginas estimadas: ~30
+Duración: 120-150 minutos | Dificultad: Avanzada
 
 Objetivos:
 - Integrar todos los conceptos de Labs 1-7
 - Diseñar e implementar arquitectura 3-tier completa
-- Aplicar mejores prácticas de seguridad y alta disponibilidad
+- Aplicar mejores prácticas de seguridad
 - Documentar arquitectura end-to-end
 
-Escenario:
-"Implementar aplicación web 3-tier en AWS con separación de capas, seguridad multicapa, y monitoreo completo usando Free Tier"
-
-Arquitectura a implementar:
-- Capa Presentación: Instancias EC2 web servers en subnets públicas multi-AZ
-- Capa Aplicación: Instancias EC2 app servers en subnets privadas multi-AZ
-- Capa Datos: Simulación de DB en subnet privada (sin RDS para Free Tier)
+Contenido implementado:
+- Arquitectura 3-tier completa en AWS
+- Capa Presentación: EC2 web servers en subnets públicas multi-AZ
+- Capa Aplicación: EC2 app servers en subnets privadas multi-AZ
+- Capa Datos: Simulación de DB en subnet privada
 - Bastion host para administración segura
-- Load balancing conceptual (sin crear ALB para evitar costos)
-
-Procedimiento:
-1. Verificar infraestructura Labs 1-3: VPC, subnets, IGW, routes
-2. Lanzar 2 EC2 web (Public-Subnet-1A y 1B) con Apache/Nginx
-3. Lanzar 2 EC2 app (Private-Subnet-1A y 1B) con app simulada
-4. Configurar Security Groups:
-   - Web-SG: allow HTTP 80, HTTPS 443 desde 0.0.0.0/0
-   - App-SG: allow puerto app (8080) solo desde Web-SG
-   - DB-SG: allow puerto DB (3306/5432) solo desde App-SG
-   - Bastion-SG: allow SSH desde tu IP
-5. Configurar NACLs para cada capa
-6. Habilitar VPC Flow Logs completos
-7. Crear CloudWatch dashboard con métricas de toda la arquitectura
-8. Configurar alarmas para cada capa
-9. Documentar: diagrama arquitectura, IPs, Security Groups, rutas
-10. Calcular costos reales vs Free Tier
-
-Entregables del proyecto:
-- Diagrama de arquitectura completo (3-tier + seguridad + monitoreo)
-- Tabla de recursos creados (VPC, subnets, EC2, SGs, NACLs, etc.)
-- Configuración de Security Groups y NACLs documentada
-- Tabla de routing completa
-- Screenshots CloudWatch dashboard (excepción: único lab con capturas)
-- Análisis VPC Flow Logs
-- Cálculo de costos (debe ser $0.00 Free Tier)
+- Security Groups multicapa
+- NACLs para cada capa
+- VPC Flow Logs completos
+- CloudWatch dashboard con métricas completas
+- Documentación arquitectónica detallada
 - 20 preguntas integradoras sobre toda la arquitectura
-- Conclusiones: lecciones aprendidas, mejores prácticas aplicadas
 
-Servicios integrados:
-- Todos los anteriores: VPC, Subnets, IGW, Route Tables
-- EC2 (6 instancias t2.micro máximo)
-- Security Groups, NACLs
-- VPC Flow Logs, CloudWatch, SNS
-
-Costo: $0.00 (Free Tier: 750 hrs EC2/mes = 31 días * 24hrs, suficiente para 6 instancias corriendo 5 días)
+Servicios: VPC, Subnets, IGW, EC2, Security Groups, NACLs, Flow Logs, CloudWatch
+Costo: $0.00 (Free Tier)
 
 
 RESUMEN DEL PROYECTO
 ====================
 
 Total Laboratorios: 8
-Páginas totales estimadas: ~185 páginas
 Preguntas evaluativas: 120+ (15 por lab × 8)
-
-Progresión de aprendizaje:
-- Labs 1-3 (COMPLETADOS): Fundamentos (cuenta, VPC, conectividad)
-- Labs 4-5: Cómputo y seguridad intermedia
-- Labs 6-7: Conectividad avanzada y monitoreo
-- Lab 8: Integración completa
 
 Servicios AWS cubiertos:
 - Core: IAM, VPC, Subnets, Route Tables, Internet Gateway
@@ -261,24 +204,17 @@ Servicios AWS cubiertos:
 - Seguridad: Security Groups, NACLs, MFA
 - Monitoreo: CloudWatch (Metrics, Logs, Alarms), SNS, VPC Flow Logs
 - Red avanzada: VPC Peering
-- Conceptual: NAT Gateway, Load Balancing
 
-Características del proyecto:
+Características:
 ✓ 100% Free Tier - Costo total: $0.00
-✓ Documentación textual completa (sin screenshots excepto Lab 8 final)
-✓ Marco teórico extenso en cada lab
-✓ Procedimientos paso a paso ultra-detallados
-✓ Cuestionarios evaluativos con respuestas justificadas
+✓ Documentación técnica completa en LaTeX
+✓ Marco teórico extenso en cada laboratorio
+✓ Procedimientos detallados paso a paso
+✓ Cuestionarios con respuestas justificadas
+✓ Diagramas de arquitectura con TikZ
 ✓ Conclusiones y referencias académicas
-✓ Progresión lógica: cada lab construye sobre anteriores
-✓ Preparación para certificación AWS Solutions Architect Associate
+✓ Progresión lógica de aprendizaje
 
-Entrega final incluye:
-- 8 documentos LaTeX compilados (PDFs de ~20-30 páginas c/u)
-- Banco de 120+ preguntas unificado
-- Diagramas de arquitectura
-- Manual de instalación/configuración
-- Memoria técnica del proyecto (decisiones, justificaciones)
-
-Timeline: Octubre-Diciembre 2025 (aparentar trabajo semestral)
+---
+Universidad Javeriana Cali - Diciembre 2025
 
